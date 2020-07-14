@@ -103,5 +103,15 @@
   <ItemGroup>
     <Folder Include="Views\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SimpleClientServer\ClientServerLibrary\ClientServerLibrary.csproj">
+      <Project>{A0960DF5-4958-4F6C-9227-2EA3E36E86CD}</Project>
+      <Name>ClientServerLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GlobalSettings\GlobalSettings.csproj">
+      <Project>{06E495C8-FC22-4595-B895-FBDE20BEAD5A}</Project>
+      <Name>GlobalSettings</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
