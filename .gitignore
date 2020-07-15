@@ -2,3 +2,27 @@
 bin/Debug/
 
 obj/Debug/
+
+.vs/Reversi/DesignTimeBuild/
+
+.vs/Reversi/v16/
+
+GlobalSettings/obj/Debug/netstandard2.0/.NETStandard,Version=v2.0.AssemblyAttributes.cs
+
+ReversiServer/bin/Debug/
+
+ReversiServer/obj/Debug/
+
+GlobalSettings/obj/Debug/netstandard2.0/
+
+GlobalSettings/bin/Debug/netstandard2.0/
+
+GlobalSettings/obj/Debug/net472/
+
+GlobalSettings/bin/Debug/net472/
+
+ClientServerLibrary/obj/
+
+GlobalSettings/obj/
+
+ClientServerLibrary/bin/Debug/net472/

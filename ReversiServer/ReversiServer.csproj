@@ -50,11 +50,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SimpleClientServer\ClientServerLibrary\ClientServerLibrary.csproj">
-      <Project>{a0960df5-4958-4f6c-9227-2ea3e36e86cd}</Project>
+    <ProjectReference Include="..\ClientServerLibrary\ClientServerLibrary.csproj">
+      <Project>{3a1edbe6-f7bf-4939-a84c-335c4f4c0128}</Project>
       <Name>ClientServerLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CS376-Network-Reversi\Reversi.csproj">
+    <ProjectReference Include="..\Reversi.csproj">
       <Project>{6b60f976-38f2-4d05-bbb3-454cd2056f62}</Project>
       <Name>Reversi</Name>
     </ProjectReference>

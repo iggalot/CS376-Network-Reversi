@@ -22,6 +22,11 @@ namespace Settings
         /// <summary>
         /// The maximum number of connections that the server can handle
         /// </summary>
-        public const int MaxConnections = 8;  
+        public const int MaxConnections = 8;
+
+        /// <summary>
+        /// The number of players in allowed in a game.
+        /// </summary>
+        public const int PlayersPerGame = 2;
     }
 }

@@ -104,12 +104,12 @@
     <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SimpleClientServer\ClientServerLibrary\ClientServerLibrary.csproj">
-      <Project>{A0960DF5-4958-4F6C-9227-2EA3E36E86CD}</Project>
+    <ProjectReference Include="ClientServerLibrary\ClientServerLibrary.csproj">
+      <Project>{3a1edbe6-f7bf-4939-a84c-335c4f4c0128}</Project>
       <Name>ClientServerLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GlobalSettings\GlobalSettings.csproj">
-      <Project>{06E495C8-FC22-4595-B895-FBDE20BEAD5A}</Project>
+    <ProjectReference Include="GlobalSettings\GlobalSettings.csproj">
+      <Project>{1ddec5e3-9352-4c2a-9a52-07e238d0079d}</Project>
       <Name>GlobalSettings</Name>
     </ProjectReference>
   </ItemGroup>

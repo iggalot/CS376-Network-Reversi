@@ -4,6 +4,8 @@ using Reversi.Models;
 using System;
 using System.Net.Sockets;
 using System.Windows;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Reversi
 {
@@ -30,7 +32,20 @@ namespace Reversi
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// The current game being controlled by this client
+        /// </summary>
         public Game CurrentGame { get; set; }
+
+        /// <summary>
+        /// The connection to the server has been made.
+        /// </summary>
+        public bool IsConnectedToGameServer { get; set; } = false;
+
+        /// <summary>
+        /// Is waiting for a response from the server.
+        /// </summary>
+        public bool IsWaitingForResponse { get; set; } = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -40,7 +55,7 @@ namespace Reversi
             CurrentGame = game.Instance;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_SubmitMoveClick(object sender, RoutedEventArgs e)
         {
             int result;
             if (Int32.TryParse(tbIndex.Text, out result))
@@ -56,14 +71,8 @@ namespace Reversi
                     lbCurrentPlayer.Content = (CurrentGame.CurrentPlayer.ID + CurrentGame.CurrentPlayer.Name);
 
                     lbStatus.Content = "Processing Move";
-
                     
                     CurrentGame.PlaySounds(GameSounds.SOUND_CLICK_SUCCESSFUL);
-
-                    //using (var soundPlayer = new SoundPlayer(@"c:\Windows\Media\Windows User Account Control.wav"))
-                    //{
-                    //    soundPlayer.Play();
-                    //}
 
                     CurrentGame.PlayRound();
                     tbGameboard.Text = CurrentGame.Gameboard.DrawGameboard();
@@ -71,31 +80,45 @@ namespace Reversi
                     lbStatus.Content = "Move Successful";
 
                     CurrentGame.PlaySounds(GameSounds.SOUND_TURN_COMPLETE);
-
-                    //using (var soundPlayer = new SoundPlayer(@"c:\Windows\Media\tada.wav"))
-                    //{
-                    //    soundPlayer.Play();
-                    //}
                 }
-
             }
         }
 
+        /// <summary>
+        /// The button that makes the connection to the game server.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Button_ConnectClick(object sender, RoutedEventArgs e)
         {
             TcpClient clientSocket;
             NetworkStream serverStream;
 
+            // retrieve the server address
             string address = GlobalSettings.ServerAddress;
 
-            
+            // If the client is already connected to the game server, then don't
+            // allow another connection.
+            if (IsConnectedToGameServer)
+            {
+                lbConnectStatus.Content = "You are already connected to the server!";
+                return;
+            }
+                
+            // Check if the player name is valid
+            if(String.IsNullOrEmpty(tbPlayerName.Text))
+            {
+                lbConnectStatus.Content = "You must enter a user name.";
+                return;
+            }
 
             // Otherwise try to make the connection
             try
-            {
-                
+            {           
                 clientSocket = Client.Connect(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
                 serverStream = clientSocket.GetStream();
+                IsConnectedToGameServer = true;
+
             }
             catch (ArgumentNullException excep)
             {
@@ -108,23 +131,63 @@ namespace Reversi
                 return;
             }
 
+            // If the connection is not successful...
+            if (!IsConnectedToGameServer)
+                return;
+
             //readData = "Connected to Chat Server...";
             //msg();
 
-            // If our socket is not connected, 
+            // If our socket is not connected, or we have lost link... 
             if (!clientSocket.Connected)
             {
-                //lbConnectStatus.Visibility = Visibility.Visible;
-                //lbConnectStatus.Content = "Error connected to socket.";
-                //isConnected = false;
+                IsConnectedToGameServer = false;
+                lbConnectStatus.Visibility = Visibility.Visible;
+                lbConnectStatus.Content = "Error connecting to socket.";
                 return;
             }
 
+            string name = tbPlayerName.Text;
             // Send our login name to the server
-            byte[] outStream = System.Text.Encoding.ASCII.GetBytes("Test name from client" + "$");
+            if(String.IsNullOrEmpty(name))
+            {
+                IsConnectedToGameServer = false;
+                lbConnectStatus.Visibility = Visibility.Visible;
+                lbConnectStatus.Content = "A valid name must be entered.";
+                return;
+            }
+
+            // Create the packet info.  Send ID of -1 to signal that we need a server id to be assigned to this player
+            PacketInfo packet = new PacketInfo(-1, name, PacketType.PACKET_CONNECTION_REQUEST);
+
+            byte[] outStream = System.Text.Encoding.ASCII.GetBytes(packet.FormPacket());
+            //            byte[] outStream = System.Text.Encoding.ASCII.GetBytes("Test name from client" + "$");
             serverStream.Write(outStream, 0, outStream.Length);
             serverStream.Flush();
+            IsWaitingForResponse = true;  // waiting for a response from the server.
 
+            // Await the server response
+            string response = Client.Receive(serverStream);
+
+            // Now make the game area visible
+            spMakeConnection.Visibility = Visibility.Collapsed;
+            spActiveGameRegion.Visibility = Visibility.Visible;
+
+            // If the client is null or empty, wait for a period then try again
+            while (String.IsNullOrEmpty(response))
+            {
+                Thread.Sleep(1000);
+                response = Client.Receive(serverStream);
+            }
+
+            // Unpack the contents of the packet that were received from the server.
+            PacketInfo receivepacket = new PacketInfo();
+            receivepacket.UnpackPacket(response);
+
+            // Display results in the window
+            lbPlayerID.Content = receivepacket.Id;
+            lbCurrentPlayer.Content = receivepacket.Data;
+            lbStatus.Content = receivepacket.Type;
         }
     }
 }

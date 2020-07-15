@@ -5,21 +5,45 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Reversi"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="1000">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <Button Content="Connect to Server" Click="Button_ConnectClick"></Button>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Name="spMakeConnection" Orientation="Vertical" Visibility="Visible">
+                <Label Content="Enter name: "/>
+                <TextBox Name="tbPlayerName" FontSize="12"/>
+                <Label Name="lbConnectStatus" Content="Connection status Label here"></Label>
+                <Button Content="Connect to Server" HorizontalAlignment="Left" Width="300" Click="Button_ConnectClick"></Button>
+            </StackPanel>
+             <StackPanel Name="spActiveGameRegion" Width="800" Height="300" Visibility="Collapsed" Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
-                    <Label Name="lbIndex" Content="TextBlock here"/>
-                    <Label Name="lbCurrentPlayer" Content="TextBlock here"/>
-                    <TextBlock Name="tbGameboard" Width="400" Height="200"></TextBlock>
-                    <Label Name="lbStatus" Content="Status Label here"></Label>
+                    <StackPanel Background="LightGray" Orientation="Horizontal">
+                        <Label Content="Player ID: "/>
+                        <Label Name="lbPlayerID" Content="PlayerID here"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Current Player: "/>
+                        <Label Name="lbCurrentPlayer" Content="TextBlock here"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Current Move: "/>
+                        <Label Name="lbIndex" Content="TextBlock here"/>
+                    </StackPanel>
+
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Name="tbIndex" Height="25" Width="100"/>
+                        <Button Height="40" Width="100" Content="Submit Move" Click="Button_SubmitMoveClick"></Button>
+                    </StackPanel>
+           
+                    <StackPanel Orientation="Horizontal" Background="LightBlue">
+                        <Label Content="Status: "></Label>
+                        <Label Name="lbStatus" Width ="300" Content="Move submission status Label here"></Label>
+                    </StackPanel>
+
                 </StackPanel>
+                <TextBlock Background="Beige" Text="Test" Name="tbGameboard" Width="200" Height="200"></TextBlock>
 
-                <TextBox Name="tbIndex" Height="25" Width="100"/>
-
-                <Button Height="100" Width="100" Content="Submit Turn" Click="Button_Click"></Button>
 
             </StackPanel>
         </StackPanel>

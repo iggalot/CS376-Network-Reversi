@@ -14,11 +14,16 @@ namespace ReversiServer
         /// The list of threads running a game server
         /// </summary>
         public static List<Thread> GameThreads { get; set; } = new List<Thread>();
-    
+
         /// <summary>
         /// The list of threads runnign a chat server
         /// </summary>
         public static List<Thread> ChatThreads { get; set; } = new List<Thread>();
+
+        /// <summary>
+        /// The next id for the server to use
+        /// </summary>
+        public static int NextId { get; set; } = 0;
 
         static void Main()
         {
@@ -61,7 +66,6 @@ namespace ReversiServer
         /// </summary>
         private static void GameServerThread()
         {
-
             List<TcpClient> connectedClients = new List<TcpClient>();
             // Start our communication server listening for players
             Server server = new Server(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
@@ -69,15 +73,29 @@ namespace ReversiServer
             // Listen for a connection
             Console.WriteLine("... Game server started. Listening for connections...");
             TcpClient client = server.ListenForConnections();
-            connectedClients.Add(client);
+            if(client != null)
+                connectedClients.Add(client);
+
+            NetworkStream serverStream = client.GetStream();
+            // Prepare a connection acknowledgement from the server to the client
+            int newID = NextId;
+            NextId++;
+            PacketInfo packet = new PacketInfo(newID, "Test Response from Server", PacketType.PACKET_CONNECTION_ACCEPTED);
+            string packetString = packet.FormPacket();
+            byte[] outStream = System.Text.Encoding.ASCII.GetBytes(packetString);
+            serverStream.Write(outStream, 0, outStream.Length);
+            serverStream.Flush();
 
             //TODO: Detect if there are any dead sockets.  If so, revise the count.
             // Now listen for connections
-            while(connectedClients.Count < 2)
-            {
-                Console.WriteLine("... " + connectedClients.Count.ToString() + " connections currently. Waiting for additional connections.");
-                connectedClients.Add(server.ListenForConnections());
-            }
+            // While there are less than total number of players...continue listening for new players
+            //while(connectedClients.Count < GlobalSettings.PlayersPerGame)
+            //{
+            //    Console.WriteLine("... " + connectedClients.Count.ToString() + " connections currently. Waiting for additional connections.");
+            //    client = server.ListenForConnections();
+            //    if(client != null)
+            //        connectedClients.Add(client);
+            //}
 
             Console.WriteLine("... " + connectedClients.Count.ToString() + " connections made ... Ready to begin game");
             // Once two players have connected, start the game with the two players.
@@ -105,6 +123,7 @@ namespace ReversiServer
                 Console.WriteLine("...... Game is Running");
             }
 
+         
             // Once the game is over, shutdown the server
             server.Shutdown();
         }
