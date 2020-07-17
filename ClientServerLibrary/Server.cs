@@ -10,7 +10,7 @@ namespace ClientServerLibrary
     /// <summary>
     /// Our primary server class that handles multiple client connections
     /// </summary>
-    public class Server
+    public class Server : DataTransmission
     {
         // Store our list of client sockets.
         public static Hashtable ClientSocketList { get; set; }
@@ -18,8 +18,17 @@ namespace ClientServerLibrary
         // The socket for our server
         public static TcpListener ServerSocket { get; set; }
 
+        // The current data held by the server
+        public string TempData { get; set; }
+
+        // The current status connection result
+        public PacketType TempStatus { get; set; }
+
         // Tells our server that it should shutdown
         public static bool ShouldShutdownNow { get; set; } = false;
+
+        public const string RejectConnectionMessage = "The server has rejected your connection. Please try again later.";
+        public const string AcceptConnectionMessage = "Welcome to the Reversi / Othello server!";
 
         /// <summary>
         /// Default constructor
@@ -56,7 +65,7 @@ namespace ClientServerLibrary
         /// the client socket when a connection is made.
         /// </summary>
         /// <returns></returns>
-        public TcpClient ListenForConnections() { 
+        public TcpClient ListenForConnections(out PacketInfo newPacket) { 
 
             //int counter = 0;
             //counter = 0;   // for counting our connections.
@@ -64,45 +73,44 @@ namespace ClientServerLibrary
             // Create a default client socket to be used by each thread.
             TcpClient clientSocket = default(TcpClient);
 
-            // Enter the listening loop for detecting client connections.
-//            while (true)
-//            {
-                // If we have received a signal that we should shut down break from the loop
-                //if (ShouldShutdownNow)
-                //    break;
+            // Perform a blocking call to accept requests.
+            // You could also use server.AcceptSocket() here.
+            clientSocket = ServerSocket.AcceptTcpClient();
 
-                // Otherwise continue listening
-                //counter += 1;
-                // Perform a blocking call to accept requests.
-                // You could also use server.AcceptSocket() here.
-                clientSocket = ServerSocket.AcceptTcpClient();
+            byte[] bytesFrom = new byte[65536];
+            string dataFromClient = null;
 
-                byte[] bytesFrom = new byte[65536];
-                string dataFromClient = null;
+            NetworkStream networkStream = clientSocket.GetStream();
+            networkStream.Read(bytesFrom, 0, (int)clientSocket.ReceiveBufferSize);
+            dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFrom);
+            dataFromClient = dataFromClient.Substring(0, dataFromClient.IndexOf("$"));
 
-                NetworkStream networkStream = clientSocket.GetStream();
-                networkStream.Read(bytesFrom, 0, (int)clientSocket.ReceiveBufferSize);
-                dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFrom);
-                dataFromClient = dataFromClient.Substring(0, dataFromClient.IndexOf("$"));
+            // Convert the data from the client to the PacketInfo form
+            newPacket = ReceiveData(dataFromClient);
 
-                // Convert the data from the client to the PacketInfo form
-                PacketInfo newPacket = ReceiveData(dataFromClient);
-
-                // Write the data to the console.
-                Console.WriteLine("...Received: "+ newPacket.Id.ToString() + " " 
-                    + newPacket.Type.ToString() + " " + newPacket.Data);
+            // Write the data to the console.
+            Console.WriteLine("...Received: "+ newPacket.Id.ToString() + " " + newPacket.Type.ToString() + " " + newPacket.Data);
                 
-                if(newPacket.Type == PacketType.PACKET_CONNECTION_REQUEST)
-                {
-                    // TODO: Generate unique ID for each connection
-                    Console.WriteLine("--- (ID#" + newPacket.Id + ") " + newPacket.Data + " has connected");
+            if(newPacket.Type == PacketType.PACKET_CONNECTION_REQUEST)
+            {
+                // TODO: Generate unique ID for each connection
+                Console.WriteLine("--- (ID#" + newPacket.Id + ") " + newPacket.Data + " has connected");
+                TempData = newPacket.Data;
+                    
+                // Store the client socket in the connected socket list if it isn't already there.
+                if (!ClientSocketList.Contains(dataFromClient))
+                    ClientSocketList.Add(dataFromClient, clientSocket);
 
-                    // Store the client socket in the connected socket list if it isn't already there.
-                    if (!ClientSocketList.Contains(dataFromClient))
-                        ClientSocketList.Add(dataFromClient, clientSocket);
+                networkStream.Flush();
 
-                    return clientSocket;
-                }
+                return clientSocket;
+            } else
+            {
+                // TODO:  what do we do if its not a PACKET_CONNECTION_REQUEST?
+            }
+
+            // clear the socket contents
+            networkStream.Flush();
 
 
             // Announce a connection

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Sockets;
 
 namespace ClientServerLibrary
 {
@@ -31,7 +32,6 @@ namespace ClientServerLibrary
             Type = PacketType.PACKET_UNDEFINED;
         }
 
-
         /// <summary>
         /// Forms the packet information into a string to be transmitted
         /// </summary>
@@ -62,11 +62,14 @@ namespace ClientServerLibrary
     /// </summary>
     public enum PacketType
     {
-        PACKET_UNDEFINED = -1,  // An undefined packet type
-        PACKET_CONNECTION_REQUEST = 0,
-        PACKET_CONNECTION_ACCEPTED = 1,
-        PACKET_CONNECTION_REFUSED = 2,
-        PACKET_GAMEDATA_ACCEPTED = 3,  // if a move is deemed as valid
-        PACKET_GAMEDATA_DENIED = 4 // if a move is deemed invalid
+        PACKET_UNDEFINED =             -1,  // An undefined packet type
+        PACKET_CONNECTION_REQUEST =     0,
+        PACKET_CONNECTION_ACCEPTED =    1,
+        PACKET_CONNECTION_REFUSED =     2,
+        PACKET_GAME_STARTING =          3,
+        PACKET_GAMEMOVE_REQUEST =       4,
+        PACKET_GAMEMOVE_ACCEPTED =      5,  // if a move is deemed as valid
+        PACKET_GAMEMOVE_DENIED =        6,  // if a move is deemed invalid
+        PACKET_GAME_ENDING =            7
     }
 }

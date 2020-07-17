@@ -19,10 +19,7 @@
                     <StackPanel Background="LightGray" Orientation="Horizontal">
                         <Label Content="Player ID: "/>
                         <Label Name="lbPlayerID" Content="PlayerID here"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Current Player: "/>
-                        <Label Name="lbCurrentPlayer" Content="TextBlock here"/>
+                        <Label Name="lbCurrentPlayer" Content="Player name here"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal">

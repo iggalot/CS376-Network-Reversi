@@ -26,6 +26,18 @@ namespace Reversi
             // Start the game
             Instance.PlayGame();
         }
+
+        public ReversiGame(Player p1, Player p2)
+        {
+            // Start the game with specified numer of players
+            Instance = new Game(p1, p2);
+
+            // Setup the gameboard
+            Instance.SetupGame();
+
+            // Start the game
+            Instance.PlayGame();
+        }
     }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -36,6 +48,12 @@ namespace Reversi
         /// The current game being controlled by this client
         /// </summary>
         public Game CurrentGame { get; set; }
+
+        /// <summary>
+        /// The current player associated with this client
+        /// </summary>
+        public Player PlayerInfo { get; set; }
+        
 
         /// <summary>
         /// The connection to the server has been made.
@@ -53,11 +71,27 @@ namespace Reversi
             // TODO:  Remove this instance creation here...for testing purposes only.  Must revise the ButtonClick routine below.
             ReversiGame game = new ReversiGame(2);
             CurrentGame = game.Instance;
+
+            // Create player placeholder
+            PlayerInfo = new Player(Players.UNDEFINED, "unknown", null);
         }
 
         private void Button_SubmitMoveClick(object sender, RoutedEventArgs e)
         {
             int result;
+
+            //// Send move to to server
+            //PacketInfo packet = new PacketInfo(1, "40", PacketType.PACKET_GAMEMOVE_REQUEST);
+            //DataTransmission.SendData(client, packet);
+
+
+            // Wait for response
+
+            // Process display of results
+
+
+
+            //// Parse the results
             if (Int32.TryParse(tbIndex.Text, out result))
             {
                 if(result < 0)
@@ -160,18 +194,79 @@ namespace Reversi
             // Create the packet info.  Send ID of -1 to signal that we need a server id to be assigned to this player
             PacketInfo packet = new PacketInfo(-1, name, PacketType.PACKET_CONNECTION_REQUEST);
 
-            byte[] outStream = System.Text.Encoding.ASCII.GetBytes(packet.FormPacket());
-            //            byte[] outStream = System.Text.Encoding.ASCII.GetBytes("Test name from client" + "$");
-            serverStream.Write(outStream, 0, outStream.Length);
-            serverStream.Flush();
-            IsWaitingForResponse = true;  // waiting for a response from the server.
+            DataTransmission.SendData(clientSocket, packet);
+
+            // waiting for a response from the server.
+            IsWaitingForResponse = true;
 
             // Await the server response
+            Console.WriteLine("Client:  waiting for response from server...");
             string response = Client.Receive(serverStream);
 
-            // Now make the game area visible
-            spMakeConnection.Visibility = Visibility.Collapsed;
-            spActiveGameRegion.Visibility = Visibility.Visible;
+            // If the client is null or empty, wait for a period then try again
+            while (String.IsNullOrEmpty(response))
+            {
+                Thread.Sleep(1000);
+                response = Client.Receive(serverStream);
+                Console.WriteLine("Client:  waiting for response from server...");
+            }
+
+            // Unpack the contents of the packet that were received from the server.
+            PacketInfo receivepacket = new PacketInfo();
+            receivepacket.UnpackPacket(response);
+
+            IsWaitingForResponse = false;
+
+            switch (receivepacket.Type)
+            {
+                case PacketType.PACKET_UNDEFINED:
+                    break;
+                case PacketType.PACKET_CONNECTION_REQUEST:
+                        break;
+                case PacketType.PACKET_CONNECTION_ACCEPTED:
+                    {
+                        // Now make the game area visible
+                        spMakeConnection.Visibility = Visibility.Collapsed;
+                        spActiveGameRegion.Visibility = Visibility.Visible;
+
+                        // Once verified, create our player object
+                        PlayerInfo.ID = Players.PLAYER1;
+                        PlayerInfo.Name = receivepacket.Data;
+                        PlayerInfo.Socket = clientSocket;
+
+                        // Display results in the window
+                        lbPlayerID.Content = receivepacket.Id;
+                        lbCurrentPlayer.Content = receivepacket.Data;
+                        lbStatus.Content = receivepacket.Type;
+                        break;
+                    }
+                case PacketType.PACKET_CONNECTION_REFUSED:
+                    {
+                        // Now make the game area visible
+                        spMakeConnection.Visibility = Visibility.Visible;
+                        spActiveGameRegion.Visibility = Visibility.Collapsed;
+                        lbConnectStatus.Content = receivepacket.Data;
+
+                        IsConnectedToGameServer = false;
+                        
+                        break;
+                    }
+                case PacketType.PACKET_GAME_STARTING:
+                    break;
+                case PacketType.PACKET_GAMEMOVE_REQUEST:
+                    break;
+                case PacketType.PACKET_GAMEMOVE_ACCEPTED:
+                    break;
+                case PacketType.PACKET_GAMEMOVE_DENIED:
+                    break;
+                case PacketType.PACKET_GAME_ENDING:
+                    break;
+                default:
+                    break;
+            }
+
+            // Wait for the server to signal that the game has begun.
+            response = Client.Receive(serverStream);
 
             // If the client is null or empty, wait for a period then try again
             while (String.IsNullOrEmpty(response))
@@ -180,14 +275,10 @@ namespace Reversi
                 response = Client.Receive(serverStream);
             }
 
-            // Unpack the contents of the packet that were received from the server.
-            PacketInfo receivepacket = new PacketInfo();
+            receivepacket = new PacketInfo();
             receivepacket.UnpackPacket(response);
 
-            // Display results in the window
-            lbPlayerID.Content = receivepacket.Id;
-            lbCurrentPlayer.Content = receivepacket.Data;
-            lbStatus.Content = receivepacket.Type;
+            lbConnectStatus.Content = receivepacket.Data;
         }
     }
 }

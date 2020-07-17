@@ -7,12 +7,12 @@ namespace ClientServerLibrary
     /// A generic client class utilizing the TcpClient protocol.  Requires a TcpListener 
     /// on the other end to create the socket before communications can start.
     /// </summary>
-    public static class Client
+    public class Client : DataTransmission
     {
         /// <summary>
         /// Receives data from the connected socket and stores it in a NetworkStream.
         /// The byte stream information is then encoded to an ASCII string and returned
-        /// to the calling function.
+        /// to the calling function for further parsing.
         /// </summary>
         /// <param name="stream"></param>
         /// <returns></returns>
@@ -38,7 +38,7 @@ namespace ClientServerLibrary
         }
 
         /// <summary>
-        /// Connects our client to a tcpip socket
+        /// Connects our client to a TcpIp socket
         /// </summary>
         /// <param name="v">Address to connect to</param>
         /// <param name="port">Port number to connect to</param>
@@ -59,23 +59,23 @@ namespace ClientServerLibrary
             client.Close();
         }
 
-        /// <summary>
-        /// Sends a string message across the socket.  Also appends a "$" terminator
-        /// to the end of the string for the server to signal that the end of line has been 
-        /// received.
-        /// </summary>
-        /// <param name="stream">The network stream to be used in the transmission</param>
-        /// <param name="message">The string message to send</param>
-        public static void Send(NetworkStream stream, string message)
-        {
-            // Translate the passed message into ASCII and store it as a Byte array
-            Byte[] senddata = System.Text.Encoding.ASCII.GetBytes(message + "$");
+        ///// <summary>
+        ///// Sends a string message across the socket.  Also appends a "$" terminator
+        ///// to the end of the string for the server to signal that the end of line has been 
+        ///// received.
+        ///// </summary>
+        ///// <param name="stream">The network stream to be used in the transmission</param>
+        ///// <param name="message">The string message to send</param>
+        //public static void Send(NetworkStream stream, string message)
+        //{
+        //    // Translate the passed message into ASCII and store it as a Byte array
+        //    Byte[] senddata = System.Text.Encoding.ASCII.GetBytes(message + "$");
 
-            // Send the message to the connected TcpServer.
-            stream.Write(senddata, 0, senddata.Length);
+        //    // Send the message to the connected TcpServer.
+        //    stream.Write(senddata, 0, senddata.Length);
 
-            Console.WriteLine("Sent: {0}", message);
-        }
+        //    Console.WriteLine("Sent: {0}", message);
+        //}
     }
 }
 

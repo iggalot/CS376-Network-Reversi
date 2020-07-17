@@ -18,7 +18,7 @@
         /// </summary>
         public GamePiece()
         {
-            Owner = new Player(Players.UNDEFINED, "Unknown");
+            Owner = new Player(Players.UNDEFINED, "Unknown", null);
             Shape = Pieceshapes.UNDEFINED;
         }
 

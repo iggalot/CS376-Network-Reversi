@@ -8,7 +8,18 @@ namespace Reversi.Models
 {
     public class Game
     {
+        #region Private Properties
+        private static int _gameID = 0;
+        #endregion
+
         #region Public Properties
+        /// <summary>
+        /// The game ID for this game
+        /// </summary>
+        public static int GameID { 
+            get=>_gameID; 
+        }
+
         /// <summary>
         /// Flag to determine if the game is over
         /// </summary>
@@ -49,15 +60,39 @@ namespace Reversi.Models
         #region Constructor
         public Game(int num_players)
         {
+            // Set our game id
+            _gameID = NextID();
+
             // create our gameboard
             Gameboard = new Board(8, 8);
 
             // Initialize our players list
             Players = new Player[num_players];
 
-            // create our players
-            Players[0] = new Player(Models.Players.PLAYER1, "Bob");
-            Players[1] = new Player(Models.Players.PLAYER2, "Alice");
+            // create our empty players
+            Players[0] = new Player(Models.Players.UNDEFINED, "unknown", null);
+            Players[1] = new Player(Models.Players.UNDEFINED, "unknown", null);
+        }
+
+        /// <summary>
+        /// Constructor that creates a game of two players.
+        /// </summary>
+        /// <param name="p1">Player 1</param>
+        /// <param name="p2">Player 2</param>
+        public Game(Player p1, Player p2)
+        {
+            // Set our game id
+            _gameID = NextID();
+
+            // create our gameboard
+            Gameboard = new Board(8, 8);
+
+            // Initialize our players list
+            Players = new Player[2];
+
+            // Assign the players
+            Players[0] = p1;
+            Players[1] = p2;
         }
 
         internal void SetupGame()
@@ -79,6 +114,15 @@ namespace Reversi.Models
         }
         #endregion
 
+        #region Private Methods
+        private int NextID()
+        {
+            _gameID++;
+            return _gameID;
+        }
+        #endregion
+
+        #region Public Methods
         /// <summary>
         /// Toggle the current and opponent player properties for the game
         /// </summary>
@@ -124,7 +168,7 @@ namespace Reversi.Models
 
             //    IsGameOver = CheckGameOver();
             //}
-                
+
         }
 
         /// <summary>
@@ -133,9 +177,9 @@ namespace Reversi.Models
         /// <returns></returns>
         private bool CheckGameOver()
         {
-            for(int i=0; i < Gameboard.Rows * Gameboard.Cols; i++)
+            for (int i = 0; i < Gameboard.Rows * Gameboard.Cols; i++)
             {
-                if(!ValidatePlacement(i))
+                if (!ValidatePlacement(i))
                 {
                     return false;
                 }
@@ -159,7 +203,7 @@ namespace Reversi.Models
         {
             Player player = CurrentPlayer;
 
-            if(ValidatePlacement(index))
+            if (ValidatePlacement(index))
             {
                 // Add a new game piece at the location
                 GamePiece piece = new GamePiece(Pieceshapes.ELLIPSE, player);
@@ -210,12 +254,12 @@ namespace Reversi.Models
             Player opponent = (player == Players[0]) ? Players[1] : Players[0];
 
             // Make sure that we are within acceptable index ranges, otherwise return
-            if(index < 0 || index >= Gameboard.Squares.Length)
+            if (index < 0 || index >= Gameboard.Squares.Length)
             {
                 return false;
             }
             // Selected index must not already contain a piece
-            if(Gameboard.Squares[index].Piece != null)
+            if (Gameboard.Squares[index].Piece != null)
             {
                 //MessageBox.Show("This block already contains a piece.");
                 return false;
@@ -226,7 +270,7 @@ namespace Reversi.Models
             // 4 X 5
             // 6 7 8
             // A neightbor must be owned by the opposite player
-            foreach(DirectionVectors dv in Enum.GetValues(typeof(DirectionVectors)))
+            foreach (DirectionVectors dv in Enum.GetValues(typeof(DirectionVectors)))
             {
                 isValidMove = false;
 
@@ -243,7 +287,8 @@ namespace Reversi.Models
                 {
                     // Neighbor isn't the opponent so not a valid move
                     continue;
-                } else
+                }
+                else
                 {
                     // Store indices in a list while we search
                     List<int> tmpList = new List<int>();
@@ -255,7 +300,7 @@ namespace Reversi.Models
 
                     // Continue searching so long as we don't reach the border (-1) and the next square is 
                     // owned by the opponent.
-                    while((next_index != -1) && (next_owner == opponent))
+                    while ((next_index != -1) && (next_owner == opponent))
                     {
                         // Add our element to the list.
                         tmpList.Add(next_index);
@@ -298,7 +343,7 @@ namespace Reversi.Models
 
         internal void PlaySounds(GameSounds sound)
         {
-            string soundString="";
+            string soundString = "";
 
             // chimes.wav
             // Windows Default.wav -- click to place
@@ -324,5 +369,7 @@ namespace Reversi.Models
                 soundPlayer.Play(); // can also use soundPlayer.PlaySync()
             }
         }
+        #endregion
+
     }
 }
