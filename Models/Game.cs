@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Media;
+using System.Net.Sockets;
 using System.Threading;
 using System.Windows;
 
@@ -44,7 +45,7 @@ namespace Reversi.Models
         /// <summary>
         /// A list of the players for our game
         /// </summary>
-        private Player[] Players { get; set; }
+        private Player[] CurrentPlayers { get; set; }
 
         /// <summary>
         /// The gameboard for our game
@@ -67,11 +68,11 @@ namespace Reversi.Models
             Gameboard = new Board(8, 8);
 
             // Initialize our players list
-            Players = new Player[num_players];
+            CurrentPlayers = new Player[num_players];
 
             // create our empty players
-            Players[0] = new Player(Models.Players.UNDEFINED, "unknown", null);
-            Players[1] = new Player(Models.Players.UNDEFINED, "unknown", null);
+            CurrentPlayers[0] = new Player(Models.Players.UNDEFINED, "unknown", null);
+            CurrentPlayers[1] = new Player(Models.Players.UNDEFINED, "unknown", null);
         }
 
         /// <summary>
@@ -88,11 +89,11 @@ namespace Reversi.Models
             Gameboard = new Board(8, 8);
 
             // Initialize our players list
-            Players = new Player[2];
+            CurrentPlayers = new Player[2];
 
             // Assign the players
-            Players[0] = p1;
-            Players[1] = p2;
+            CurrentPlayers[0] = p1;
+            CurrentPlayers[1] = p2;
         }
 
         internal void SetupGame()
@@ -101,16 +102,16 @@ namespace Reversi.Models
             var midpoint = Gameboard.Rows * Gameboard.Cols / 2;
 
             // Place the starting pieces
-            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, Players[0]));
-            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, Players[1]));
-            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 -1 , new GamePiece(Pieceshapes.ELLIPSE, Players[1]));
-            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, Players[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 -1 , new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[0]));
 
-            MessageBox.Show(Gameboard.DrawGameboard());
+           // MessageBox.Show(Gameboard.DrawGameboard());
 
             // Set the First player to be the current player
-            CurrentPlayer = Players[0];
-            CurrentOpponent = Players[1];
+            CurrentPlayer = CurrentPlayers[0];
+            CurrentOpponent = CurrentPlayers[1];
         }
         #endregion
 
@@ -129,7 +130,7 @@ namespace Reversi.Models
         public void NextPlayer()
         {
             CurrentOpponent = CurrentPlayer;
-            CurrentPlayer = (CurrentPlayer == Players[0]) ? Players[1] : Players[0];
+            CurrentPlayer = (CurrentPlayer == CurrentPlayers[0]) ? CurrentPlayers[1] : CurrentPlayers[0];
         }
 
         /// <summary>
@@ -150,12 +151,12 @@ namespace Reversi.Models
             //            MakePlayerMove(Players[0], 12);
 
             // Test scenario for our board
-            Gameboard.AddPiece(18, new GamePiece(Pieceshapes.ELLIPSE, Players[1]));
-            Gameboard.AddPiece(17, new GamePiece(Pieceshapes.ELLIPSE, Players[0]));
-            Gameboard.AddPiece(19, new GamePiece(Pieceshapes.ELLIPSE, Players[1]));
-            Gameboard.AddPiece(21, new GamePiece(Pieceshapes.ELLIPSE, Players[1]));
-            Gameboard.AddPiece(12, new GamePiece(Pieceshapes.ELLIPSE, Players[1]));
-            MessageBox.Show(Gameboard.DrawGameboard());
+            Gameboard.AddPiece(18, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(17, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[0]));
+            Gameboard.AddPiece(19, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(21, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(12, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            //MessageBox.Show(Gameboard.DrawGameboard());
 
             //// The main game loop -- 
             //while (!IsGameOver)
@@ -215,7 +216,7 @@ namespace Reversi.Models
                 // Reset the tiles to be turned array
                 TilesToTurn.Clear();
             }
-            MessageBox.Show(Gameboard.DrawGameboard() + "\nCurrent Player: " + CurrentPlayer.ID + " : " + CurrentPlayer.Name);
+            //MessageBox.Show(Gameboard.DrawGameboard() + "\nCurrent Player: " + CurrentPlayer.ID + " : " + CurrentPlayer.Name);
         }
 
         /// <summary>
@@ -251,7 +252,7 @@ namespace Reversi.Models
             Console.WriteLine("Index: " + index);
             // Determine our opponent
             Player player = CurrentPlayer;
-            Player opponent = (player == Players[0]) ? Players[1] : Players[0];
+            Player opponent = (player == CurrentPlayers[0]) ? CurrentPlayers[1] : CurrentPlayers[0];
 
             // Make sure that we are within acceptable index ranges, otherwise return
             if (index < 0 || index >= Gameboard.Squares.Length)
@@ -368,6 +369,22 @@ namespace Reversi.Models
                 Thread.Sleep(500);
                 soundPlayer.Play(); // can also use soundPlayer.PlaySync()
             }
+        }
+
+        /// <summary>
+        /// Make a list of the current player sockets for the game.
+        /// </summary>
+        /// <returns></returns>
+        public List<TcpClient> GetPlayersSockets()
+        {
+            List<TcpClient> list = new List<TcpClient>();
+
+            foreach(Player item in CurrentPlayers)
+            {
+                list.Add(item.Socket);
+            }
+
+            return list;
         }
         #endregion
 

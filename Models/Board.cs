@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace Reversi.Models
 {
@@ -94,7 +95,96 @@ namespace Reversi.Models
             //MessageBox.Show(str);
             return str;
         }
-        
+
+
+        /// <summary>
+        /// Unpackets a gameboard packet string and reinserts the new line characters for displaying
+        /// /// Packet:  NumCols ### Board Info 
+        /// </summary>
+        /// <param name="str">The gameboard string to unpacket</param>
+        /// <returns></returns>
+        public static string UnpackGameboardPacketString(string gameboardPacketString)
+        {
+            string[] separateStrings = { "~~~" }; // The packet data separators
+            string[] words = gameboardPacketString.Split(separateStrings, StringSplitOptions.None);
+
+           
+            int cols = int.Parse(words[0]);
+            string gameboardString = words[1];
+
+            string newstr = "";
+
+            for(int i=0; i< gameboardString.Length;i++)
+            {
+                string temp = "";
+
+                if(i % cols == 0)
+                {
+                    temp += "\n";
+                }
+                temp += " " + gameboardString[i] + " ";
+
+                newstr += temp;
+            }
+            newstr += "\n";
+
+           // MessageBox.Show(newstr);
+
+            return newstr;
+        }
+
+
+        /// <summary>
+        /// Writes the string to be used by a packet for this gameboard
+        /// Packet:  NumCols ### Board Info 
+        /// </summary>
+        public string CreateGameboardPacketString()
+        {
+            string str = "";
+
+            // Add the number of columns to the board data information
+            str += Cols.ToString();
+            str += "~~~"; // Information divider
+
+            for (int i = 0; i < Rows; i++)
+            {
+                for (int j = 0; j < Cols; j++)
+                {
+                    var index = i * Cols + j;
+
+                    // If there's no piece...
+                    if (Squares[index].Piece == null)
+                    {
+                        str += "-";
+                        continue;
+                    }
+
+                    // Otherwise determine the owner of the piece
+                    switch (Squares[index].Piece.Owner.ID)
+                    {
+                        case Players.PLAYER1:
+                            {
+                                str += "1";
+                                break;
+                            }
+                        case Players.PLAYER2:
+                            {
+                                str += "2";
+                                break;
+                            }
+
+                        default:
+                            str += "?";
+                            break;
+                    }
+                }
+            }
+            str += "~~~"; // Information divider needed at the end of the string
+
+            //MessageBox.Show(str);
+            return str;
+        }
+
 
         /// <summary>
         /// Returns an index on the gameboard based on a row or column offset

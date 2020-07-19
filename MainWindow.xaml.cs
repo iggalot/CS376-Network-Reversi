@@ -69,8 +69,8 @@ namespace Reversi
             InitializeComponent();
 
             // TODO:  Remove this instance creation here...for testing purposes only.  Must revise the ButtonClick routine below.
-            ReversiGame game = new ReversiGame(2);
-            CurrentGame = game.Instance;
+            //ReversiGame game = new ReversiGame(2);
+            //CurrentGame = game.Instance;
 
             // Create player placeholder
             PlayerInfo = new Player(Players.UNDEFINED, "unknown", null);
@@ -127,6 +127,7 @@ namespace Reversi
         {
             TcpClient clientSocket;
             NetworkStream serverStream;
+            PacketInfo receivePacket = new PacketInfo();  // a palceholder packet
 
             // retrieve the server address
             string address = GlobalSettings.ServerAddress;
@@ -201,23 +202,13 @@ namespace Reversi
 
             // Await the server response
             Console.WriteLine("Client:  waiting for response from server...");
-            string response = Client.Receive(serverStream);
+            receivePacket = new PacketInfo();
+            Client.ReceiveData(clientSocket, out receivePacket);
 
-            // If the client is null or empty, wait for a period then try again
-            while (String.IsNullOrEmpty(response))
-            {
-                Thread.Sleep(1000);
-                response = Client.Receive(serverStream);
-                Console.WriteLine("Client:  waiting for response from server...");
-            }
-
-            // Unpack the contents of the packet that were received from the server.
-            PacketInfo receivepacket = new PacketInfo();
-            receivepacket.UnpackPacket(response);
 
             IsWaitingForResponse = false;
 
-            switch (receivepacket.Type)
+            switch (receivePacket.Type)
             {
                 case PacketType.PACKET_UNDEFINED:
                     break;
@@ -231,13 +222,14 @@ namespace Reversi
 
                         // Once verified, create our player object
                         PlayerInfo.ID = Players.PLAYER1;
-                        PlayerInfo.Name = receivepacket.Data;
+                        PlayerInfo.Name = receivePacket.Data;
                         PlayerInfo.Socket = clientSocket;
 
                         // Display results in the window
-                        lbPlayerID.Content = receivepacket.Id;
-                        lbCurrentPlayer.Content = receivepacket.Data;
-                        lbStatus.Content = receivepacket.Type;
+                        lbPlayerID.Content = receivePacket.Id;
+                        lbCurrentPlayer.Content = receivePacket.Data;
+                        lbStatus.Content = receivePacket.Type;
+                        lbPacketStatus.Content = receivePacket.Type;
                         break;
                     }
                 case PacketType.PACKET_CONNECTION_REFUSED:
@@ -245,7 +237,8 @@ namespace Reversi
                         // Now make the game area visible
                         spMakeConnection.Visibility = Visibility.Visible;
                         spActiveGameRegion.Visibility = Visibility.Collapsed;
-                        lbConnectStatus.Content = receivepacket.Data;
+                        lbConnectStatus.Content = receivePacket.Data;
+                        lbPacketStatus.Content = receivePacket.Type;
 
                         IsConnectedToGameServer = false;
                         
@@ -266,19 +259,27 @@ namespace Reversi
             }
 
             // Wait for the server to signal that the game has begun.
-            response = Client.Receive(serverStream);
+            receivePacket = new PacketInfo();
+            Client.ReceiveData(clientSocket, out receivePacket);
 
-            // If the client is null or empty, wait for a period then try again
-            while (String.IsNullOrEmpty(response))
-            {
-                Thread.Sleep(1000);
-                response = Client.Receive(serverStream);
-            }
+            lbConnectStatus.Content = receivePacket.Data;
+            lbStatus.Content = receivePacket.Data;
+            lbPacketStatus.Content = receivePacket.Type;
 
-            receivepacket = new PacketInfo();
-            receivepacket.UnpackPacket(response);
 
-            lbConnectStatus.Content = receivepacket.Data;
+            // Wait for the server to signal that the game has begun.
+            receivePacket = new PacketInfo();
+            Client.ReceiveData(clientSocket, out receivePacket);
+
+            lbStatus.Content = receivePacket.ToString(); ;
+
+            lbConnectStatus.Content = receivePacket.Data;
+            lbStatus.Content = receivePacket.Data;
+            lbPacketStatus.Content = receivePacket.Type;
+
+            // Send the gameboard packet string to be unpacked
+            //TODO: Fix the packet unpacker for the gameboard in Board.cs
+            tbGameboard.Text = Board.UnpackGameboardPacketString(receivePacket.Data);
         }
     }
 }

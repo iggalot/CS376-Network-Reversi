@@ -77,41 +77,39 @@ namespace ClientServerLibrary
             // You could also use server.AcceptSocket() here.
             clientSocket = ServerSocket.AcceptTcpClient();
 
-            byte[] bytesFrom = new byte[65536];
-            string dataFromClient = null;
+            //byte[] bytesFrom = new byte[65536];
+            //string dataFromClient = null;
 
-            NetworkStream networkStream = clientSocket.GetStream();
-            networkStream.Read(bytesFrom, 0, (int)clientSocket.ReceiveBufferSize);
-            dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFrom);
-            dataFromClient = dataFromClient.Substring(0, dataFromClient.IndexOf("$"));
+            //NetworkStream networkStream = clientSocket.GetStream();
+            //networkStream.Read(bytesFrom, 0, (int)clientSocket.ReceiveBufferSize);
+            //dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFrom);
+            //dataFromClient = dataFromClient.Substring(0, dataFromClient.IndexOf("$"));
 
             // Convert the data from the client to the PacketInfo form
-            newPacket = ReceiveData(dataFromClient);
+            PacketInfo receivePacket = new PacketInfo();
+            ReceiveData(clientSocket, out receivePacket);
+            newPacket = receivePacket;
+
+            string dataFromClient = newPacket.Data;
 
             // Write the data to the console.
-            Console.WriteLine("...Received: "+ newPacket.Id.ToString() + " " + newPacket.Type.ToString() + " " + newPacket.Data);
+            Console.WriteLine("...Server Received: "+ newPacket.Id.ToString() + " " + newPacket.Type.ToString() + " " + newPacket.Data);
                 
             if(newPacket.Type == PacketType.PACKET_CONNECTION_REQUEST)
             {
                 // TODO: Generate unique ID for each connection
-                Console.WriteLine("--- (ID#" + newPacket.Id + ") " + newPacket.Data + " has connected");
+                Console.WriteLine("--- Server: (ID#" + newPacket.Id + ") " + newPacket.Data + " has connected");
                 TempData = newPacket.Data;
-                    
+
                 // Store the client socket in the connected socket list if it isn't already there.
                 if (!ClientSocketList.Contains(dataFromClient))
                     ClientSocketList.Add(dataFromClient, clientSocket);
-
-                networkStream.Flush();
 
                 return clientSocket;
             } else
             {
                 // TODO:  what do we do if its not a PACKET_CONNECTION_REQUEST?
             }
-
-            // clear the socket contents
-            networkStream.Flush();
-
 
             // Announce a connection
             // BroadcastToAll(dataFromClient + " has joined. ", dataFromClient, false);
@@ -132,20 +130,20 @@ namespace ClientServerLibrary
         /// Converts data received back into a useable packet
         /// </summary>
         /// <returns></returns>
-        public PacketInfo ReceiveData(string data)
-        {
-            string[] separateStrings = { "###" }; // The packet data separators
-            string[] words = data.Split(separateStrings,StringSplitOptions.None);
+        //public PacketInfo ReceiveData(string data)
+        //{
+        //    string[] separateStrings = { "###" }; // The packet data separators
+        //    string[] words = data.Split(separateStrings,StringSplitOptions.None);
 
-            // packet:  type ### id ### data
-            PacketType type = (PacketType)Enum.Parse(typeof(PacketType), words[0]);
-            int id = Int32.Parse(words[1]);
-            string name = words[2];
+        //    // packet:  type ### id ### data
+        //    PacketType type = (PacketType)Enum.Parse(typeof(PacketType), words[0]);
+        //    int id = Int32.Parse(words[1]);
+        //    string name = words[2];
 
-            // recreate the packet info
-            PacketInfo packet = new PacketInfo(id, name, type);
-            return packet;
-        }
+        //    // recreate the packet info
+        //    PacketInfo packet = new PacketInfo(id, name, type);
+        //    return packet;
+        //}
 
         /// <summary>
         /// A function for shutting down the server.

@@ -1,11 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 
 namespace ClientServerLibrary
 {
     public class DataTransmission
     {
+        /// <summary>
+        /// The max size of the read / write socket data array
+        /// </summary>
+        public const int MAX_DATA_SIZE = 1024;
+
         /// <summary>
         /// The number of attempts to successful send a packet
         /// </summary>
@@ -15,6 +22,57 @@ namespace ClientServerLibrary
         /// Was the transmission deemed a success?
         /// </summary>
         public static bool SendSuccess = true;
+
+
+
+        /// <summary>
+        /// Receives data from a socket.
+        /// </summary>
+        /// <param name="socket">The socket to receive data from</param>
+        /// <param name="packet">The packet <see cref="PacketInfo"/> of information to create when receiving data</param>
+        /// <returns></returns>
+        public static bool ReceiveData(TcpClient socket, out PacketInfo packet)
+        {
+            PacketInfo newpacket = new PacketInfo();
+            StringBuilder message = new StringBuilder();
+
+            // Get the stream associated with the socket.
+            NetworkStream stream = socket.GetStream();
+
+            if (stream.CanRead)
+            {
+                // Receive the TcpServer response.
+                // Buffer to store the response bytes.
+                Byte[] receivedata = new byte[MAX_DATA_SIZE];
+
+                int numberOfBytesRead = 0;
+
+                // Incoming message may be larger than the buffer size.
+                do
+                {
+                    numberOfBytesRead = stream.Read(receivedata, 0, receivedata.Length);
+                    message.AppendFormat("{0}", Encoding.ASCII.GetString(receivedata, 0, numberOfBytesRead));
+                }
+                while (stream.DataAvailable);
+
+                Console.WriteLine("Data Received: {0}", message);
+            }
+            else
+            {
+                Console.WriteLine("Data received: There was nothing in the stream at this time.");
+            }
+
+            stream.Flush();
+
+            // Reform the basic packet information.
+            newpacket.UnpackPacket(message.ToString());
+
+            // Assign the packet to the outgoing variable.
+            packet = newpacket;
+
+            return true;
+        }
+
 
         /// <summary>
         /// Function that sends a packet of information to a tcpclient
@@ -30,7 +88,7 @@ namespace ClientServerLibrary
             if (!client.Connected)
                 return false;
 
-            // Retrieve the steam for the client socket
+            // Retrieve the stream for the client socket
             NetworkStream serverStream = client.GetStream();
 
             int attempt = 0;
@@ -58,5 +116,42 @@ namespace ClientServerLibrary
 
             return SendSuccess;
         }
+
+
+
+        /// <summary>
+        ///  Send packet to list of multiple players
+        /// </summary>
+        /// <param name="list">List of client sockets (playerS)</param>
+        /// <param name="packet">The packet to broadcast</param>
+        /// <returns></returns>
+        public static bool SendDataToMultipleUsers(List<TcpClient> list, PacketInfo packet)
+        {
+            bool status = true;
+
+            foreach(TcpClient client in list)
+            {
+                bool send_status = SendData(client, packet);
+
+                if (send_status == false)
+                    status = false;
+            }
+
+            return status;
+        }
+
+        /// <summary>
+        /// Flushes the sockets for multiple users.  Useful for process milestones such as
+        /// starting a game or ending a game, prior to broadcasting.
+        /// </summary>
+        /// <param name="list"></param>
+        public static void FlushMultipleUsers(List<TcpClient> list)
+        {
+            foreach(TcpClient item in list)
+            {
+                item.GetStream().Flush();
+            }
+        }
+
     }
 }

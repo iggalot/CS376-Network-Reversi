@@ -43,6 +43,11 @@
 
 
             </StackPanel>
+            <StackPanel Orientation="Horizontal" Background="LightGreen" VerticalAlignment="Bottom">
+                <Label Content="PACKET STATUS: "/>
+                <Label Name="lbPacketStatus" Width="300" Content="Packet status label here"></Label>
+            </StackPanel>
+
         </StackPanel>
 
         

@@ -78,11 +78,11 @@ namespace ReversiServer
         /// </summary>
         private static void ChatServerThread()
         {
-            Console.WriteLine("... chat server started");
+            Console.WriteLine("... ChatServer: Chat server started");
             while(true)
             {
                 Thread.Sleep(3000);
-                Console.WriteLine("...... chat server is idle");
+                Console.WriteLine("...ChatServer: chat server is idle");
             }
         }
 
@@ -95,7 +95,7 @@ namespace ReversiServer
             GameServer = new Server(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
 
             // Listen for a connection, and send acknowledgement when one is made
-            Console.WriteLine("... Game server started. Listening for connections...");
+            Console.WriteLine("... GameServer: Game server started. Listening for connections...");
 
             TcpClient client;
 
@@ -121,15 +121,16 @@ namespace ReversiServer
                 // Must make sure that count is greater than 0
                 if ((WaitingRoom.Count % GlobalSettings.PlayersPerGame == 0) && (WaitingRoom.Count > GlobalSettings.PlayersPerGame-1))
                 {
-                    Console.WriteLine("... " + ConnectedClients.Count.ToString() + " connections made ... Ready to begin game");
+                    Console.WriteLine("... GameServer: " + ConnectedClients.Count.ToString() + " connections made ... Ready to begin game");
 
-                    // Retrieve the placeholder players from the WaitingRoom
+                    // Retrieve the placeholder players from the WaitingRoom and add them to the Staging Area
                     Player player1 = WaitingRoom[0];
+                    StagingArea.Add(player1);
+
                     Player player2 = WaitingRoom[1];
+                    StagingArea.Add(player2);
 
                     // Remove players from the Waiting room
-                    StagingArea.Add(player1);
-                    StagingArea.Add(player2);
                     WaitingRoom.Remove(player1);
                     WaitingRoom.Remove(player2);
 
@@ -138,9 +139,11 @@ namespace ReversiServer
                     // Start the game
                     Thread gameThread = new Thread(InitializeMatchup);
                     gameThread.Start(StagingArea);
-                } 
+                } else
+                {
+                    Console.WriteLine("... GameServer: " + ConnectedClients.Count.ToString() + " connections currently. Waiting for additional connections.");
 
-                Console.WriteLine("... " + ConnectedClients.Count.ToString() + " connections currently. Waiting for additional connections.");
+                }
             }
 
             // Once the game is over, shutdown the server
@@ -154,7 +157,7 @@ namespace ReversiServer
         /// <param name="packet">The packet of data created when the connection was first made in ListenForConnections</param>
         private static void AcceptConnection(TcpClient client, PacketInfo packet)
         {
-            Console.WriteLine("... Connection accepted for " + packet.Data);
+            Console.WriteLine("... GameServer: Connection accepted for " + packet.Data);
 
             if (client != null)
             {
@@ -186,7 +189,7 @@ namespace ReversiServer
         /// <param name="packet">The packet of data created when the connection was first made in ListenForConnections</param>
         private static void RefuseConnection(TcpClient client, PacketInfo packet)
         {
-            Console.WriteLine("...Maximum number of server connections exceeded. Refusing connection for " + packet.Data);
+            Console.WriteLine("... GameServer: Maximum number of server connections exceeded. Refusing connection for " + packet.Data);
 
             if (client != null)
             {
@@ -255,35 +258,69 @@ namespace ReversiServer
                 }
             }
 
-            Console.WriteLine("... Matchup pairing complete. Beginning game");
+
             // Create the game instance and play the game between the two players...
             // TODO:  Add client information into the game...(socket references, data, etc?)
             ReversiGame game = new ReversiGame(player1, player2);
+
             game.Instance.CurrentPlayer = player1;
             game.Instance.CurrentOpponent = player2;
+            Console.WriteLine("...... (GameThread (id: " + Game.GameID.ToString() + ") Matchup pairing complete. Beginning game...");
 
             // Signal the players that the game is starting...
-            PacketInfo gameStartPacket = new PacketInfo(-1, "The game is ready to begin...", PacketType.PACKET_GAME_STARTING);
+            PacketInfo gameStartPacket = new PacketInfo(-1, "......(GameThread (id: " + Game.GameID.ToString() + ") Game is starting.", PacketType.PACKET_GAME_STARTING);
 
-            // TODO: Handle any errors in transmission -- should this be in DataTransmission instead?
-            if (!DataTransmission.SendData(player1.Socket, gameStartPacket))
+            
+
+
+            //// Flush all sockets prior to starting the game.
+            //NetworkStream clientStream1 = player1.Socket.GetStream();
+
+            //clientStream1.Flush();
+            //// TODO: Handle any errors in transmission -- should this be in DataTransmission instead?
+            //if (!DataTransmission.SendData(player1.Socket, gameStartPacket))
+            //{
+            //    throw new SocketException();
+            //};
+
+            // Compile a list of the player sockets.
+            List<TcpClient> playersSocketList = game.Instance.GetPlayersSockets();
+            
+            // Clear the socket streams for the game server since we are starting the game
+            DataTransmission.FlushMultipleUsers(playersSocketList);
+
+            // Broadcast the start of game message
+            if(!DataTransmission.SendDataToMultipleUsers(playersSocketList, gameStartPacket))
             {
                 throw new SocketException();
-            };
-            // TODO: Handle any errors in transmission -- should this be in DataTransmission instead?
-            if (!DataTransmission.SendData(player2.Socket, gameStartPacket))
+            }
+
+            /////////////////////////////////////////
+            // Broadcast the initial game board
+            /////////////////////////////////////////
+            // Signal the players that the game is starting...
+            Console.WriteLine("...... (GameThread (id: " + Game.GameID.ToString() + ") Sending gameboard to clients...");
+
+            PacketInfo gameboardPacket = new PacketInfo(-1, game.Instance.Gameboard.CreateGameboardPacketString(), PacketType.PACKET_GAMEMOVE_ACCEPTED);
+
+            Thread.Sleep(5000);
+
+            //// Clear the socket streams for the game server since we are broadcasting the gameboard
+            DataTransmission.FlushMultipleUsers(playersSocketList);
+
+            // Broadcast the first gameboard
+            if(!DataTransmission.SendDataToMultipleUsers(playersSocketList, gameboardPacket))
             {
                 throw new SocketException();
-            };
-
-
+            }
+            Console.WriteLine("Initial gameboard packet sent...");
 
             // The main game loop
             while (true)
             {
-                // Check for dropped players, or dead sockets.
+                // TODO: Check for dropped players, or dead sockets.
                 Thread.Sleep(3000);
-                Console.WriteLine("...... Game is Running");
+                Console.WriteLine("......(GameThread(id: " + Game.GameID.ToString() + ") Game is Running");
             }
 
         }
