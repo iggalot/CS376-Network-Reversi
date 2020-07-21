@@ -278,7 +278,6 @@ namespace Reversi
             lbPacketStatus.Content = receivePacket.Type;
 
             // Send the gameboard packet string to be unpacked
-            //TODO: Fix the packet unpacker for the gameboard in Board.cs
             tbGameboard.Text = Board.UnpackGameboardPacketString(receivePacket.Data);
         }
     }
