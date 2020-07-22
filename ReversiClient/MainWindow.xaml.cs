@@ -1,44 +1,13 @@
 ﻿using ClientServerLibrary;
-using Settings;
 using Reversi.Models;
+using Settings;
 using System;
 using System.Net.Sockets;
 using System.Windows;
-using System.Threading.Tasks;
-using System.Threading;
 
-namespace Reversi
+namespace ReversiClient
 {
-    public class ReversiGame
-    {
-        /// <summary>
-        /// The instance for our game
-        /// </summary>
-        public Game Instance { get; set; }
-        public ReversiGame(int num_players)
-        {
-            // Start the game with specified numer of players
-            Instance = new Game(num_players);
 
-            // Setup the gameboard
-            Instance.SetupGame();
-
-            // Start the game
-            Instance.PlayGame();
-        }
-
-        public ReversiGame(Player p1, Player p2)
-        {
-            // Start the game with specified numer of players
-            Instance = new Game(p1, p2);
-
-            // Setup the gameboard
-            Instance.SetupGame();
-
-            // Start the game
-            Instance.PlayGame();
-        }
-    }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -53,7 +22,7 @@ namespace Reversi
         /// The current player associated with this client
         /// </summary>
         public Player PlayerInfo { get; set; }
-        
+
 
         /// <summary>
         /// The connection to the server has been made.
@@ -94,26 +63,27 @@ namespace Reversi
             //// Parse the results
             if (Int32.TryParse(tbIndex.Text, out result))
             {
-                if(result < 0)
+                if (result < 0)
                 {
                     lbStatus.Content = "Invalid entry";
                     return;
-                } else
+                }
+                else
                 {
                     CurrentGame.CurrentMoveIndex = result;
                     lbIndex.Content = CurrentGame.CurrentMoveIndex;
                     lbCurrentPlayer.Content = (CurrentGame.CurrentPlayer.ID + CurrentGame.CurrentPlayer.Name);
 
                     lbStatus.Content = "Processing Move";
-                    
-                    CurrentGame.PlaySounds(GameSounds.SOUND_CLICK_SUCCESSFUL);
+
+                    ReversiSounds.PlaySounds(GameSounds.SOUND_CLICK_SUCCESSFUL);
 
                     CurrentGame.PlayRound();
                     tbGameboard.Text = CurrentGame.Gameboard.DrawGameboard();
 
                     lbStatus.Content = "Move Successful";
 
-                    CurrentGame.PlaySounds(GameSounds.SOUND_TURN_COMPLETE);
+                    ReversiSounds.PlaySounds(GameSounds.SOUND_TURN_COMPLETE);
                 }
             }
         }
@@ -139,9 +109,9 @@ namespace Reversi
                 lbConnectStatus.Content = "You are already connected to the server!";
                 return;
             }
-                
+
             // Check if the player name is valid
-            if(String.IsNullOrEmpty(tbPlayerName.Text))
+            if (String.IsNullOrEmpty(tbPlayerName.Text))
             {
                 lbConnectStatus.Content = "You must enter a user name.";
                 return;
@@ -149,7 +119,7 @@ namespace Reversi
 
             // Otherwise try to make the connection
             try
-            {           
+            {
                 clientSocket = Client.Connect(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
                 serverStream = clientSocket.GetStream();
                 IsConnectedToGameServer = true;
@@ -184,7 +154,7 @@ namespace Reversi
 
             string name = tbPlayerName.Text;
             // Send our login name to the server
-            if(String.IsNullOrEmpty(name))
+            if (String.IsNullOrEmpty(name))
             {
                 IsConnectedToGameServer = false;
                 lbConnectStatus.Visibility = Visibility.Visible;
@@ -213,7 +183,7 @@ namespace Reversi
                 case PacketType.PACKET_UNDEFINED:
                     break;
                 case PacketType.PACKET_CONNECTION_REQUEST:
-                        break;
+                    break;
                 case PacketType.PACKET_CONNECTION_ACCEPTED:
                     {
                         // Now make the game area visible
@@ -241,7 +211,7 @@ namespace Reversi
                         lbPacketStatus.Content = receivePacket.Type;
 
                         IsConnectedToGameServer = false;
-                        
+
                         break;
                     }
                 case PacketType.PACKET_GAME_STARTING:

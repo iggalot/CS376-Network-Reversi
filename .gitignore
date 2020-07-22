@@ -26,3 +26,13 @@ ClientServerLibrary/obj/
 GlobalSettings/obj/
 
 ClientServerLibrary/bin/Debug/net472/
+
+Reversi/obj/Debug/netstandard2.0/
+
+ReversiClient/obj/Debug/
+
+Reversi/obj/
+
+Reversi/bin/Debug/netstandard2.0/
+
+ReversiClient/bin/Debug/

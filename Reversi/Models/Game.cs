@@ -1,12 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Media;
 using System.Net.Sockets;
-using System.Threading;
-using System.Windows;
 
 namespace Reversi.Models
 {
+
+    public class ReversiGame
+    {
+        /// <summary>
+        /// The instance for our game
+        /// </summary>
+        public Game Instance { get; set; }
+        public ReversiGame(int num_players)
+        {
+            // Start the game with specified numer of players
+            Instance = new Game(num_players);
+
+            // Setup the gameboard
+            Instance.SetupGame();
+
+            // Start the game
+            Instance.PlayGame();
+        }
+
+        public ReversiGame(Player p1, Player p2)
+        {
+            // Start the game with specified numer of players
+            Instance = new Game(p1, p2);
+
+            // Setup the gameboard
+            Instance.SetupGame();
+
+            // Start the game
+            Instance.PlayGame();
+        }
+    }
+
     public class Game
     {
         #region Private Properties
@@ -230,8 +259,8 @@ namespace Reversi.Models
             {
                 Gameboard.Squares[index].Piece.Owner = player;
 
-                // For each tile being flipped...play a sounds
-                PlaySounds(GameSounds.SOUND_FLIPTILE);
+                //// For each tile being flipped...play a sounds
+                //ReversiSounds.PlaySounds(GameSounds.SOUND_FLIPTILE);
 
 
             }
@@ -340,35 +369,6 @@ namespace Reversi.Models
             }
 
             return true;
-        }
-
-        public void PlaySounds(GameSounds sound)
-        {
-            string soundString = "";
-
-            // chimes.wav
-            // Windows Default.wav -- click to place
-            // Windows User Account Control.wav -- click to place
-            // tada.wav -- successful move
-            switch (sound)
-            {
-                case GameSounds.SOUND_CLICK_SUCCESSFUL:
-                    soundString = @"c:\Windows\Media\Windows User Account Control.wav";
-                    break;
-                case GameSounds.SOUND_FLIPTILE:
-                    soundString = @"c:\Windows\Media\chimes.wav";
-                    break;
-                case GameSounds.SOUND_TURN_COMPLETE:
-                    soundString = @"c:\Windows\Media\tada.wav";
-                    break;
-                default:
-                    return;
-            }
-            using (var soundPlayer = new SoundPlayer(soundString))
-            {
-                Thread.Sleep(500);
-                soundPlayer.Play(); // can also use soundPlayer.PlaySync()
-            }
         }
 
         /// <summary>

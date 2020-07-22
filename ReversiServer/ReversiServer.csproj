@@ -54,13 +54,13 @@
       <Project>{3a1edbe6-f7bf-4939-a84c-335c4f4c0128}</Project>
       <Name>ClientServerLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Reversi.csproj">
-      <Project>{6b60f976-38f2-4d05-bbb3-454cd2056f62}</Project>
-      <Name>Reversi</Name>
-    </ProjectReference>
     <ProjectReference Include="..\GlobalSettings\GlobalSettings.csproj">
       <Project>{06e495c8-fc22-4595-b895-fbde20bead5a}</Project>
       <Name>GlobalSettings</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Reversi\Reversi.csproj">
+      <Project>{222dfcb7-b3eb-4c75-87ed-aa9babb92ae7}</Project>
+      <Name>Reversi</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

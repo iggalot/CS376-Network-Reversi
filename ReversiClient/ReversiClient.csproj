@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6B60F976-38F2-4D05-BBB3-454CD2056F62}</ProjectGuid>
+    <ProjectGuid>{889735E6-CD43-41F2-9BFB-470924E37526}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Reversi</RootNamespace>
-    <AssemblyName>Reversi</AssemblyName>
+    <RootNamespace>ReversiClient</RootNamespace>
+    <AssemblyName>ReversiClient</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ReversiSounds.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -69,12 +70,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\Board.cs" />
-    <Compile Include="Models\Enums.cs" />
-    <Compile Include="Models\Game.cs" />
-    <Compile Include="Models\GamePiece.cs" />
-    <Compile Include="Models\Player.cs" />
-    <Compile Include="Models\Square.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -101,16 +96,17 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Views\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="ClientServerLibrary\ClientServerLibrary.csproj">
+    <ProjectReference Include="..\ClientServerLibrary\ClientServerLibrary.csproj">
       <Project>{3a1edbe6-f7bf-4939-a84c-335c4f4c0128}</Project>
       <Name>ClientServerLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="GlobalSettings\GlobalSettings.csproj">
+    <ProjectReference Include="..\GlobalSettings\GlobalSettings.csproj">
       <Project>{1ddec5e3-9352-4c2a-9a52-07e238d0079d}</Project>
       <Name>GlobalSettings</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Reversi\Reversi.csproj">
+      <Project>{222dfcb7-b3eb-4c75-87ed-aa9babb92ae7}</Project>
+      <Name>Reversi</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

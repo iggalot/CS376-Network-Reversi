@@ -1,11 +1,11 @@
-﻿<Window x:Class="Reversi.MainWindow"
+﻿<Window x:Class="ReversiClient.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Reversi"
+        xmlns:local="clr-namespace:ReversiClient"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="1000">
+        Title="MainWindow" Height="450" Width="800">
     <Grid>
         <StackPanel Orientation="Vertical">
             <StackPanel Name="spMakeConnection" Orientation="Vertical" Visibility="Visible">
@@ -14,7 +14,7 @@
                 <Label Name="lbConnectStatus" Content="Connection status Label here"></Label>
                 <Button Content="Connect to Server" HorizontalAlignment="Left" Width="300" Click="Button_ConnectClick"></Button>
             </StackPanel>
-             <StackPanel Name="spActiveGameRegion" Width="800" Height="300" Visibility="Collapsed" Orientation="Horizontal">
+            <StackPanel Name="spActiveGameRegion" Width="800" Height="300" Visibility="Collapsed" Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Background="LightGray" Orientation="Horizontal">
                         <Label Content="Player ID: "/>
@@ -32,7 +32,7 @@
                         <TextBox Name="tbIndex" Height="25" Width="100"/>
                         <Button Height="40" Width="100" Content="Submit Move" Click="Button_SubmitMoveClick"></Button>
                     </StackPanel>
-           
+
                     <StackPanel Orientation="Horizontal" Background="LightBlue">
                         <Label Content="Status: "></Label>
                         <Label Name="lbStatus" Width ="300" Content="Move submission status Label here"></Label>
@@ -50,6 +50,6 @@
 
         </StackPanel>
 
-        
+
     </Grid>
 </Window>
