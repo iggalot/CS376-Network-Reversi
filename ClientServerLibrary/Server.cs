@@ -88,6 +88,15 @@ namespace ClientServerLibrary
             // Convert the data from the client to the PacketInfo form
             PacketInfo receivePacket = new PacketInfo();
             ReceiveData(clientSocket, out receivePacket);
+
+            // If there is no packet...return
+            if (receivePacket == null)
+            {
+                newPacket = null;
+                return null;
+            }
+                
+
             newPacket = receivePacket;
 
             string dataFromClient = newPacket.Data;

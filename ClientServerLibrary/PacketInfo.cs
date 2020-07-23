@@ -59,6 +59,7 @@ namespace ClientServerLibrary
     /// <summary>
     /// Enum for types of packets that the client and servers will use
     /// This is used as a STATE machine for the server and client.
+    /// TODO:  Should this be here?  or in the game specific enums?  PacketInfo in this library requires these types...
     /// </summary>
     public enum PacketType
     {
@@ -70,6 +71,7 @@ namespace ClientServerLibrary
         PACKET_GAMEMOVE_REQUEST =       4,
         PACKET_GAMEMOVE_ACCEPTED =      5,  // if a move is deemed as valid
         PACKET_GAMEMOVE_DENIED =        6,  // if a move is deemed invalid
-        PACKET_GAME_ENDING =            7
+        PACKET_SWITCH_PLAYERS =         7,  // Switches the current player and the opponent  TODO:  Should this be here? Or is this game specific?
+        PACKET_GAME_ENDING =            8
     }
 }

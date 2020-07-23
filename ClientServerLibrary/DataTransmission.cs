@@ -35,42 +35,53 @@ namespace ClientServerLibrary
         {
             PacketInfo newpacket = new PacketInfo();
             StringBuilder message = new StringBuilder();
+            bool dataRead = false;
 
             // Get the stream associated with the socket.
             NetworkStream stream = socket.GetStream();
+            packet = null;
 
-            if (stream.CanRead)
+            while (stream.CanRead)
             {
-                // Receive the TcpServer response.
-                // Buffer to store the response bytes.
-                Byte[] receivedata = new byte[MAX_DATA_SIZE];
-
-                int numberOfBytesRead = 0;
-
-                // Incoming message may be larger than the buffer size.
-                do
+                if (!stream.DataAvailable)
                 {
-                    numberOfBytesRead = stream.Read(receivedata, 0, receivedata.Length);
-                    message.AppendFormat("{0}", Encoding.ASCII.GetString(receivedata, 0, numberOfBytesRead));
+        //            Console.WriteLine("ReceiveData: There was nothing in the stream at this time.");
                 }
-                while (stream.DataAvailable);
+                else
+                {
 
-                Console.WriteLine("Data Received: {0}", message);
+                    // Receive the TcpServer response.
+                    // Buffer to store the response bytes.
+                    Byte[] receivedata = new byte[MAX_DATA_SIZE];
+
+                    int numberOfBytesRead = 0;
+
+                    // Incoming message may be larger than the buffer size.
+                    do
+                    {
+                        numberOfBytesRead = stream.Read(receivedata, 0, receivedata.Length);
+                        message.AppendFormat("{0}", Encoding.ASCII.GetString(receivedata, 0, numberOfBytesRead));
+                    }
+                    while (stream.DataAvailable);
+
+                    Console.WriteLine("Data Received: {0}", message);
+                    dataRead = true;
+
+                    if (dataRead)
+                    {
+                        stream.Flush();
+
+                        // Reform the basic packet information.
+                        newpacket.UnpackPacket(message.ToString());
+
+                        // Assign the packet to the outgoing variable.
+                        packet = newpacket;
+                        break;
+                    }
+                }
             }
-            else
-            {
-                Console.WriteLine("Data received: There was nothing in the stream at this time.");
-            }
 
-            stream.Flush();
-
-            // Reform the basic packet information.
-            newpacket.UnpackPacket(message.ToString());
-
-            // Assign the packet to the outgoing variable.
-            packet = newpacket;
-
-            return true;
+            return dataRead;
         }
 
 
@@ -111,7 +122,10 @@ namespace ClientServerLibrary
 
                 // Exit out of our send loop attempt
                 if (SendSuccess)
+                {
+                    Console.WriteLine("... Data Sent: " + packet.FormPacket());
                     break;
+                }
             }
 
             return SendSuccess;

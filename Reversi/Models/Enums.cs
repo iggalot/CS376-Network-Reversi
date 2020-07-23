@@ -35,10 +35,15 @@
         SE = 8
     }
 
+    /// <summary>
+    /// Enum for the different sounds that the client will play.
+    /// </summary>
     public enum GameSounds
     {
         SOUND_CLICK_SUCCESSFUL = 0,
         SOUND_FLIPTILE = 1,
-        SOUND_TURN_COMPLETE = 2
+        SOUND_TURN_COMPLETE = 2,
+        SOUND_MOVE_ACCEPTED = 3,
+        SOUND_MOVE_REJECTED = 4
     }
 }

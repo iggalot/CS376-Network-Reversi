@@ -4,6 +4,7 @@ using Settings;
 using System;
 using System.Net.Sockets;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace ReversiClient
 {
@@ -16,13 +17,15 @@ namespace ReversiClient
         /// <summary>
         /// The current game being controlled by this client
         /// </summary>
-        public Game CurrentGame { get; set; }
+        public Game CurrentGame { get; set; } = new ReversiGame(2).Instance;
+
+        /// The connected socket between the client and the server.
+        public TcpClient ClientSocket { get; set; }
 
         /// <summary>
         /// The current player associated with this client
         /// </summary>
         public Player PlayerInfo { get; set; }
-
 
         /// <summary>
         /// The connection to the server has been made.
@@ -45,48 +48,20 @@ namespace ReversiClient
             PlayerInfo = new Player(Players.UNDEFINED, "unknown", null);
         }
 
-        private void Button_SubmitMoveClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// HAcky routine to allow the UI to update in the middle of a method.
+        /// </summary>
+        void AllowUIToUpdate()
         {
-            int result;
-
-            //// Send move to to server
-            //PacketInfo packet = new PacketInfo(1, "40", PacketType.PACKET_GAMEMOVE_REQUEST);
-            //DataTransmission.SendData(client, packet);
-
-
-            // Wait for response
-
-            // Process display of results
-
-
-
-            //// Parse the results
-            if (Int32.TryParse(tbIndex.Text, out result))
+            DispatcherFrame frame = new DispatcherFrame();
+            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Render, new DispatcherOperationCallback(delegate (object parameter)
             {
-                if (result < 0)
-                {
-                    lbStatus.Content = "Invalid entry";
-                    return;
-                }
-                else
-                {
-                    CurrentGame.CurrentMoveIndex = result;
-                    lbIndex.Content = CurrentGame.CurrentMoveIndex;
-                    lbCurrentPlayer.Content = (CurrentGame.CurrentPlayer.ID + CurrentGame.CurrentPlayer.Name);
-
-                    lbStatus.Content = "Processing Move";
-
-                    ReversiSounds.PlaySounds(GameSounds.SOUND_CLICK_SUCCESSFUL);
-
-                    CurrentGame.PlayRound();
-                    tbGameboard.Text = CurrentGame.Gameboard.DrawGameboard();
-
-                    lbStatus.Content = "Move Successful";
-
-                    ReversiSounds.PlaySounds(GameSounds.SOUND_TURN_COMPLETE);
-                }
-            }
+                frame.Continue = false;
+                return null;
+            }), null);
+            Dispatcher.PushFrame(frame);
         }
+
 
         /// <summary>
         /// The button that makes the connection to the game server.
@@ -121,6 +96,7 @@ namespace ReversiClient
             try
             {
                 clientSocket = Client.Connect(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
+                ClientSocket = clientSocket;  // save the socket once the connection is made
                 serverStream = clientSocket.GetStream();
                 IsConnectedToGameServer = true;
 
@@ -164,7 +140,6 @@ namespace ReversiClient
 
             // Create the packet info.  Send ID of -1 to signal that we need a server id to be assigned to this player
             PacketInfo packet = new PacketInfo(-1, name, PacketType.PACKET_CONNECTION_REQUEST);
-
             DataTransmission.SendData(clientSocket, packet);
 
             // waiting for a response from the server.
@@ -175,6 +150,12 @@ namespace ReversiClient
             receivePacket = new PacketInfo();
             Client.ReceiveData(clientSocket, out receivePacket);
 
+            while(receivePacket == null)
+            {
+                System.Threading.Thread.Sleep(1000);
+                Console.WriteLine("Client:  waiting for response from server...");
+                Client.ReceiveData(clientSocket, out receivePacket);
+            }
 
             IsWaitingForResponse = false;
 
@@ -249,6 +230,100 @@ namespace ReversiClient
 
             // Send the gameboard packet string to be unpacked
             tbGameboard.Text = Board.UnpackGameboardPacketString(receivePacket.Data);
+        }
+
+        private void Button_SubmitMoveClick(object sender, RoutedEventArgs e)
+        {
+            int result;
+            TcpClient clientSocket = ClientSocket;  // retrieve our socket
+            PacketInfo receivePacket = new PacketInfo(); ;
+
+            // Parse the results of the text box.
+            if (Int32.TryParse(tbIndex.Text, out result))
+            {
+                if (result < 0)
+                {
+                    lbStatus.Content = "Invalid entry";
+                    return;
+                }
+                else
+                {
+                    CurrentGame.CurrentMoveIndex = result;
+
+                    // TODO: Remove this update. Display data on the screen (temporary)
+                    lbIndex.Content = CurrentGame.CurrentMoveIndex;
+                    lbCurrentPlayer.Content = (CurrentGame.CurrentPlayer.ID + CurrentGame.CurrentPlayer.Name);
+
+                    //// Send move to to server
+                    // Create the packet info.
+                    lbStatus.Content = "Processing Move. Waiting for response from Server...";
+                    PacketInfo packet = new PacketInfo(-1, CurrentGame.CurrentMoveIndex.ToString(), PacketType.PACKET_GAMEMOVE_REQUEST);
+                    DataTransmission.SendData(clientSocket, packet);
+
+                    // Wait for the server to signal whether the move was accepted or not.
+                    receivePacket = new PacketInfo();
+                    System.Threading.Thread.Sleep(1000);
+
+                    while (!DataTransmission.ReceiveData(clientSocket, out receivePacket))
+                    {
+                        if (receivePacket == null)
+                        {
+                            lbStatus.Content = "Packet was null";
+                            lbPacketStatus.Content = "null packet";
+                            Console.WriteLine("Client: gameMovePacket was null for opponent");
+                            return;
+                        }
+                        else if (receivePacket.Type == PacketType.PACKET_UNDEFINED)
+                        {
+                            lbStatus.Content = "Packet was undefined";
+                            lbPacketStatus.Content = receivePacket.Type;
+                            Console.WriteLine("Client: gameMovePacket type was UNDEFINED");
+                            return;
+                        }
+                        // send a denied response if a move was received
+                        else if (receivePacket.Type == PacketType.PACKET_GAMEMOVE_DENIED)
+                        {
+                            Console.WriteLine("Client: Move denied by server");
+                            lbStatus.Content = "The move is invalid.";
+                            lbPacketStatus.Content = receivePacket.Type;
+
+                            AllowUIToUpdate();
+                            // TODO:  Add reject sound
+
+                            break;
+                        }
+                        else if (receivePacket.Type == PacketType.PACKET_GAMEMOVE_ACCEPTED) 
+                        {
+                            Console.WriteLine("Client: Move accepted by server");
+                            lbStatus.Content = "The move is valid.  Updating board.";
+                            lbPacketStatus.Content = receivePacket.Type;
+
+                            //TODO:  Update board and apply move
+
+                            ReversiSounds.PlaySounds(GameSounds.SOUND_CLICK_SUCCESSFUL);
+
+                            CurrentGame.PlayRound();
+                            tbGameboard.Text = CurrentGame.Gameboard.DrawGameboard();
+
+                            AllowUIToUpdate();
+
+                            ReversiSounds.PlaySounds(GameSounds.SOUND_TURN_COMPLETE);
+                            break;
+                        } 
+                        else
+                        {
+                            lbStatus.Content = "Invalid or unknown packet type received";
+                            lbPacketStatus.Content = receivePacket.Type;
+                            Console.WriteLine("Client: Invalid packet of type " + receivePacket.Type + " was received.");
+                            return;
+                        }
+
+                        //TODO:  Add a timeout delay here...
+                    }
+                }
+            }
+            lbStatus.Content = receivePacket.Data;
+            lbPacketStatus.Content = receivePacket.Type;
         }
     }
 }

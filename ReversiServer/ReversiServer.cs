@@ -108,13 +108,13 @@ namespace ReversiServer
                 client = GameServer.ListenForConnections(out packet);
 
                 // If no socket, return to listening.
-                if (client == null)
+                if (client == null || packet == null)
                     continue;
 
                 // Add to the connected sockets list
                 ConnectedClients.Add(client);
 
-                // Acknowledge the connectio and determine if we should accept it or refuse it.
+                // Acknowledge the connection and determine if we should accept it or refuse it.
                 AcknowledgeConnection(client, packet);
 
                 // If we have two players currently waiting, create a game for them
@@ -301,9 +301,9 @@ namespace ReversiServer
             // Signal the players that the game is starting...
             Console.WriteLine("...... (GameThread (id: " + Game.GameID.ToString() + ") Sending gameboard to clients...");
 
-            PacketInfo gameboardPacket = new PacketInfo(-1, game.Instance.Gameboard.CreateGameboardPacketString(), PacketType.PACKET_GAMEMOVE_ACCEPTED);
+            PacketInfo gameboardPacket = new PacketInfo(-1, game.Instance.Gameboard.CreateGameboardPacketString(), PacketType.PACKET_GAME_STARTING);
 
-            Thread.Sleep(5000);
+            Thread.Sleep(1000);
 
             //// Clear the socket streams for the game server since we are broadcasting the gameboard
             DataTransmission.FlushMultipleUsers(playersSocketList);
@@ -315,14 +315,68 @@ namespace ReversiServer
             }
             Console.WriteLine("Initial gameboard packet sent...");
 
-            // The main game loop
+
+            Console.WriteLine("......(GameThread(id: " + Game.GameID.ToString() + ") Game is Running");
+            // The main game loop. Process individual moves here
             while (true)
             {
                 // TODO: Check for dropped players, or dead sockets.
                 Thread.Sleep(3000);
-                Console.WriteLine("......(GameThread(id: " + Game.GameID.ToString() + ") Game is Running");
-            }
 
+                // Listen for game moves
+                Console.WriteLine("......(GameThread(id: " + Game.GameID.ToString() + ") Waiting to receive game move");
+                PacketInfo gameMovePacket;
+
+                // Ignore the opponent moves and send rejection message
+                if(game.Instance.CurrentOpponent.Socket.GetStream().DataAvailable)
+                {
+                    Console.WriteLine("Checking for move from opponent...");
+                    // If there was no data (or an UNDEFINED packet was returned), do nothing because the client isn't listening
+                    // otherwise we send a MOVE_DENIED packet back to the opponent.
+                    if (DataTransmission.ReceiveData(game.Instance.CurrentOpponent.Socket, out gameMovePacket))
+                    {
+                        if (gameMovePacket == null)
+                        {
+                            Console.WriteLine("Server: gameMovePacket was null for opponent");
+                        }
+                        else if (gameMovePacket.Type == PacketType.PACKET_UNDEFINED)
+                        {
+                            Console.WriteLine("Server: gameMovePacket type was UNDEFINED");
+                        }
+                        // send a denied response if a move was received
+                        else if (gameMovePacket.Type == PacketType.PACKET_GAMEMOVE_REQUEST)
+                        {
+                            Console.WriteLine("Server: Move received");
+                            DataTransmission.SendData(game.Instance.CurrentOpponent.Socket, new PacketInfo(-1, "It is not your move.", PacketType.PACKET_GAMEMOVE_DENIED));
+                        } else
+                        {
+                            Console.WriteLine("Server: Invalid packet of type " + gameMovePacket.Type + " was received.");
+                        }
+                    }
+                }
+
+                // Now check the Current Player socket for a move
+                if (game.Instance.CurrentPlayer.Socket.GetStream().DataAvailable)
+                {
+                    Console.WriteLine("Server: Checking for move from current player...");
+                    DataTransmission.ReceiveData(game.Instance.CurrentPlayer.Socket, out gameMovePacket);
+
+                    // If there was no data (or an UNDEFINED packet was returned, do nothing because the client isn't listening
+                    // and cycle back to the beginning og the loop and continue listening
+                    if ((gameMovePacket == null) || (gameMovePacket.Type == PacketType.PACKET_UNDEFINED))
+                    {
+                        // No data was received so we restart the listening cycle
+                        continue;
+                    }
+                    else
+                    {
+                        // Determine if the move request was valid...
+                        //TODO: Determine if move was valid...
+                        DataTransmission.SendData(game.Instance.CurrentPlayer.Socket, new PacketInfo(-1, "Valid move detected.", 
+                            PacketType.PACKET_GAMEMOVE_ACCEPTED));
+                    }
+                }
+            }
         }
     }
 }
