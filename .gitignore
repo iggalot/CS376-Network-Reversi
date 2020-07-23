@@ -36,3 +36,9 @@ Reversi/obj/
 Reversi/bin/Debug/netstandard2.0/
 
 ReversiClient/bin/Debug/
+
+StateMachine/bin/Debug/netstandard2.0/
+
+StateMachine/obj/Debug/net472/
+
+StateMachine/obj/

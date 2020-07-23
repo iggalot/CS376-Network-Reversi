@@ -232,6 +232,11 @@ namespace ReversiClient
             tbGameboard.Text = Board.UnpackGameboardPacketString(receivePacket.Data);
         }
 
+        /// <summary>
+        /// The action for when the move submission button is clicked.  This will be changed when we get to UI clicking.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Button_SubmitMoveClick(object sender, RoutedEventArgs e)
         {
             int result;

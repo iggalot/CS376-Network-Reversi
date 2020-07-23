@@ -52,6 +52,10 @@ namespace ReversiServer
 
         static void Main()
         {
+            // Setup our statemachine for this game
+            ReversiStateMachine gs = new ReversiStateMachine();
+            ReversiStateMachine.TestStateMachine();
+            
             // Start the game server thread
             ThreadStart gameStart = new ThreadStart(GameServerThread);
             Thread gameThread = new Thread(gameStart);

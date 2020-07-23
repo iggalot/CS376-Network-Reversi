@@ -4,4 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ClientServerLibrary\ClientServerLibrary.csproj" />
+    <ProjectReference Include="..\GlobalSettings\GlobalSettings.csproj" />
+    <ProjectReference Include="..\StateMachine\StateMachine.csproj" />
+  </ItemGroup>
+
 </Project>
