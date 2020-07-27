@@ -1,8 +1,10 @@
 ﻿using System;
-using System.Windows;
 
 namespace Reversi.Models
 {
+    /// <summary>
+    /// The class defining the gameboard characteristics.
+    /// </summary>
     public class Board
     {
 

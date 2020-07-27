@@ -2,6 +2,9 @@
 
 namespace Reversi.Models
 {
+    /// <summary>
+    /// A class that defines the basic game regions for our game.
+    /// </summary>
     public class Square
     {
         /// <summary>

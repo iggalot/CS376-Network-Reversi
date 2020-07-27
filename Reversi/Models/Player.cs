@@ -2,6 +2,9 @@
 
 namespace Reversi.Models
 {
+    /// <summary>
+    /// A class that defines the basic game player
+    /// </summary>
     public class Player
     {
         /// <summary>

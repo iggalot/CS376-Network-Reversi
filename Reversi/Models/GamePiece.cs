@@ -1,5 +1,8 @@
 ﻿namespace Reversi.Models
 {
+    /// <summary>
+    /// Class that governs the game pieces
+    /// </summary>
     public class GamePiece
     {
         /// <summary>

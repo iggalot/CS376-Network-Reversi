@@ -6,21 +6,14 @@ namespace Reversi.Models
 {
     /// <summary>
     /// The Reversi Game class...
-    /// Uses a singleton of the GAME class as the INSTANCE property
-    /// TODO: -- should be able to inherit directly from GAME but constructors
-    /// dont have the same number of arguments. How to resolve?
     /// </summary>
-    public class ReversiGame
+    public class ReversiGame : Game
     {
+        #region Public Properties
         /// <summary>
         /// An array to hold the indices of tiles to turn in a given round.
         /// </summary>
         public List<int> TilesToTurn { get; set; } = new List<int>();
-
-        /// <summary>
-        /// The instance for our game
-        /// </summary>
-        public Game Instance { get; set; }
 
         /// <summary>
         /// Has the P1 player gone yet?
@@ -31,13 +24,12 @@ namespace Reversi.Models
         /// Has the P2 player gone yet?
         /// </summary>
         public bool P2Went { get; set; } = false;
+        #endregion
 
+        #region Constructors
 
-        public ReversiGame(int num_players)
+        public ReversiGame(int num_players) : base(num_players)
         {
-            // Start the game with specified numer of players
-            Instance = new Game(num_players);
-
             // Setup the gameboard
             SetupGame();
 
@@ -45,17 +37,23 @@ namespace Reversi.Models
             PlayGame();
         }
 
-        public ReversiGame(Player p1, Player p2)
+        /// <summary>
+        /// Constructor for a two player game
+        /// </summary>
+        /// <param name="p1">Player 1</param>
+        /// <param name="p2">Player 2</param>
+        public ReversiGame(Player p1, Player p2) : base(p1, p2)
         {
-            // Start the game with specified numer of players
-            Instance = new Game(p1, p2);
-
             // Setup the gameboard
             SetupGame();
 
             // Start the game
             PlayGame();
         }
+
+        #endregion
+
+        #region Public Methods
 
         /// <summary>
         /// Determine if the new placement location is valid.
@@ -68,16 +66,16 @@ namespace Reversi.Models
 
             Console.WriteLine("Index: " + index);
             // Determine our opponent
-            Player player = Instance.CurrentPlayer;
-            Player opponent = (player == Instance.CurrentPlayers[0]) ? Instance.CurrentPlayers[1] : Instance.CurrentPlayers[0];
+            Player player = CurrentPlayer;
+            Player opponent = (player == CurrentPlayers[0]) ? CurrentPlayers[1] : CurrentPlayers[0];
 
             // Make sure that we are within acceptable index ranges, otherwise return
-            if (index < 0 || index >= Instance.Gameboard.Squares.Length)
+            if (index < 0 || index >= Gameboard.Squares.Length)
             {
                 return false;
             }
             // Selected index must not already contain a piece
-            if (Instance.Gameboard.Squares[index].Piece != null)
+            if (Gameboard.Squares[index].Piece != null)
             {
                 //MessageBox.Show("This block already contains a piece.");
                 return false;
@@ -92,14 +90,14 @@ namespace Reversi.Models
             {
                 isValidMove = false;
 
-                tmp_index = Instance.Gameboard.GetIndexByOffsets(index, dv);
+                tmp_index = Gameboard.GetIndexByOffsets(index, dv);
 
                 // Is there a valid piece in this square?
-                if ((tmp_index == -1) || (Instance.Gameboard.Squares[tmp_index].Piece == null))
+                if ((tmp_index == -1) || (Gameboard.Squares[tmp_index].Piece == null))
                     continue;
 
                 // Check if the neighbor is owned by the opponent
-                Player owner = Instance.Gameboard.Squares[tmp_index].Piece.Owner;
+                Player owner = Gameboard.Squares[tmp_index].Piece.Owner;
 
                 if (owner != opponent)
                 {
@@ -125,18 +123,18 @@ namespace Reversi.Models
 
                         Console.WriteLine("...searching " + next_index + " to " + dv);
 
-                        next_index = Instance.Gameboard.GetIndexByOffsets(next_index, dv);
+                        next_index = Gameboard.GetIndexByOffsets(next_index, dv);
 
 
                         // Did we find the border? Is there a valid piece in this square? 
                         // If not, stop searching
-                        if ((next_index == -1) || (Instance.Gameboard.Squares[next_index].Piece == null))
+                        if ((next_index == -1) || (Gameboard.Squares[next_index].Piece == null))
                         {
                             tmpList.Clear(); // clear the temp list
                             break;
                         }
 
-                        next_owner = Instance.Gameboard.Squares[next_index].Piece.Owner;
+                        next_owner = Gameboard.Squares[next_index].Piece.Owner;
 
                         // If neighbor to the neighbor in this direction is the same as the player,
                         // the move is valid.
@@ -165,13 +163,13 @@ namespace Reversi.Models
         /// <param name="index">the index of the move being made</param>
         internal void MakePlayerMove(int index)
         {
-            Player player = Instance.CurrentPlayer;
+            Player player = CurrentPlayer;
 
             if (ValidatePlacement(index))
             {
                 // Add a new game piece at the location
                 GamePiece piece = new GamePiece(Pieceshapes.ELLIPSE, player);
-                Instance.Gameboard.AddPiece(index, piece);
+                Gameboard.AddPiece(index, piece);
 
                 // Capture the opponents tiles
                 DoTurnTiles();
@@ -187,16 +185,14 @@ namespace Reversi.Models
         /// </summary>
         private void DoTurnTiles()
         {
-            Player player = Instance.CurrentPlayer;
+            Player player = CurrentPlayer;
 
             foreach (int index in TilesToTurn)
             {
-                Instance.Gameboard.Squares[index].Piece.Owner = player;
+                Gameboard.Squares[index].Piece.Owner = player;
 
                 //// For each tile being flipped...play a sounds
                 //ReversiSounds.PlaySounds(GameSounds.SOUND_FLIPTILE);
-
-
             }
 
             // Now clear the tiles to turn array since all the moves have been made
@@ -206,19 +202,19 @@ namespace Reversi.Models
         public void SetupGame()
         {
             // TODO:  What if the board has odd rows and columns ODD numbered?
-            var midpoint = Instance.Gameboard.Rows * Instance.Gameboard.Cols / 2;
+            var midpoint = Gameboard.Rows * Gameboard.Cols / 2;
 
             // Place the starting pieces
-            Instance.Gameboard.AddPiece(midpoint - Instance.Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, Instance.CurrentPlayers[0]));
-            Instance.Gameboard.AddPiece(midpoint - Instance.Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, Instance.CurrentPlayers[1]));
-            Instance.Gameboard.AddPiece(midpoint + Instance.Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, Instance.CurrentPlayers[1]));
-            Instance.Gameboard.AddPiece(midpoint + Instance.Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, Instance.CurrentPlayers[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[0]));
 
             // MessageBox.Show(Gameboard.DrawGameboard());
 
             // Set the First player to be the current player
-            Instance.CurrentPlayer = Instance.CurrentPlayers[0];
-            Instance.CurrentOpponent = Instance.CurrentPlayers[1];
+            CurrentPlayer = CurrentPlayers[0];
+            CurrentOpponent = CurrentPlayers[1];
         }
 
 
@@ -240,11 +236,11 @@ namespace Reversi.Models
             //            MakePlayerMove(Players[0], 12);
 
             // Test scenario for our board
-            Instance.Gameboard.AddPiece(18, new GamePiece(Pieceshapes.ELLIPSE, Instance.CurrentPlayers[1]));
-            Instance.Gameboard.AddPiece(17, new GamePiece(Pieceshapes.ELLIPSE, Instance.CurrentPlayers[0]));
-            Instance.Gameboard.AddPiece(19, new GamePiece(Pieceshapes.ELLIPSE, Instance.CurrentPlayers[1]));
-            Instance.Gameboard.AddPiece(21, new GamePiece(Pieceshapes.ELLIPSE, Instance.CurrentPlayers[1]));
-            Instance.Gameboard.AddPiece(12, new GamePiece(Pieceshapes.ELLIPSE, Instance.CurrentPlayers[1]));
+            Gameboard.AddPiece(18, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(17, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[0]));
+            Gameboard.AddPiece(19, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(21, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(12, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
             //MessageBox.Show(Gameboard.DrawGameboard());
 
             //// The main game loop -- 
@@ -267,7 +263,7 @@ namespace Reversi.Models
         /// <returns></returns>
         private bool CheckGameOver()
         {
-            for (int i = 0; i < Instance.Gameboard.Rows * Instance.Gameboard.Cols; i++)
+            for (int i = 0; i < Gameboard.Rows * Gameboard.Cols; i++)
             {
                 if (!ValidatePlacement(i))
                 {
@@ -281,15 +277,16 @@ namespace Reversi.Models
         public void PlayRound()
         {
             // Make a move for player 1
-            MakePlayerMove(Instance.CurrentMoveIndex);
-            Instance.NextPlayer();
+            MakePlayerMove(CurrentMoveIndex);
+            NextPlayer();
         }
 
+        #endregion
 
     }
 
     /// <summary>
-    /// Generic game class for the game.  Provides vasic functionality.
+    /// Generic game class for the game.  Provides basic functionality.
     /// </summary>
     public class Game
     {
@@ -416,6 +413,5 @@ namespace Reversi.Models
             return list;
         }
         #endregion
-
     }
 }

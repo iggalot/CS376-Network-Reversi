@@ -1,5 +1,8 @@
 ﻿namespace Reversi.Models
 {
+    /// <summary>
+    /// Enum for the players of the game
+    /// </summary>
     public enum Players
     {
         UNDEFINED = -1,
@@ -7,6 +10,9 @@
         PLAYER2 = 1
     }
 
+    /// <summary>
+    /// Enum for the shape of the gamepieces
+    /// </summary>
     public enum Pieceshapes
     {
         UNDEFINED = -1,
@@ -14,6 +20,9 @@
         SQUARE = 1
     }
 
+    /// <summary>
+    /// Enum for the shape of the gameboard regions
+    /// </summary>
     public enum Regionshapes
     {
         UNDEFINED = -1,
