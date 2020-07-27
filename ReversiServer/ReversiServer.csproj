@@ -51,19 +51,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ClientServerLibrary\ClientServerLibrary.csproj">
-      <Project>{3a1edbe6-f7bf-4939-a84c-335c4f4c0128}</Project>
+      <Project>{598105ce-2bb6-4493-9654-3e213c6d0004}</Project>
       <Name>ClientServerLibrary</Name>
     </ProjectReference>
     <ProjectReference Include="..\GlobalSettings\GlobalSettings.csproj">
-      <Project>{06e495c8-fc22-4595-b895-fbde20bead5a}</Project>
+      <Project>{2d23b76a-9a46-46a7-859e-913f4f141b1e}</Project>
       <Name>GlobalSettings</Name>
     </ProjectReference>
     <ProjectReference Include="..\Reversi\Reversi.csproj">
-      <Project>{222dfcb7-b3eb-4c75-87ed-aa9babb92ae7}</Project>
+      <Project>{c3eaa10d-c3c0-43e5-aa6b-6382372ecbf1}</Project>
       <Name>Reversi</Name>
     </ProjectReference>
     <ProjectReference Include="..\StateMachine\StateMachine.csproj">
-      <Project>{4fac7e06-a392-4e74-81a1-a12022eb92da}</Project>
+      <Project>{532fb2bc-c59b-4927-afd1-4c939ee24b9b}</Project>
       <Name>StateMachine</Name>
     </ProjectReference>
   </ItemGroup>
