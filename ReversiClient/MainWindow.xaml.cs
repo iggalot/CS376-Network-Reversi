@@ -17,7 +17,7 @@ namespace ReversiClient
         /// <summary>
         /// The current game being controlled by this client
         /// </summary>
-        public Game CurrentGame { get; set; } = new ReversiGame(2).Instance;
+        public ReversiGame CurrentGame { get; set; }
 
         /// The connected socket between the client and the server.
         public TcpClient ClientSocket { get; set; }
@@ -253,16 +253,16 @@ namespace ReversiClient
                 }
                 else
                 {
-                    CurrentGame.CurrentMoveIndex = result;
+                    CurrentGame.Instance.CurrentMoveIndex = result;
 
                     // TODO: Remove this update. Display data on the screen (temporary)
-                    lbIndex.Content = CurrentGame.CurrentMoveIndex;
-                    lbCurrentPlayer.Content = (CurrentGame.CurrentPlayer.ID + CurrentGame.CurrentPlayer.Name);
+                    lbIndex.Content = CurrentGame.Instance.CurrentMoveIndex;
+                    lbCurrentPlayer.Content = (CurrentGame.Instance.CurrentPlayer.ID + CurrentGame.Instance.CurrentPlayer.Name);
 
                     //// Send move to to server
                     // Create the packet info.
                     lbStatus.Content = "Processing Move. Waiting for response from Server...";
-                    PacketInfo packet = new PacketInfo(-1, CurrentGame.CurrentMoveIndex.ToString(), PacketType.PACKET_GAMEMOVE_REQUEST);
+                    PacketInfo packet = new PacketInfo(-1, CurrentGame.Instance.CurrentMoveIndex.ToString(), PacketType.PACKET_GAMEMOVE_REQUEST);
                     DataTransmission.SendData(clientSocket, packet);
 
                     // Wait for the server to signal whether the move was accepted or not.
@@ -308,7 +308,7 @@ namespace ReversiClient
                             ReversiSounds.PlaySounds(GameSounds.SOUND_CLICK_SUCCESSFUL);
 
                             CurrentGame.PlayRound();
-                            tbGameboard.Text = CurrentGame.Gameboard.DrawGameboard();
+                            tbGameboard.Text = CurrentGame.Instance.Gameboard.DrawGameboard();
 
                             AllowUIToUpdate();
 

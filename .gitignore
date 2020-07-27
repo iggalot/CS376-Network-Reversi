@@ -6,3 +6,21 @@ ClientServerLibrary/obj/
 GlobalSettings/obj/
 
 Reversi/obj/
+
+ClientServerLibrary/bin/
+
+GlobalSettings/bin/
+
+Reversi/bin/
+
+StateMachine/bin/
+
+StateMachine/obj/
+
+ReversiServer/bin/
+
+ReversiServer/obj/
+
+ReversiClient/bin/
+
+ReversiClient/obj/
