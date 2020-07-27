@@ -1,8 +1,0 @@
-C:\Programming\CS376-Network-Reversi\StateMachine\bin\Debug\net472\StateMachine.dll
-C:\Programming\CS376-Network-Reversi\StateMachine\bin\Debug\net472\StateMachine.pdb
-C:\Programming\CS376-Network-Reversi\StateMachine\obj\Debug\net472\StateMachine.csprojAssemblyReference.cache
-C:\Programming\CS376-Network-Reversi\StateMachine\obj\Debug\net472\StateMachine.AssemblyInfoInputs.cache
-C:\Programming\CS376-Network-Reversi\StateMachine\obj\Debug\net472\StateMachine.AssemblyInfo.cs
-C:\Programming\CS376-Network-Reversi\StateMachine\obj\Debug\net472\StateMachine.csproj.CoreCompileInputs.cache
-C:\Programming\CS376-Network-Reversi\StateMachine\obj\Debug\net472\StateMachine.dll
-C:\Programming\CS376-Network-Reversi\StateMachine\obj\Debug\net472\StateMachine.pdb
