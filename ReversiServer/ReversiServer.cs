@@ -362,7 +362,20 @@ namespace ReversiServer
             //// The main game loop. Process individual moves here
             while(!game.GameIsOver)
             {
-                //TODO: Listen for game moves from connected clients
+                // If the current turn is valid and complete, switch to the next player
+                if (game.TurnComplete)
+                {
+                    game.NextPlayer();
+                    game.TurnComplete = false;
+
+                    // Send the update gameboard to each player
+                    foreach(TcpClient client in sockets)
+                    {
+                        DataTransmission.SerializeData<ReversiGame>(game, client);
+                    }
+                }
+                
+                // Listen for moves from each player
                 foreach (TcpClient client in sockets)
                 {
                     if(client == null)
@@ -374,7 +387,23 @@ namespace ReversiServer
 
                     if (stream.DataAvailable)
                     {
-                        //DataTransmission.DeserializeData<ReversiGameTurnData>(client);
+                        ReversiGameMove move = DataTransmission.DeserializeData<ReversiGameMove>(client);
+                        Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Player ID# move request" + move.ByPlayer + " received");
+
+                        if(move.ByPlayer == game.CurrentPlayer)
+                        { 
+                            game.CurrentMoveIndex = move.MoveIndex;
+
+                            // Check that the move was valid.
+                            if (game.PlayTurn())
+                            {
+                                Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Player ID#" + move.ByPlayer + " submitted a valid move");
+                                game.TurnComplete = true;
+                            }
+                        } else
+                        {
+                            Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Move received by opponent.  Ignoring...");
+                        }
                     }
                 }
 

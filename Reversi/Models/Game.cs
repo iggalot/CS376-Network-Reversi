@@ -163,7 +163,7 @@ namespace Reversi.Models
         /// Primary routine for a player to make a move
         /// </summary>
         /// <param name="index">the index of the move being made</param>
-        internal void MakePlayerMove(int index)
+        internal bool MakePlayerMove(int index)
         {
             Player player = null; ;
             bool playerFound = false;            
@@ -180,7 +180,7 @@ namespace Reversi.Models
             if (playerFound && ValidatePlacement(index))
             {
                 if (player == null)
-                    return;
+                    return false;
 
                 // Add a new game piece at the location
                 GamePiece piece = new GamePiece(Pieceshapes.ELLIPSE, player);
@@ -192,6 +192,8 @@ namespace Reversi.Models
                 // Reset the tiles to be turned array
                 TilesToTurn.Clear();
             }
+
+            return true;
             //MessageBox.Show(Gameboard.DrawGameboard() + "\nCurrent Player: " + CurrentPlayer.IDType + " : " + CurrentPlayer.Name);
         }
 
@@ -302,11 +304,9 @@ namespace Reversi.Models
             return true;
         }
 
-        public void PlayRound()
+        public bool PlayTurn()
         {
-            // Make a move for player 1
-            MakePlayerMove(CurrentMoveIndex);
-            NextPlayer();
+            return (MakePlayerMove(CurrentMoveIndex));
         }
 
         #endregion
@@ -336,6 +336,11 @@ namespace Reversi.Models
         /// Flag to determine if the game is over
         /// </summary>
         public bool GameIsOver { get; set; } = false;
+
+        /// <summary>
+        /// Flag that indicates that the current player has completed their tur.
+        /// </summary>
+        public bool TurnComplete { get; set; } = false;
 
         /// <summary>
         /// The current player whos turn is active

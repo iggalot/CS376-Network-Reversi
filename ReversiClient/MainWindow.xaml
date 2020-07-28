@@ -19,6 +19,7 @@
                 <StackPanel Orientation="Vertical">
                     <Label Name="lbGameID" Content="Current game ID here"/>
                     <Label Name="lbCurrentPlayer" Content="Player name here"/>
+                    <Label Name="lbCurrentMove" Content="Move request here"/>
 
                     <StackPanel Background="LightGray" Orientation="Horizontal">
                         <Label Content="Player1 ID: "/>
