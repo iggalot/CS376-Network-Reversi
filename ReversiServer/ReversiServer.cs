@@ -313,7 +313,7 @@ namespace ReversiServer
             DataTransmission.FlushMultipleUsers(playersSocketList);
 
             // Broadcast the first gameboard
-            if(!DataTransmission.SendDataToMultipleUsers(playersSocketList, gameboardPacket))
+            if (!DataTransmission.SendDataToMultipleUsers(playersSocketList, gameboardPacket))
             {
                 throw new SocketException();
             }
@@ -321,9 +321,14 @@ namespace ReversiServer
 
 
             Console.WriteLine("......(GameThread(id: " + Game.GameID.ToString() + ") Game is Running");
+
+
             // The main game loop. Process individual moves here
             while (true)
             {
+                // Test receiving the serialized data....
+                ReversiGame newgame = DataTransmission.DeserializeData<ReversiGame>(playersSocketList[0]);
+
                 // TODO: Check for dropped players, or dead sockets.
                 Thread.Sleep(3000);
 

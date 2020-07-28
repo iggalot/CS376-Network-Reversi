@@ -5,6 +5,7 @@ namespace Reversi.Models
     /// <summary>
     /// The class defining the gameboard characteristics.
     /// </summary>
+    [Serializable]
     public class Board
     {
 

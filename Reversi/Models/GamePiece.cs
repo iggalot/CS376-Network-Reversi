@@ -1,8 +1,11 @@
-﻿namespace Reversi.Models
+﻿using System;
+
+namespace Reversi.Models
 {
     /// <summary>
     /// Class that governs the game pieces
     /// </summary>
+    [Serializable]
     public class GamePiece
     {
         /// <summary>

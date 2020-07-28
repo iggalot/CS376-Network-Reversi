@@ -10,6 +10,7 @@ namespace ClientServerLibrary
     /// <summary>
     /// Our primary server class that handles multiple client connections
     /// </summary>
+    [Serializable]
     public class Server : DataTransmission
     {
         // Store our list of client sockets.

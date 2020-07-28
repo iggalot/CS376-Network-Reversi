@@ -1,10 +1,13 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 
 namespace Reversi.Models
 {
     /// <summary>
     /// A class that defines the basic game player
     /// </summary>
+    
+    [Serializable]
     public class Player
     {
         /// <summary>
@@ -19,8 +22,9 @@ namespace Reversi.Models
 
         /// <summary>
         /// The socket for this players connection
-        /// </summary>
-        public TcpClient Socket { get; set; }
+        /// /summary>
+
+        [NonSerialized()] public TcpClient Socket;
 
         /// <summary>
         /// Default constructor

@@ -211,8 +211,9 @@ namespace ReversiClient
 
             // Wait for the server to signal that the game has begun.
             receivePacket = new PacketInfo();
-            Client.ReceiveData(clientSocket, out receivePacket);
 
+            Client.ReceiveData(clientSocket, out receivePacket);
+            
             lbConnectStatus.Content = receivePacket.Data;
             lbStatus.Content = receivePacket.Data;
             lbPacketStatus.Content = receivePacket.Type;
@@ -230,6 +231,7 @@ namespace ReversiClient
 
             // Send the gameboard packet string to be unpacked
             tbGameboard.Text = Board.UnpackGameboardPacketString(receivePacket.Data);
+
         }
 
         /// <summary>
@@ -239,6 +241,11 @@ namespace ReversiClient
         /// <param name="e"></param>
         private void Button_SubmitMoveClick(object sender, RoutedEventArgs e)
         {
+            //Test data to serialize a game object and send to server as a test...
+            ReversiGame testgame = new ReversiGame(2);
+            testgame.CurrentPlayer.Name = "Frank";
+            DataTransmission.SerializeData<ReversiGame>(testgame, ClientSocket);
+
             int result;
             TcpClient clientSocket = ClientSocket;  // retrieve our socket
             PacketInfo receivePacket = new PacketInfo(); ;

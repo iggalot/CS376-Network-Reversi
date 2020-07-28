@@ -7,6 +7,7 @@ namespace Reversi.Models
     /// <summary>
     /// The Reversi Game class...
     /// </summary>
+    [Serializable]
     public class ReversiGame : Game
     {
         #region Public Properties
@@ -288,6 +289,9 @@ namespace Reversi.Models
     /// <summary>
     /// Generic game class for the game.  Provides basic functionality.
     /// </summary>
+    /// 
+
+    [Serializable]
     public class Game
     {
         #region Private Properties
