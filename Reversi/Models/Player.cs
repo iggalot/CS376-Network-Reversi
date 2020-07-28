@@ -10,10 +10,22 @@ namespace Reversi.Models
     [Serializable]
     public class Player
     {
+        #region Private Properties
+
+
+        #endregion
+
+        #region Public Properties
         /// <summary>
-        /// The ID of our player
+        /// 
         /// </summary>
-        public Players ID { get; set; }
+        public int PlayerID { get; set; } = -1;
+
+        /// <summary>
+        /// The IDType of our player as a player type
+        /// </summary>
+        public Players IDType { get; set; }
+
 
         /// <summary>
         /// The name of the player
@@ -26,12 +38,15 @@ namespace Reversi.Models
 
         [NonSerialized()] public TcpClient Socket;
 
+        #endregion
+
         /// <summary>
         /// Default constructor
         /// </summary>
         public Player()
         {
-            ID = Players.UNDEFINED;
+            PlayerID = -1;
+            IDType = Players.UNDEFINED;
             Name = "Some bloke...";
             Socket = null;
         }
@@ -42,9 +57,10 @@ namespace Reversi.Models
         /// <param name="id">The player number</param>
         /// <param name="name">The name of the player</param>
         /// <param name="socket">The associated socket for this player</param>
-        public Player(Players id, string name, TcpClient socket)
+        public Player(int num, Players id, string name, TcpClient socket)
         {
-            ID = id;
+            PlayerID = num;
+            IDType = id;
             Name = name;
             Socket = socket;
         }

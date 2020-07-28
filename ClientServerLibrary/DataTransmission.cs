@@ -195,7 +195,7 @@ namespace ClientServerLibrary
 
             IFormatter formatter = new BinaryFormatter();
             formatter.Serialize(stream, data);
-            stream.Close();
+            //stream.Close();
         }
 
         /// <summary>

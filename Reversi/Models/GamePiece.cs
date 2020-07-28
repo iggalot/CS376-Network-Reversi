@@ -24,7 +24,7 @@ namespace Reversi.Models
         /// </summary>
         public GamePiece()
         {
-            Owner = new Player(Players.UNDEFINED, "Unknown", null);
+            Owner = new Player();
             Shape = Pieceshapes.UNDEFINED;
         }
 
