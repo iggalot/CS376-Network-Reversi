@@ -4,19 +4,17 @@ using System.Collections.Generic;
 
 namespace Reversi
 {
-    public class ReversiStateMachine
+    /// <summary>
+    /// Creates a basic state machine for the reversi game.
+    /// </summary>
+    public class ReversiStateMachine : StateMachine
     {
-        /// <summary>
-        /// The singleton instance of our reversi state machine
-        /// </summary>
-        public static StateMachine Instance { get; set; }
-
         /// <summary>
         /// Constructor for the reversi state machine.  Includes the entries for the state machine transitions for this game declared as
         /// a list of items of the form:  
         /// list.Add(new StateMachineTransitionElement(new StateTransition(ProcessState.Inactive, Command.Begin), ProcessState.Active));
         /// </summary>
-        public ReversiStateMachine()
+        public ReversiStateMachine() : base()
         {
             List<StateMachineTransitionElement> list = new List<StateMachineTransitionElement>();
 
@@ -30,15 +28,15 @@ namespace Reversi
             list.Add(new StateMachineTransitionElement(new StateTransition(ProcessState.Paused, Command.End), ProcessState.Inactive));
             list.Add(new StateMachineTransitionElement(new StateTransition(ProcessState.Paused, Command.Resume), ProcessState.Active));
 
-            Instance = new StateMachine(list);
+            CreateTransitionDictionary(list);
         }
         public static void TestStateMachine()
         {
-            Console.WriteLine("Current State = " + Instance.CurrentState);
-            Console.WriteLine("Command.Begin: Current State = " + Instance.MoveNextState(Command.Begin));
-            Console.WriteLine("Command.Pause: Current State = " + Instance.MoveNextState(Command.Pause));
-            Console.WriteLine("Command.End: Current State = " + Instance.MoveNextState(Command.End));
-            Console.WriteLine("Command.Exit: Current State = " + Instance.MoveNextState(Command.Exit));
+            Console.WriteLine("Current State = " + CurrentState);
+            Console.WriteLine("Command.Begin: Current State = " + MoveNextState(Command.Begin));
+            Console.WriteLine("Command.Pause: Current State = " + MoveNextState(Command.Pause));
+            Console.WriteLine("Command.End: Current State = " + MoveNextState(Command.End));
+            Console.WriteLine("Command.Exit: Current State = " + MoveNextState(Command.Exit));
             Console.ReadLine();
         }
     }

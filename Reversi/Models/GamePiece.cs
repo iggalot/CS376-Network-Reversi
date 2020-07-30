@@ -1,5 +1,11 @@
-﻿namespace Reversi.Models
+﻿using System;
+
+namespace Reversi.Models
 {
+    /// <summary>
+    /// Class that governs the game pieces
+    /// </summary>
+    [Serializable]
     public class GamePiece
     {
         /// <summary>
@@ -18,7 +24,7 @@
         /// </summary>
         public GamePiece()
         {
-            Owner = new Player(Players.UNDEFINED, "Unknown", null);
+            Owner = new Player();
             Shape = Pieceshapes.UNDEFINED;
         }
 

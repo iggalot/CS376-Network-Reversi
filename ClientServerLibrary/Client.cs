@@ -8,6 +8,8 @@ namespace ClientServerLibrary
     /// A generic client class utilizing the TcpClient protocol.  Requires a TcpListener 
     /// on the other end to create the socket before communications can start.
     /// </summary>
+    
+    [Serializable]
     public class Client : DataTransmission
     {
         /// <summary>

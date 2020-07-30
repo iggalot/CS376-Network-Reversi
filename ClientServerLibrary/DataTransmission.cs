@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 
@@ -37,6 +40,11 @@ namespace ClientServerLibrary
             StringBuilder message = new StringBuilder();
             bool dataRead = false;
 
+            if (!socket.Connected)
+            {
+                throw new SocketException();
+            }
+
             // Get the stream associated with the socket.
             NetworkStream stream = socket.GetStream();
             packet = null;
@@ -49,7 +57,6 @@ namespace ClientServerLibrary
                 }
                 else
                 {
-
                     // Receive the TcpServer response.
                     // Buffer to store the response bytes.
                     Byte[] receivedata = new byte[MAX_DATA_SIZE];
@@ -83,7 +90,6 @@ namespace ClientServerLibrary
 
             return dataRead;
         }
-
 
         /// <summary>
         /// Function that sends a packet of information to a tcpclient
@@ -131,8 +137,6 @@ namespace ClientServerLibrary
             return SendSuccess;
         }
 
-
-
         /// <summary>
         ///  Send packet to list of multiple players
         /// </summary>
@@ -145,7 +149,13 @@ namespace ClientServerLibrary
 
             foreach(TcpClient client in list)
             {
-                bool send_status = SendData(client, packet);
+                bool send_status = false;
+
+                // Check that the client is connected
+                if(client.Connected)
+                {
+                    send_status = SendData(client, packet);
+                }
 
                 if (send_status == false)
                     status = false;
@@ -165,6 +175,46 @@ namespace ClientServerLibrary
             {
                 item.GetStream().Flush();
             }
+        }
+
+        /// <summary>
+        /// Method that takes generic data of type T and a data stream and serializes it for transmission
+        /// across the socket.
+        /// </summary>
+        /// <typeparam name="T">The generic class of the data being serializes</typeparam>
+        /// <param name="data">The data to be serialized</param>
+        /// <param name="stream">The stream to send the serialized data to (FileStream, NetworkStream, etc.) </param>
+        public static void SerializeData<T>(T data, TcpClient client) where T : class
+        {
+            if (!client.Connected)
+            {
+                throw new SocketException();
+            }
+
+            NetworkStream stream = client.GetStream();
+
+            IFormatter formatter = new BinaryFormatter();
+            formatter.Serialize(stream, data);
+            //stream.Close();
+        }
+
+        /// <summary>
+        /// Method that deserializes the data on a network stream
+        /// </summary>
+        /// <typeparam name="T">The generic class of the data that was serializes</typeparam>
+        /// <param name="stream">The stream in which to deserialize (FileStream, NetworkStream, etc.)</param>
+        /// <returns></returns>
+        public static T DeserializeData<T>(TcpClient client) where T: class
+        {
+            if(!client.Connected)
+            {
+                throw new SocketException();
+            }
+            NetworkStream stream = client.GetStream();
+
+            IFormatter formatter = new BinaryFormatter();
+            T objnew = (T)formatter.Deserialize(stream);
+            return objnew;
         }
 
     }

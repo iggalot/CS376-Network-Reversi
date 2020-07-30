@@ -10,6 +10,7 @@ namespace ClientServerLibrary
     /// <summary>
     /// Our primary server class that handles multiple client connections
     /// </summary>
+    [Serializable]
     public class Server : DataTransmission
     {
         // Store our list of client sockets.
@@ -61,15 +62,11 @@ namespace ClientServerLibrary
         }
 
         /// <summary>
-        /// Routine that listens for a connection on a swerver socket and returns 
-        /// the client socket when a connection is made.
+        /// Listen for Connections
         /// </summary>
         /// <returns></returns>
-        public TcpClient ListenForConnections(out PacketInfo newPacket) { 
-
-            //int counter = 0;
-            //counter = 0;   // for counting our connections.
-
+        public TcpClient ListenForConnections()
+        {
             // Create a default client socket to be used by each thread.
             TcpClient clientSocket = default(TcpClient);
 
@@ -77,62 +74,7 @@ namespace ClientServerLibrary
             // You could also use server.AcceptSocket() here.
             clientSocket = ServerSocket.AcceptTcpClient();
 
-            //byte[] bytesFrom = new byte[65536];
-            //string dataFromClient = null;
-
-            //NetworkStream networkStream = clientSocket.GetStream();
-            //networkStream.Read(bytesFrom, 0, (int)clientSocket.ReceiveBufferSize);
-            //dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFrom);
-            //dataFromClient = dataFromClient.Substring(0, dataFromClient.IndexOf("$"));
-
-            // Convert the data from the client to the PacketInfo form
-            PacketInfo receivePacket = new PacketInfo();
-            ReceiveData(clientSocket, out receivePacket);
-
-            // If there is no packet...return
-            if (receivePacket == null)
-            {
-                newPacket = null;
-                return null;
-            }
-                
-
-            newPacket = receivePacket;
-
-            string dataFromClient = newPacket.Data;
-
-            // Write the data to the console.
-            Console.WriteLine("...Server Received: "+ newPacket.Id.ToString() + " " + newPacket.Type.ToString() + " " + newPacket.Data);
-                
-            if(newPacket.Type == PacketType.PACKET_CONNECTION_REQUEST)
-            {
-                // TODO: Generate unique ID for each connection
-                Console.WriteLine("--- Server: (ID#" + newPacket.Id + ") " + newPacket.Data + " has connected");
-                TempData = newPacket.Data;
-
-                // Store the client socket in the connected socket list if it isn't already there.
-                if (!ClientSocketList.Contains(dataFromClient))
-                    ClientSocketList.Add(dataFromClient, clientSocket);
-
-                return clientSocket;
-            } else
-            {
-                // TODO:  what do we do if its not a PACKET_CONNECTION_REQUEST?
-            }
-
-            // Announce a connection
-            // BroadcastToAll(dataFromClient + " has joined. ", dataFromClient, false);
-
-            //counter += 1;
-
-            /// For Chat handling uncomment this code.
-
-            //// Once connected, hand off the new connection to client handler class
-            //Console.WriteLine(" >> " + dataFromClient + " has joined.");
-            //handleClient client = new handleClient();
-            //client.startClient(clientSocket, dataFromClient, ClientSocketList);
-            //            }
-            return null;
+            return clientSocket;
         }
 
         /// <summary>

@@ -6,6 +6,8 @@ namespace ClientServerLibrary
     /// <summary>
     /// The basic packet class for information to be shared between clients and the server 
     /// </summary>
+    
+    [Serializable]
     public class PacketInfo
     {
         public int Id;

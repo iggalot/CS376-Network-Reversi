@@ -1,7 +1,12 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace Reversi.Models
 {
+    /// <summary>
+    /// A class that defines the basic game regions for our game.
+    /// </summary>
+    [Serializable]
     public class Square
     {
         /// <summary>

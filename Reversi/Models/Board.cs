@@ -1,8 +1,11 @@
 ﻿using System;
-using System.Windows;
 
 namespace Reversi.Models
 {
+    /// <summary>
+    /// The class defining the gameboard characteristics.
+    /// </summary>
+    [Serializable]
     public class Board
     {
 
@@ -71,7 +74,7 @@ namespace Reversi.Models
                     }
 
                     // Otherwise determine the owner of the piece
-                    switch(Squares[index].Piece.Owner.ID)
+                    switch(Squares[index].Piece.Owner.IDType)
                     {
                         case Players.PLAYER1:
                             {
@@ -160,7 +163,7 @@ namespace Reversi.Models
                     }
 
                     // Otherwise determine the owner of the piece
-                    switch (Squares[index].Piece.Owner.ID)
+                    switch (Squares[index].Piece.Owner.IDType)
                     {
                         case Players.PLAYER1:
                             {

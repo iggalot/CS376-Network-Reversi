@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace StateMachines
 {
@@ -90,18 +91,25 @@ namespace StateMachines
     public class StateMachine
     {
         // Dictionary containing our state transitions
-        Dictionary<StateTransition, ProcessState> TransitionDictionary;
+        public static Dictionary<StateTransition, ProcessState> TransitionDictionary;
 
         // The current state machine
-        public ProcessState CurrentState { get; private set; }
+        public static ProcessState CurrentState;
+
+        #region Constructor
+
+        static StateMachine()
+        {
+            TransitionDictionary = new Dictionary<StateTransition, ProcessState>();
+            CurrentState = ProcessState.STATE_INACTIVE;
+        }
 
         /// <summary>
         /// Default constructor
         /// </summary>
         /// <param name="list">A list of defined <see cref="StateMachineTransitionElement"/> needed to create the transition dictionary</param>
-        public StateMachine(List<StateMachineTransitionElement> list)
+        public void CreateTransitionDictionary(List<StateMachineTransitionElement> list)
         {
-            CurrentState = ProcessState.Inactive;
             TransitionDictionary = new Dictionary<StateTransition, ProcessState>();
 
             // Build our dictionary of transition states.
@@ -136,13 +144,16 @@ namespace StateMachines
             }
         }
 
+
+        #endregion
+
         /// <summary>
         /// Retrieves the next state from our state machine
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
 
-        public ProcessState GetNext(Command command)
+        public static ProcessState GetNext(Command command)
         {
             StateTransition transition = new StateTransition(CurrentState, command);
             ProcessState nextState;
@@ -156,7 +167,7 @@ namespace StateMachines
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        public ProcessState MoveNextState(Command command)
+        public static ProcessState MoveNextState(Command command)
         {
             CurrentState = GetNext(command);
             return CurrentState;
