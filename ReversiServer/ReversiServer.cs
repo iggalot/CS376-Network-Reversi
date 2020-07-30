@@ -391,7 +391,7 @@ namespace ReversiServer
                     if (stream.DataAvailable)
                     {
                         ReversiGameMove move = DataTransmission.DeserializeData<ReversiGameMove>(client);
-                        Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Player ID#" + move.ByPlayer + "move request received");
+                        Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Player ID#" + move.ByPlayer + " move request received");
 
                         if(move.ByPlayer == game.CurrentPlayer)
                         { 

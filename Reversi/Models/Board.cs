@@ -58,7 +58,7 @@ namespace Reversi.Models
         /// <summary>
         /// Draws the gameboard and its pieces
         /// </summary>
-        public string DrawGameboard() {
+        public string DrawGameboardString() {
             string str = "";
             for (int i = 0; i < Rows; i++)
             {

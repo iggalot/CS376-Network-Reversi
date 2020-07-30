@@ -31,7 +31,7 @@ namespace Reversi.Models
         #region Constructors
 
         /// <summary>
-        /// Constructor for our game
+        /// Constructor for our Reversi game
         /// </summary>
         /// <param name="list">The list of participating player objects</param>
         public ReversiGame(List<Player> list) : base(list)
@@ -315,9 +315,9 @@ namespace Reversi.Models
 
         #region Public Properties
         /// <summary>
-        /// The game IDType for this game
+        /// The game ID for this game
         /// </summary>
-        public int GameID { get; set; }
+        public int GameID { get; private set; } = -20;
 
         /// <summary>
         /// Flag to determine if the game is over
@@ -337,7 +337,7 @@ namespace Reversi.Models
         /// <summary>
         /// The index of the current move
         /// </summary>
-        public int CurrentMoveIndex { get; set; } = 20;
+        public int CurrentMoveIndex { get; set; } = -1;
 
 
         /// <summary>
@@ -354,6 +354,10 @@ namespace Reversi.Models
         #endregion
 
         #region Constructor
+        /// <summary>
+        /// The constructor for a game object
+        /// </summary>
+        /// <param name="list">List of players to join the game</param>
         public Game(List<Player> list)
         {
             // Set our game id
@@ -405,7 +409,6 @@ namespace Reversi.Models
             }
 
             return null;
-
         }
 
         /// <summary>

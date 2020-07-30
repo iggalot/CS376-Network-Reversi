@@ -55,7 +55,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\ReversiClientModel.cs" />
+    <Compile Include="ViewModels\BaseViewModel.cs" />
+    <Compile Include="ViewModels\ReversiClientViewModel.cs" />
+    <Compile Include="Views\ReversiGameView.xaml.cs">
+      <DependentUpon>ReversiGameView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ReversiSounds.cs" />
+    <Compile Include="ViewModels\ReversiGameViewModel.cs" />
+    <Page Include="Views\ReversiGameView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
