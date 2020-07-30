@@ -16,8 +16,21 @@ namespace ReversiClient
     public partial class MainWindow : Window
     {
         #region Private Properties
+        /// <summary>
+        /// The player id number assigned to this client by the server
+        /// </summary>
         private int _playerID;
+
+        /// <summary>
+        /// The connected socket to the server
+        /// </summary>
         private TcpClient _serverSocket;
+
+        /// <summary>
+        /// The thread that listens for continuous messages from the server.
+        /// </summary>
+        private Thread _listenThread;
+        private bool ClientShouldShutdown = false;
 
         #endregion
 
@@ -26,6 +39,16 @@ namespace ReversiClient
         /// The current game being controlled by this client
         /// </summary>
         public ReversiGame CurrentGame { get; set; }
+
+        /// <summary>
+        /// The player object associated with this UI
+        /// </summary>
+        public Player ThisPlayer { get; set; }
+
+        /// <summary>
+        /// Stores the object data for the last move sent to the server.
+        /// </summary>
+        public ReversiGameMove LastMove { get; set; }
 
         ///// <summary>
         ///// The assigned id of the player.
@@ -167,9 +190,9 @@ namespace ReversiClient
             Client.SerializeData<Player>(newPlayer, _serverSocket);
 
             // Retrieve the accepted player data from the server
-            newPlayer = DataTransmission.DeserializeData<Player>(_serverSocket);
+            ThisPlayer = DataTransmission.DeserializeData<Player>(_serverSocket);
 
-            if(newPlayer.IDType == Players.UNDEFINED)
+            if(ThisPlayer.IDType == Players.UNDEFINED)
             {
                 // Update the UI
                 spMakeConnection.Visibility = Visibility.Visible;
@@ -182,26 +205,86 @@ namespace ReversiClient
                 return;
             } else
             {
-                _playerID = newPlayer.PlayerID; // remember the server assigned id number
+                _playerID = ThisPlayer.PlayerID; // remember the server assigned id number
 
                 // Now make the game area visible
                 spMakeConnection.Visibility = Visibility.Collapsed;
                 spActiveGameRegion.Visibility = Visibility.Visible;
 
                 // Display results in the window
-                lbPlayer1ID.Content = newPlayer.PlayerID;
-                lbPlayer1Name.Content = newPlayer.Name;
+                lbPlayer1ID.Content = ThisPlayer.PlayerID;
+                lbPlayer1Name.Content = ThisPlayer.Name;
             }
 
-            // Now receive the gameboard from the server
-            if(_serverSocket.Connected)
-            {
-                // Receive the gameboard from the server
-                CurrentGame = DataTransmission.DeserializeData<ReversiGame>(_serverSocket);
-                UpdateUI();
-            }
+            //// Now receive the gameboard from the server
+            //if(_serverSocket.Connected)
+            //{
+            //    // Receive the gameboard from the server
+            //    CurrentGame = DataTransmission.DeserializeData<ReversiGame>(_serverSocket);
+            //    UpdateUI();
+            //}
             #endregion
 
+            #region Create a listening thread
+            _listenThread = new Thread(ListenServer);
+            _listenThread.Start();
+            #endregion
+        }
+
+        private void ListenServer()
+        {
+            NetworkStream stream = _serverSocket.GetStream();
+            Dispatcher.Invoke(() =>
+               {
+                   lbPacketStatus.Content = "Client:  Listen thread started.";
+               }
+            );
+
+            
+
+            while (!ClientShouldShutdown)
+            {
+                if (stream.DataAvailable)
+                {
+                        Dispatcher.Invoke(() =>
+                        {
+                            lbPacketStatus.Content = "Client:  Data on thread detected.";
+                        });
+                    try
+                    {
+                        CurrentGame = DataTransmission.DeserializeData<ReversiGame>(_serverSocket);
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            UpdateUI();
+                            lbPacketStatus.Content = "Game data received";
+
+                        });
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            LastMove = DataTransmission.DeserializeData<ReversiGameMove>(_serverSocket);
+                            Dispatcher.Invoke(() =>
+                            {
+                                UpdateUI();
+                                lbPacketStatus.Content = "GameMove data received";
+                            });
+                        }
+                        catch
+                        {
+                            ThisPlayer = DataTransmission.DeserializeData<Player>(_serverSocket);
+                            Dispatcher.Invoke(() =>
+                            {
+                                UpdateUI();
+                                lbPacketStatus.Content = "Player data received";
+                            });
+                        }
+
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -228,18 +311,18 @@ namespace ReversiClient
                     lbCurrentPlayer.Content = ("Current Players turn: " + CurrentGame.CurrentPlayer);
 
                     // Send move to server
-                    ReversiGameMove move = new ReversiGameMove(_playerID, result);
-                    DataTransmission.SerializeData<ReversiGameMove>(move, _serverSocket);
+                    LastMove = new ReversiGameMove(_playerID, result);
+                    DataTransmission.SerializeData<ReversiGameMove>(LastMove, _serverSocket);
 
                     // Create the packet info.
                     lbStatus.Content = "Processing Move. Waiting for response from Server...";
 
-                    // And wait for the gameserver to respond with the new gameboard                   
-                    CurrentGame = DataTransmission.DeserializeData<ReversiGame>(_serverSocket);
-                    UpdateUI();
+                    //// And wait for the gameserver to respond with the new gameboard                   
+                    //CurrentGame = DataTransmission.DeserializeData<ReversiGame>(_serverSocket);
+                    //UpdateUI();
                 }
             }
-            lbStatus.Content = "Move acknowledged by server!";
+//            lbStatus.Content = "Move acknowledged by server!";
             //lbPacketStatus.Content = receivePacket.Type;
         }
         #endregion
@@ -255,11 +338,11 @@ namespace ReversiClient
             Player current = CurrentGame.GetPlayerById(CurrentGame.CurrentPlayer);
             lbCurrentPlayer.Content = "Current Player: (Id# " + current.PlayerID + ") " + current.Name;
 
-            lbPlayer1ID.Content = CurrentGame.CurrentPlayers[0].PlayerID;
-            lbPlayer1Name.Content = CurrentGame.CurrentPlayers[0].Name;
+            lbPlayer1ID.Content = CurrentGame.CurrentPlayersList[0].PlayerID;
+            lbPlayer1Name.Content = CurrentGame.CurrentPlayersList[0].Name;
 
-            lbPlayer2ID.Content = CurrentGame.CurrentPlayers[1].PlayerID;
-            lbPlayer2Name.Content = CurrentGame.CurrentPlayers[1].Name;
+            lbPlayer2ID.Content = CurrentGame.CurrentPlayersList[1].PlayerID;
+            lbPlayer2Name.Content = CurrentGame.CurrentPlayersList[1].Name;
 
             lbCurrentMove.Content = CurrentGame.CurrentMoveIndex.ToString();
 

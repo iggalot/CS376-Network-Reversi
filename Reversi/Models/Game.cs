@@ -69,7 +69,7 @@ namespace Reversi.Models
             Console.WriteLine("Index: " + index);
             // Determine our opponent
             int player = CurrentPlayer;
-            int opponent = (player == CurrentPlayers[0].PlayerID) ? CurrentPlayers[1].PlayerID : CurrentPlayers[0].PlayerID;
+            int opponent = (player == CurrentPlayersList[0].PlayerID) ? CurrentPlayersList[1].PlayerID : CurrentPlayersList[0].PlayerID;
 
             // Make sure that we are within acceptable index ranges, otherwise return
             if (index < 0 || index >= Gameboard.Squares.Length)
@@ -168,7 +168,7 @@ namespace Reversi.Models
             Player player = null; ;
             bool playerFound = false;            
 
-            foreach(Player item in CurrentPlayers)
+            foreach(Player item in CurrentPlayersList)
             {
                 if (item.PlayerID == CurrentPlayer)
                 {
@@ -205,7 +205,7 @@ namespace Reversi.Models
             Player player = null; ;
             bool playerFound = false;
 
-            foreach (Player item in CurrentPlayers)
+            foreach (Player item in CurrentPlayersList)
             {
                 if (item.PlayerID == CurrentPlayer)
                 {
@@ -236,15 +236,15 @@ namespace Reversi.Models
             var midpoint = Gameboard.Rows * Gameboard.Cols / 2;
 
             // Place the starting pieces
-            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[0]));
-            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
-            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
-            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
 
             // MessageBox.Show(Gameboard.DrawGameboard());
 
             // Set the First player to be the current player
-            CurrentPlayer = CurrentPlayers[0].PlayerID;
+            CurrentPlayer = CurrentPlayersList[0].PlayerID;
         }
 
 
@@ -266,11 +266,11 @@ namespace Reversi.Models
             //            MakePlayerMove(Players[0], 12);
 
             // Test scenario for our board
-            Gameboard.AddPiece(18, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
-            Gameboard.AddPiece(17, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[0]));
-            Gameboard.AddPiece(19, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
-            Gameboard.AddPiece(21, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
-            Gameboard.AddPiece(12, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayers[1]));
+            Gameboard.AddPiece(18, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(17, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
+            Gameboard.AddPiece(19, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(21, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(12, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
             //MessageBox.Show(Gameboard.DrawGameboard());
 
             //// The main game loop -- 
@@ -317,7 +317,6 @@ namespace Reversi.Models
     /// Generic game class for the game.  Provides basic functionality.
     /// </summary>
     /// 
-
     [Serializable]
     public class Game
     {
@@ -356,7 +355,7 @@ namespace Reversi.Models
         /// <summary>
         /// A list of the players for our game
         /// </summary>
-        public Player[] CurrentPlayers { get; set; }
+        public Player[] CurrentPlayersList { get; set; }
 
         /// <summary>
         /// The gameboard for our game
@@ -376,11 +375,11 @@ namespace Reversi.Models
             Gameboard = new Board(8, 8);
 
             // Initialize our players list
-            CurrentPlayers = new Player[num_players];
+            CurrentPlayersList = new Player[num_players];
 
             // create our empty players
-            CurrentPlayers[0] = new Player();
-            CurrentPlayers[1] = new Player();
+            CurrentPlayersList[0] = new Player();
+            CurrentPlayersList[1] = new Player();
         }
 
         /// <summary>
@@ -397,11 +396,11 @@ namespace Reversi.Models
             Gameboard = new Board(8, 8);
 
             // Initialize our players list
-            CurrentPlayers = new Player[2];
+            CurrentPlayersList = new Player[2];
 
             // Assign the players
-            CurrentPlayers[0] = p1;
-            CurrentPlayers[1] = p2;
+            CurrentPlayersList[0] = p1;
+            CurrentPlayersList[1] = p2;
         }
 
         #endregion
@@ -420,7 +419,7 @@ namespace Reversi.Models
         /// </summary>
         public void NextPlayer()
         {
-            CurrentPlayer = (CurrentPlayer == CurrentPlayers[0].PlayerID) ? CurrentPlayers[1].PlayerID : CurrentPlayers[0].PlayerID;
+            CurrentPlayer = (CurrentPlayer == CurrentPlayersList[0].PlayerID) ? CurrentPlayersList[1].PlayerID : CurrentPlayersList[0].PlayerID;
         }
 
         /// <summary>
@@ -430,7 +429,7 @@ namespace Reversi.Models
         /// <returns></returns>
         public Player GetPlayerById(int id)
         {
-            foreach(Player item in CurrentPlayers)
+            foreach(Player item in CurrentPlayersList)
             {
                 if (item.PlayerID == id)
                     return item;
@@ -448,7 +447,7 @@ namespace Reversi.Models
         {
             List<TcpClient> list = new List<TcpClient>();
 
-            foreach(Player item in CurrentPlayers)
+            foreach(Player item in CurrentPlayersList)
             {
                 list.Add(item.Socket);
             }

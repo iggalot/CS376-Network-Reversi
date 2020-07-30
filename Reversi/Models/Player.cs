@@ -10,10 +10,6 @@ namespace Reversi.Models
     [Serializable]
     public class Player
     {
-        #region Private Properties
-
-
-        #endregion
 
         #region Public Properties
         /// <summary>
