@@ -30,21 +30,11 @@ namespace Reversi.Models
 
         #region Constructors
 
-        public ReversiGame(int num_players) : base(num_players)
-        {
-            // Setup the gameboard
-            SetupGame();
-
-            // Start the game
-            PlayGame();
-        }
-
         /// <summary>
-        /// Constructor for a two player game
+        /// Constructor for our game
         /// </summary>
-        /// <param name="p1">Player 1</param>
-        /// <param name="p2">Player 2</param>
-        public ReversiGame(Player p1, Player p2) : base(p1, p2)
+        /// <param name="list">The list of participating player objects</param>
+        public ReversiGame(List<Player> list) : base(list)
         {
             // Setup the gameboard
             SetupGame();
@@ -52,11 +42,9 @@ namespace Reversi.Models
             // Start the game
             PlayGame();
         }
-
         #endregion
 
         #region Public Methods
-
         /// <summary>
         /// Determine if the new placement location is valid.
         /// </summary>
@@ -366,7 +354,7 @@ namespace Reversi.Models
         #endregion
 
         #region Constructor
-        public Game(int num_players)
+        public Game(List<Player> list)
         {
             // Set our game id
             GameID = NextID();
@@ -375,32 +363,13 @@ namespace Reversi.Models
             Gameboard = new Board(8, 8);
 
             // Initialize our players list
-            CurrentPlayersList = new Player[num_players];
+            CurrentPlayersList = new Player[list.Count];
 
-            // create our empty players
-            CurrentPlayersList[0] = new Player();
-            CurrentPlayersList[1] = new Player();
-        }
-
-        /// <summary>
-        /// Constructor that creates a game of two players.
-        /// </summary>
-        /// <param name="p1">Player 1</param>
-        /// <param name="p2">Player 2</param>
-        public Game(Player p1, Player p2)
-        {
-            // Set our game id
-            GameID = NextID();
-
-            // create our gameboard
-            Gameboard = new Board(8, 8);
-
-            // Initialize our players list
-            CurrentPlayersList = new Player[2];
-
-            // Assign the players
-            CurrentPlayersList[0] = p1;
-            CurrentPlayersList[1] = p2;
+            for(int i=0; i<list.Count; i++)
+            {
+                // create our empty players
+                CurrentPlayersList[i] = list[i];
+            }
         }
 
         #endregion
