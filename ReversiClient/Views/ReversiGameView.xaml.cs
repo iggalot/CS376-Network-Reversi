@@ -1,5 +1,4 @@
-﻿using Reversi.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,22 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ReversiClient
+namespace ReversiClient.Views
 {
     /// <summary>
-    /// Interaction logic for GameView.xaml
+    /// Interaction logic for ReversiGameView.xaml
     /// </summary>
-    public partial class GameView : UserControl
+    public partial class ReversiGameView : UserControl
     {
-        public GameView()
+        public ReversiGameView()
         {
             InitializeComponent();
-
-            this.DataContext = new ReversiClient.ViewModels.ReversiGameViewModel(new Reversi.Models.ReversiGame(
-                new List<Player>{
-                    new Player(),
-                    new Player()
-                })) ;
         }
     }
 }

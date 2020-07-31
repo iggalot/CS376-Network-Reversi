@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Text.RegularExpressions;
 
 namespace Reversi.Models
 {
@@ -15,6 +14,8 @@ namespace Reversi.Models
         /// <summary>
         /// An array to hold the indices of tiles to turn in a given round.
         /// </summary>
+        /// 
+        public string TestGameText {get; set;} = "My test game text";
         public List<int> TilesToTurn { get; set; } = new List<int>();
 
         /// <summary>

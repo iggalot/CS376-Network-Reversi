@@ -1,11 +1,8 @@
 ﻿using ClientServerLibrary;
 using Models.ReversiClient;
 using Reversi.Models;
-using System.ComponentModel;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace ReversiClient.ViewModels
 {
@@ -15,6 +12,8 @@ namespace ReversiClient.ViewModels
         private string _gameplayStatusString = string.Empty;
         private string _connectionStatusString = string.Empty;
         private string _packetStatusString = string.Empty;
+
+        private ReversiGameViewModel _reversiGameViewModel = null;
         #endregion
 
         #region Public Properties
@@ -22,6 +21,25 @@ namespace ReversiClient.ViewModels
         /// The client model associated with this view model
         /// </summary>
         public ReversiClientModel Model { get; private set; }
+
+        public ReversiGameViewModel GameViewModel { 
+            get => _reversiGameViewModel;
+            set
+            {
+                if (value == null)
+                    return;
+
+                if (value.Model == null)
+                    return;
+                
+                _reversiGameViewModel = new ReversiGameViewModel(value.Model);
+
+                OnPropertyChanged("GameViewModel");
+                OnPropertyChanged("GameboardViewModel");
+
+
+            }
+        }
 
         /// <summary>
         /// The current game being controlled by this client
@@ -139,6 +157,8 @@ namespace ReversiClient.ViewModels
         public ReversiClientViewModel(ReversiClientModel model)
         {
             Model = model;
+
+            GameViewModel = new ReversiGameViewModel(CurrentGame);
         }
         #endregion
 
@@ -163,7 +183,7 @@ namespace ReversiClient.ViewModels
 
         /// <summary>
         /// The thread callback function that listens for data from the server and updates
-        /// the various model objects
+        /// the various model objects.
         /// </summary>
         public void ListenServer()
         {
@@ -174,8 +194,31 @@ namespace ReversiClient.ViewModels
             }
             );
 
+            // The main listening loop
             while (!Model.ClientShouldShutdown)
             {
+                // Check if the main thread of the client application is still alive
+                if (!Model.MainThread.IsAlive)
+                {
+                    Model.ClientShouldShutdown = true;
+                    continue;
+                }
+
+                // Check if the parent process is still running
+                if (Model.ReversiClientProcess.HasExited)
+                {
+                    Model.ClientShouldShutdown = true;
+                    continue;
+                }
+
+                // Check if the Socket is still connected.  If not, exit and gracefully shutdown the thread.
+                if (!DataTransmission.SocketConnected(Model.ServerSocket.Client))
+                {
+                    Model.ClientShouldShutdown = true;
+                    continue;
+                }
+
+                // Check for any incoming data on the stream.
                 if (stream.DataAvailable)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
@@ -190,6 +233,9 @@ namespace ReversiClient.ViewModels
                         {
                             PacketStatusString = "Game data received";
                         });
+
+                        // When a new game model is received from the server, update the view model
+                        UpdateGameViewModel();
                     }
                     catch
                     {
@@ -213,6 +259,11 @@ namespace ReversiClient.ViewModels
                     }
                 }
             }
+        }
+
+        public void UpdateGameViewModel()
+        {
+            GameViewModel = new ReversiGameViewModel(CurrentGame);
         }
         #endregion
 

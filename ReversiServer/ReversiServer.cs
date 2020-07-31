@@ -264,6 +264,22 @@ namespace ReversiServer
             // While there are less than total number of players...continue listening for new players
             while (!ServerShouldShutDown)
             {
+                // Check if the Socket is still connected.  If not, exit and gracefully shutdown the thread.
+                foreach (KeyValuePair<int, TcpClient> connection in ConnectedClients)
+                {
+                    if (!DataTransmission.SocketConnected((connection.Value).Client))
+                    {
+                        // TODO:  What to do if a socket has closed
+                        // 1. Notify other members of the game that a player has left
+                        // 2. Pause the game...
+                        // 3. Remove the player from the game and chat room
+                        //      a.  Are there any players remaining in the game?
+                        // 4. Resend the updated board to remaining players...
+                        // 5. Fill empty game slots with new connections...
+                        //      a.  If user name matches, allow them to reconnect?
+                    }
+                }
+
                 //PacketInfo packet;
                 client = GameServer.ListenForConnections();
 

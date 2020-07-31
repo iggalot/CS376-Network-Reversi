@@ -2,6 +2,7 @@
 using Reversi.Models;
 using Settings;
 using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -36,9 +37,29 @@ namespace Models.ReversiClient
         public TcpClient ServerSocket { get; private set; }
 
         /// <summary>
-        /// Returns the socket connection to the game server
+        /// The listener thread for this client
         /// </summary>
         public Thread ListenThread { get; set; }
+
+        /// <summary>
+        /// The main application thread for this client
+        /// </summary>
+        public Thread MainThread { get; set; }
+        /// <summary>
+        /// Stores the process id for this client.
+        /// </summary>
+        public Process ReversiClientProcess = null;
+        #endregion
+
+        #region Constructor
+
+        public ReversiClientModel()
+        {
+            // Store the client process
+            ReversiClientProcess = Process.GetCurrentProcess();
+            MainThread = Thread.CurrentThread;
+        }
+
         #endregion
 
         #region Public Methods
