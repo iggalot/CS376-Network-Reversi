@@ -11,6 +11,7 @@ namespace Reversi.Models
     {
         public string SquareTextTest { get; set; } = "Square test";
 
+        //TODO this should not be here...but it helps with the data binding when the board is created
         public static int Width { get; set; } = 30;
         public static int Height { get; set; } = 30;
 
@@ -33,6 +34,20 @@ namespace Reversi.Models
         /// Piece contained in the square
         /// </summary>
         public GamePiece Piece { get; set; }
+
+        /// <summary>
+        /// Determines if the square contains a game piece
+        /// </summary>
+        public bool HasPiece
+        {
+            get
+            {
+                if ((Piece == null) || (Piece.Shape == Pieceshapes.UNDEFINED))
+                    return false;
+
+                return true;
+            }
+        }
 
         /// <summary>
         /// Default constructor

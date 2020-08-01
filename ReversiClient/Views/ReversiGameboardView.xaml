@@ -9,10 +9,10 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <convert:BoardIndexToCanvasPositionValueConverter x:Key="BoardIndexConverter"/>
+        <convert:BoolToVisibilityValueConverter x:Key="BoolToVisibilityConverter"/>
+        <convert:PlayerIDTypeToSolidFillConverter x:Key="PlayerIDTypeToSolidFillConverter"/>
     </UserControl.Resources>
-    <StackPanel Orientation="Vertical" Width="400">
-        <Label Content="{Binding GameboardViewModel.GameboardViewModelText}" Width="150" FontSize="15"/>
-
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
         <ItemsControl ItemsSource="{Binding Model.Gameboard.Squares}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -42,8 +42,18 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid>
-                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" Fill="DarkGreen" Stroke="Black" StrokeThickness="2"/>
+                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" 
+                                   Fill="DarkGreen" Stroke="Black" StrokeThickness="2"/>
                         <Label Content="{Binding Index}" FontSize="10"/>
+                        
+                        <Ellipse 
+                            Visibility="{Binding HasPiece, 
+                                Converter={StaticResource BoolToVisibilityConverter} 
+                                }"
+                            Width="{Binding Width}" Height="{Binding Height}" 
+                            Stroke="Black" StrokeThickness="1"
+                            Fill="{Binding Piece.Owner.IDType, Converter={StaticResource PlayerIDTypeToSolidFillConverter}}" 
+                            />
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

@@ -5,9 +5,6 @@ namespace ReversiClient.ViewModels
     public class ReversiGameViewModel : BaseViewModel
     {
         #region Private Properties
-        // The default dimensions of the squares on our gameboard.
-        private readonly double squareWidth = 30;
-        private readonly double squareHeight = 30;
 
         private ReversiGameboardViewModel _reversiGameboardViewModel;
 

@@ -57,6 +57,8 @@
     </ApplicationDefinition>
     <Compile Include="Models\ReversiClientModel.cs" />
     <Compile Include="ValueConverters\BoardIndexToCanvasPositionValueConverter.cs" />
+    <Compile Include="ValueConverters\BoolToVisibilityValueConverter.cs" />
+    <Compile Include="ValueConverters\PlayerIDTypeToSolidFillConverter.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\ReversiClientViewModel.cs" />
     <Compile Include="ViewModels\ReversiGameboardViewModel.cs" />
