@@ -9,6 +9,16 @@ namespace Reversi.Models
     [Serializable]
     public class Square
     {
+        public string SquareTextTest { get; set; } = "Square test";
+
+        public static int Width { get; set; } = 30;
+        public static int Height { get; set; } = 30;
+
+        /// <summary>
+        /// Index for the square location on the gameboard
+        /// </summary>
+        public int Index { get; set; }
+
         /// <summary>
         /// Shape of the region
         /// </summary>
@@ -27,8 +37,9 @@ namespace Reversi.Models
         /// <summary>
         /// Default constructor
         /// </summary>
-        public Square()
+        public Square(int index)
         {
+            Index = index;
             Piece = new GamePiece();
             Shape = Regionshapes.UNDEFINED;
         }

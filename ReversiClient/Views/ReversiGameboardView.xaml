@@ -4,12 +4,52 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ReversiClient.Views"
+             xmlns:convert="clr-namespace:ReversiClient.ValueConverters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <convert:BoardIndexToCanvasPositionValueConverter x:Key="BoardIndexConverter"/>
+    </UserControl.Resources>
     <StackPanel Orientation="Vertical" Width="400">
-        <Label Content="Before: " FontSize="15"/>
-        <Label Content="{Binding GameboardViewModelText}" Width="15" FontSize="15"/>
-        <Rectangle Fill="Red" Width="100" Height="40"/>
+        <Label Content="{Binding GameboardViewModel.GameboardViewModelText}" Width="150" FontSize="15"/>
+
+        <ItemsControl ItemsSource="{Binding Model.Gameboard.Squares}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="ContentPresenter">
+                    <Setter Property="Canvas.Left">
+                        <Setter.Value>
+                            <MultiBinding Converter="{StaticResource BoardIndexConverter}" ConverterParameter="LEFT">
+                                <Binding Path="Index"/>
+                                <Binding Path="Width"/>
+                            </MultiBinding>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Canvas.Top">
+                        <Setter.Value>
+                            <MultiBinding Converter="{StaticResource BoardIndexConverter}" ConverterParameter="TOP">
+                                <Binding Path="Index"/>
+                                <Binding Path="Height"/>
+                            </MultiBinding>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" Fill="DarkGreen" Stroke="Black" StrokeThickness="2"/>
+                        <Label Content="{Binding Index}" FontSize="10"/>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Label Content="After" Width="150" FontSize="15"/>
 
     </StackPanel>
 </UserControl>

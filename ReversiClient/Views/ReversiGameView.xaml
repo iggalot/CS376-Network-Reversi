@@ -9,15 +9,17 @@
 
     <Grid Background="Gray" Margin="5" Width="500">
         <StackPanel Orientation="Vertical">
-            <Rectangle Margin="15" Fill="Green" Height="200" Width="200"/>
-            <Label Content="{Binding TestText}" Width="200" Height="50" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="Blue"/>
+            <Rectangle Margin="15" Fill="Green" Height="20" Width="20"/>
+            <Label Content="{Binding TestText}" Width="200" Height="50" 
+                   FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="Blue"/>
 
-            <Label Content="{Binding GameboardViewModel.GameboardViewModelText}" Width="200" Height="50" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="Blue"/>
-            <Canvas Name="GameArea" ClipToBounds="True" Width="300" Height="300">
-                <local:ReversiGameboardView DataContext="{Binding GameboardViewModel}"/>
-            </Canvas>
+            <Label Content="{Binding GameboardViewModel.GameboardViewModelText}" Width="200" Height="50" FontSize="20" 
+                   HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="Blue"/>
 
-            <Label Content="After Canvas" FontSize="30"/>
+            <Label Content="{Binding GameboardViewModel.GameboardModel.Squares[0].Shape}" FontSize="12" Foreground="White"/>
+
+            <local:ReversiGameboardView />
+
         </StackPanel>
 
     </Grid>
