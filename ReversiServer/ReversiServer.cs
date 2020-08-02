@@ -406,7 +406,7 @@ namespace ReversiServer
 
                     if (stream.DataAvailable)
                     {
-                        ReversiGameMove move = DataTransmission.DeserializeData<ReversiGameMove>(client);
+                        GameMove move = DataTransmission.DeserializeData<GameMove>(client);
                         Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Player ID#" + move.ByPlayer + " move request received");
 
                         if(move.ByPlayer == game.CurrentPlayer)
@@ -447,8 +447,6 @@ namespace ReversiServer
         }
 
         #endregion
-
-
 
     }
 }

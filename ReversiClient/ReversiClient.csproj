@@ -59,14 +59,11 @@
     <Compile Include="ValueConverters\BoardIndexToCanvasPositionValueConverter.cs" />
     <Compile Include="ValueConverters\BoolToVisibilityValueConverter.cs" />
     <Compile Include="ValueConverters\PlayerIDTypeToSolidFillConverter.cs" />
-    <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\ReversiClientViewModel.cs" />
-    <Compile Include="ViewModels\ReversiGameboardViewModel.cs" />
     <Compile Include="Views\ReversiGameboardView.cs">
       <DependentUpon>ReversiGameboardView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ReversiSounds.cs" />
-    <Compile Include="ViewModels\ReversiGameViewModel.cs" />
     <Compile Include="Views\ReversiGameView.xaml.cs">
       <DependentUpon>ReversiGameView.xaml</DependentUpon>
     </Compile>

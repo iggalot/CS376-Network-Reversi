@@ -29,7 +29,7 @@ namespace Models.ReversiClient
         /// <summary>
         /// Stores the object data for the last move sent to the server.
         /// </summary>
-        public ReversiGameMove LastMove { get; set; }
+        public GameMove LastMove { get; set; }
 
         /// <summary>
         /// Returns the socket connection to the game server

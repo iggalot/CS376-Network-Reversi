@@ -3,7 +3,7 @@
 namespace Reversi.Models
 {
     [Serializable]
-    public class ReversiGameMove
+    public class GameMove
     {
         /// <summary>
         /// Index of the move that was made
@@ -15,7 +15,7 @@ namespace Reversi.Models
         /// </summary>
         public int ByPlayer { get; set; } = -1;
 
-        public ReversiGameMove(int player_id, int move)
+        public GameMove(int player_id, int move)
         {
             MoveIndex = move;
             ByPlayer = player_id;

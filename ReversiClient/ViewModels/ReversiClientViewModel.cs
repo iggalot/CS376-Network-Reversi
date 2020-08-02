@@ -1,6 +1,7 @@
 ﻿using ClientServerLibrary;
 using Models.ReversiClient;
 using Reversi.Models;
+using Reversi.ViewModels;
 using System.Net.Sockets;
 using System.Windows;
 
@@ -13,7 +14,9 @@ namespace ReversiClient.ViewModels
         private string _connectionStatusString = string.Empty;
         private string _packetStatusString = string.Empty;
 
-        private ReversiGameViewModel _reversiGameViewModel = null;
+        // new
+        private ReversiGameVM _reversiGameVM = null;
+
         #endregion
 
         #region Public Properties
@@ -22,8 +25,11 @@ namespace ReversiClient.ViewModels
         /// </summary>
         public ReversiClientModel Model { get; private set; }
 
-        public ReversiGameViewModel GameViewModel { 
-            get => _reversiGameViewModel;
+        /// <summary>
+        /// The game view model controlled by this client window
+        /// </summary>
+        public ReversiGameVM GameViewModel { 
+            get => _reversiGameVM;
             set
             {
                 if (value == null)
@@ -31,13 +37,11 @@ namespace ReversiClient.ViewModels
 
                 if (value.Model == null)
                     return;
-                
-                _reversiGameViewModel = new ReversiGameViewModel(value.Model);
+
+                _reversiGameVM = value;
 
                 OnPropertyChanged("GameViewModel");
-                OnPropertyChanged("GameboardViewModel");
-
-
+                OnPropertyChanged("GameboardVM");
             }
         }
 
@@ -46,13 +50,18 @@ namespace ReversiClient.ViewModels
         /// </summary>
         public ReversiGame CurrentGame
         {
-            get => Model.Game;
+            get => GetGame();
             set
             {
                 if (value == null)
                     return;
 
+                // Assigns this game object to the underlying model's game object
                 SetGame(value);
+
+                // Update the corresponding game view model
+                GameViewModel = new ReversiGameVM(value);
+
                 OnPropertyChanged("CurrentGame");
                 OnPropertyChanged("GameboardDisplayString");
             }
@@ -158,7 +167,12 @@ namespace ReversiClient.ViewModels
         {
             Model = model;
 
-            GameViewModel = new ReversiGameViewModel(CurrentGame);
+            // TODO: DO we construct off of the CurrentGame constructor?:
+            if (model.Game != null)
+            {
+                GameViewModel = new ReversiGameVM(model.Game);
+                //CurrentGame = model.Game;                
+            }
         }
         #endregion
 
@@ -170,6 +184,15 @@ namespace ReversiClient.ViewModels
         private void SetGame(ReversiGame game)
         {
             Model.Game = game;
+        }
+
+        /// <summary>
+        /// Retrtieve the underlying game object
+        /// </summary>
+        /// <returns></returns>
+        private ReversiGame GetGame()
+        {
+            return Model.Game;
         }
 
         /// <summary>
@@ -233,15 +256,12 @@ namespace ReversiClient.ViewModels
                         {
                             PacketStatusString = "Game data received";
                         });
-
-                        // When a new game model is received from the server, update the view model
-                        UpdateGameViewModel();
                     }
                     catch
                     {
                         try
                         {
-                            Model.LastMove = DataTransmission.DeserializeData<ReversiGameMove>(Model.ServerSocket);
+                            Model.LastMove = DataTransmission.DeserializeData<GameMove>(Model.ServerSocket);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 PacketStatusString = "GameMove data received";
@@ -261,10 +281,6 @@ namespace ReversiClient.ViewModels
             }
         }
 
-        public void UpdateGameViewModel()
-        {
-            GameViewModel = new ReversiGameViewModel(CurrentGame);
-        }
         #endregion
 
 

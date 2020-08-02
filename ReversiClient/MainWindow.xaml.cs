@@ -19,7 +19,7 @@ namespace ReversiClient
         /// <summary>
         /// The view model associated with this UI
         /// </summary>
-        public static ReversiClientViewModel ThisClient { get; private set; }
+        public static ReversiClientViewModel ThisClientVM { get; private set; }
         #endregion
 
         #region Constructor
@@ -27,8 +27,8 @@ namespace ReversiClient
         {
             InitializeComponent();
 
-            ThisClient = new ReversiClientViewModel(new ReversiClientModel());
-            this.DataContext = ThisClient;
+            ThisClientVM = new ReversiClientViewModel(new ReversiClientModel());
+            this.DataContext = ThisClientVM;
         }
 
         #endregion
@@ -64,32 +64,32 @@ namespace ReversiClient
             // Check if the player name is valid
             if (String.IsNullOrEmpty(tbPlayerName.Text))
             {
-                ThisClient.ConnectionStatusString = "You must enter a user name.";
+                ThisClientVM.ConnectionStatusString = "You must enter a user name.";
                 return;
             }
 
             // If the client is already connected to the game server, then don't
             // allow another connection.
             string status_string = String.Empty;
-            if (ThisClient.IsConnectedToGameServer)
+            if (ThisClientVM.IsConnectedToGameServer)
             {
-                ThisClient.ConnectionStatusString = "You are already connected to the server!";
+                ThisClientVM.ConnectionStatusString = "You are already connected to the server!";
                 return;
             }
 
             // Otherwise attempt to make the connection
-            ThisClient.IsConnectedToGameServer = ThisClient.Model.MakeConnection(out status_string);
-            if(!ThisClient.IsConnectedToGameServer)
+            ThisClientVM.IsConnectedToGameServer = ThisClientVM.Model.MakeConnection(out status_string);
+            if(!ThisClientVM.IsConnectedToGameServer)
             {
-                ThisClient.ConnectionStatusString = status_string;
+                ThisClientVM.ConnectionStatusString = status_string;
                 return;
             }
 
             // If our socket is not connected, or we have lost link... 
-            if (!ThisClient.Model.ServerSocket.Connected)
+            if (!ThisClientVM.Model.ServerSocket.Connected)
             {
-                ThisClient.IsConnectedToGameServer = false;
-                ThisClient.ConnectionStatusString = "Error connecting to socket.";
+                ThisClientVM.IsConnectedToGameServer = false;
+                ThisClientVM.ConnectionStatusString = "Error connecting to socket.";
                 return;
             }
 
@@ -97,35 +97,35 @@ namespace ReversiClient
             // Check if the name entered is a valid string
             if(String.IsNullOrEmpty(tbPlayerName.Text))
             {
-                ThisClient.ConnectionStatusString = "Invalid name!";
+                ThisClientVM.ConnectionStatusString = "Invalid name!";
                 return;
             }
 
             // Send our login name to the server
             if (String.IsNullOrEmpty(name))
             {
-                ThisClient.ConnectionStatusString = "A valid name must be entered.";
-                ThisClient.IsConnectedToGameServer = false;
+                ThisClientVM.ConnectionStatusString = "A valid name must be entered.";
+                ThisClientVM.IsConnectedToGameServer = false;
                 return;
             }
 
             // Create our player object and send to the server
-            Player newPlayer = new Player(-1, Players.UNDEFINED, name, ThisClient.Model.ServerSocket);
-            Client.SerializeData<Player>(newPlayer, ThisClient.Model.ServerSocket);
+            Player newPlayer = new Player(-1, Players.UNDEFINED, name, ThisClientVM.Model.ServerSocket);
+            Client.SerializeData<Player>(newPlayer, ThisClientVM.Model.ServerSocket);
 
             // Retrieve the accepted player data from the server
-            ThisClient.ThisPlayer = DataTransmission.DeserializeData<Player>(ThisClient.Model.ServerSocket);
+            ThisClientVM.ThisPlayer = DataTransmission.DeserializeData<Player>(ThisClientVM.Model.ServerSocket);
 
-            if(ThisClient.ThisPlayer.IDType == Players.UNDEFINED)
+            if(ThisClientVM.ThisPlayer.IDType == Players.UNDEFINED)
             {
                 // Update the UI
                 spMakeConnection.Visibility = Visibility.Visible;
                 spActiveGameRegion.Visibility = Visibility.Collapsed;
 
-                ThisClient.ConnectionStatusString = "Connection refused by server.";
+                ThisClientVM.ConnectionStatusString = "Connection refused by server.";
 
                 // close the socket
-                ThisClient.Model.ServerSocket.Close();  
+                ThisClientVM.Model.ServerSocket.Close();  
                 return;
             } else
             {
@@ -136,8 +136,8 @@ namespace ReversiClient
             #endregion
 
             #region Create a listening thread
-            ThisClient.Model.ListenThread = new Thread(ThisClient.ListenServer);
-            ThisClient.Model.ListenThread.Start();
+            ThisClientVM.Model.ListenThread = new Thread(ThisClientVM.ListenServer);
+            ThisClientVM.Model.ListenThread.Start();
             #endregion
         }
 
@@ -155,17 +155,17 @@ namespace ReversiClient
             {
                 if (result < 0)
                 {
-                    ThisClient.GameplayStatusString = "Invalid entry";
+                    ThisClientVM.GameplayStatusString = "Invalid entry";
                     return;
                 }
                 else
                 {
                     // Send move to server
-                    ThisClient.Model.LastMove = new ReversiGameMove(ThisClient.ThisPlayer.PlayerID, result);
-                    DataTransmission.SerializeData<ReversiGameMove>(ThisClient.Model.LastMove, ThisClient.Model.ServerSocket);
+                    ThisClientVM.Model.LastMove = new GameMove(ThisClientVM.ThisPlayer.PlayerID, result);
+                    DataTransmission.SerializeData<GameMove>(ThisClientVM.Model.LastMove, ThisClientVM.Model.ServerSocket);
 
                     // Create the packet info.
-                    ThisClient.GameplayStatusString = "Processing Move. Waiting for response from Server...";
+                    ThisClientVM.GameplayStatusString = "Processing Move. Waiting for response from Server...";
                     
                 }
             }

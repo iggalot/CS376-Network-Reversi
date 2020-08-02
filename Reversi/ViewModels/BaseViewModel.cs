@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace ReversiClient.ViewModels
+namespace Reversi.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
