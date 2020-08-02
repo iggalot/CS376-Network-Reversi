@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ReversiClient"
+        xmlns:view="clr-namespace:ReversiClient.Views"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
@@ -11,27 +12,44 @@
             <StackPanel Name="spMakeConnection" Orientation="Vertical" Visibility="Visible">
                 <Label Content="Enter name: "/>
                 <TextBox Name="tbPlayerName" FontSize="12"/>
-                <Label Name="lbConnectStatus" Content="Connection status Label here"></Label>
+                <Label Content="{Binding ConnectionStatusString}"></Label>
                 <Button Content="Connect to Server" HorizontalAlignment="Left" Width="300" Click="Button_ConnectClick"></Button>
             </StackPanel>
-            <StackPanel Name="spActiveGameRegion" Width="800" Height="300" Visibility="Collapsed" 
+            <StackPanel Name="spActiveGameRegion" Width="800" Height="500" Visibility="Collapsed" 
                         Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
-                    <Label Name="lbGameID" Content="Current game ID here"/>
-                    <Label Name="lbCurrentPlayer" Content="Player name here"/>
-                    <Label Name="lbCurrentMove" Content="Move request here"/>
+                    <StackPanel Orientation="Vertical" Background="Orange">
+                        <StackPanel Orientation="Horizontal">
+                            <Label HorizontalAlignment="Left" Content="Game ID: " FontSize="14"/>
+                            <Label HorizontalAlignment="Left" Content="{Binding CurrentGame.GameID, FallbackValue=Pending...}" FontSize="14"/>
+                            <Label HorizontalAlignment="Right" Content="Your ID#" Height="40" FontSize="14"/>
+                            <Label HorizontalAlignment="Right" Content="{Binding ThisPlayer.PlayerID, FallbackValue=Pending}" FontSize="14" />
+                            <Label HorizontalAlignment="Right" Content="{Binding ThisPlayer.Name, FallbackValue=Pending}" FontSize="14"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label HorizontalAlignment="Left" Content="Current Player: " FontSize="14"/>
+                            <Label HorizontalAlignment="Left" Content="{Binding CurrentGame.CurrentPlayer, FallbackValue=Pending...}" FontSize="14"/>
 
-                    <StackPanel Background="LightGray" Orientation="Horizontal">
-                        <Label Content="Player1 ID: "/>
-                        <Label Name="lbPlayer1ID" Content="Player1ID here"/>
-                        <Label Name="lbPlayer1Name" Content="Player1 name here"/>
-                    </StackPanel>
-                    <StackPanel Background="Cyan" Orientation="Horizontal">
-                        <Label Content="Player2 ID: "/>
-                        <Label Name="lbPlayer2ID" Content="Player2ID here"/>
-                        <Label Name="lbPlayer2Name" Content="Player2 name here"/>
+                        </StackPanel>
                     </StackPanel>
 
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Background="LightGray" Orientation="Horizontal">
+                            <Label Content="Player1 ID: "/>
+                            <Label Name="lbPlayer1ID" Content="{Binding CurrentGame.CurrentPlayersList[0].PlayerID}"/>
+                            <Label Name="lbPlayer1Name" Content="{Binding CurrentGame.CurrentPlayersList[0].Name}"/>
+                        </StackPanel>
+                        <StackPanel Background="Cyan" Orientation="Horizontal">
+                            <Label Content="Player2 ID: "/>
+                            <Label Name="lbPlayer2ID" Content="{Binding CurrentGame.CurrentPlayersList[1].PlayerID}"/>
+                            <Label Name="lbPlayer2Name" Content="{Binding CurrentGame.CurrentPlayersList[1].Name}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lbCurrentMove" Content="Move request here"/>
+                    </StackPanel>
+                    
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Current Move: "/>
                         <Label Name="lbIndex" Content="TextBlock here"/>
@@ -45,18 +63,21 @@
 
                     <StackPanel Orientation="Horizontal" Background="LightBlue">
                         <Label Content="Status: "></Label>
-                        <Label Name="lbStatus" Width ="300" Content="Move submission status Label here"></Label>
+                        <Label Width ="300" Content="{Binding GameplayStatusString}"></Label>
                     </StackPanel>
+                    <TextBlock Background="Beige" Text="{Binding GameboardDisplayString, FallbackValue=Pending...}" Width="400" Height="400"></TextBlock>
                 </StackPanel>
 
-
-                <TextBlock Background="Beige" Text="Test" Name="tbGameboard" Width="200" Height="200"></TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <view:ReversiGameView DataContext="{Binding GameViewModel}"/>
+                </StackPanel>
+                
             </StackPanel>
 
             </StackPanel>
         <StackPanel Orientation="Horizontal" Background="LightGreen" VerticalAlignment="Bottom">
             <Label Content="PACKET STATUS: "/>
-            <Label Name="lbPacketStatus" Width="300" Content="Packet status label here"></Label>
+            <Label Width="300" Content="{Binding PacketStatusString}"></Label>
         </StackPanel>
     </Grid>
 </Window>

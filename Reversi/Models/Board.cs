@@ -21,7 +21,7 @@ namespace Reversi.Models
         public int Rows { get; set; }
 
         /// <summary>
-        /// Number of columns on the voard
+        /// Number of columns on the board
         /// </summary>
         public int Cols { get; set; }
 
@@ -58,7 +58,7 @@ namespace Reversi.Models
         /// <summary>
         /// Draws the gameboard and its pieces
         /// </summary>
-        public string DrawGameboard() {
+        public string DrawGameboardString() {
             string str = "";
             for (int i = 0; i < Rows; i++)
             {
@@ -304,7 +304,7 @@ namespace Reversi.Models
                 for (int j = 0; j < Cols; j++)
                 {
                     var index = i * Cols + j;
-                    var square = new Square();
+                    var square = new Square(index);
                     square.Piece = null;   // no piece in the board originally
 
                     Squares[index] = square;

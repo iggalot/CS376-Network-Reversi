@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Text.RegularExpressions;
 
 namespace Reversi.Models
 {
@@ -15,6 +14,8 @@ namespace Reversi.Models
         /// <summary>
         /// An array to hold the indices of tiles to turn in a given round.
         /// </summary>
+        /// 
+        public string TestGameText {get; set;} = "My test game text";
         public List<int> TilesToTurn { get; set; } = new List<int>();
 
         /// <summary>
@@ -30,21 +31,11 @@ namespace Reversi.Models
 
         #region Constructors
 
-        public ReversiGame(int num_players) : base(num_players)
-        {
-            // Setup the gameboard
-            SetupGame();
-
-            // Start the game
-            PlayGame();
-        }
-
         /// <summary>
-        /// Constructor for a two player game
+        /// Constructor for our Reversi game
         /// </summary>
-        /// <param name="p1">Player 1</param>
-        /// <param name="p2">Player 2</param>
-        public ReversiGame(Player p1, Player p2) : base(p1, p2)
+        /// <param name="list">The list of participating player objects</param>
+        public ReversiGame(List<Player> list) : base(list)
         {
             // Setup the gameboard
             SetupGame();
@@ -52,11 +43,9 @@ namespace Reversi.Models
             // Start the game
             PlayGame();
         }
-
         #endregion
 
         #region Public Methods
-
         /// <summary>
         /// Determine if the new placement location is valid.
         /// </summary>
@@ -327,9 +316,9 @@ namespace Reversi.Models
 
         #region Public Properties
         /// <summary>
-        /// The game IDType for this game
+        /// The game ID for this game
         /// </summary>
-        public int GameID { get; set; }
+        public int GameID { get; private set; } = -20;
 
         /// <summary>
         /// Flag to determine if the game is over
@@ -349,7 +338,7 @@ namespace Reversi.Models
         /// <summary>
         /// The index of the current move
         /// </summary>
-        public int CurrentMoveIndex { get; set; } = 20;
+        public int CurrentMoveIndex { get; set; } = -1;
 
 
         /// <summary>
@@ -366,28 +355,11 @@ namespace Reversi.Models
         #endregion
 
         #region Constructor
-        public Game(int num_players)
-        {
-            // Set our game id
-            GameID = NextID();
-
-            // create our gameboard
-            Gameboard = new Board(8, 8);
-
-            // Initialize our players list
-            CurrentPlayersList = new Player[num_players];
-
-            // create our empty players
-            CurrentPlayersList[0] = new Player();
-            CurrentPlayersList[1] = new Player();
-        }
-
         /// <summary>
-        /// Constructor that creates a game of two players.
+        /// The constructor for a game object
         /// </summary>
-        /// <param name="p1">Player 1</param>
-        /// <param name="p2">Player 2</param>
-        public Game(Player p1, Player p2)
+        /// <param name="list">List of players to join the game</param>
+        public Game(List<Player> list)
         {
             // Set our game id
             GameID = NextID();
@@ -396,11 +368,13 @@ namespace Reversi.Models
             Gameboard = new Board(8, 8);
 
             // Initialize our players list
-            CurrentPlayersList = new Player[2];
+            CurrentPlayersList = new Player[list.Count];
 
-            // Assign the players
-            CurrentPlayersList[0] = p1;
-            CurrentPlayersList[1] = p2;
+            for(int i=0; i<list.Count; i++)
+            {
+                // create our empty players
+                CurrentPlayersList[i] = list[i];
+            }
         }
 
         #endregion
@@ -436,7 +410,6 @@ namespace Reversi.Models
             }
 
             return null;
-
         }
 
         /// <summary>

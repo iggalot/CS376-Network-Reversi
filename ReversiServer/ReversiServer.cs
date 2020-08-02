@@ -264,6 +264,22 @@ namespace ReversiServer
             // While there are less than total number of players...continue listening for new players
             while (!ServerShouldShutDown)
             {
+                // Check if the Socket is still connected.  If not, exit and gracefully shutdown the thread.
+                foreach (KeyValuePair<int, TcpClient> connection in ConnectedClients)
+                {
+                    if (!DataTransmission.SocketConnected((connection.Value).Client))
+                    {
+                        // TODO:  What to do if a socket has closed
+                        // 1. Notify other members of the game that a player has left
+                        // 2. Pause the game...
+                        // 3. Remove the player from the game and chat room
+                        //      a.  Are there any players remaining in the game?
+                        // 4. Resend the updated board to remaining players...
+                        // 5. Fill empty game slots with new connections...
+                        //      a.  If user name matches, allow them to reconnect?
+                    }
+                }
+
                 //PacketInfo packet;
                 client = GameServer.ListenForConnections();
 
@@ -280,16 +296,7 @@ namespace ReversiServer
                 {
                     Console.WriteLine("... GameServer: " + ConnectedClients.Count.ToString() + " connections made ... Ready to begin game");
 
-                    // Retrieve the placeholder players from the WaitingRoom and add them to the Staging Area
-                    Player player1 = WaitingRoom[0];
-                    StagingArea.Add(player1);
-
-                    Player player2 = WaitingRoom[1];
-                    StagingArea.Add(player2);
-
-                    // Remove players from the Waiting room
-                    WaitingRoom.Remove(player1);
-                    WaitingRoom.Remove(player2);
+                    MovePlayersFromWaitingToStaging();
 
                     // Create the game thread to handle this matchup and
                     // Populate the players                    
@@ -300,7 +307,6 @@ namespace ReversiServer
                 } else
                 {
                     Console.WriteLine("... GameServer: " + ConnectedClients.Count.ToString() + " connections currently. Waiting for additional connections.");
-
                 }
             }
 
@@ -309,45 +315,58 @@ namespace ReversiServer
         }
 
         /// <summary>
+        /// Moves a player from the waiting room to the staging area as a game begins.
+        /// </summary>
+        private static void MovePlayersFromWaitingToStaging()
+        {
+            for(int i = GlobalSettings.PlayersPerGame - 1; i>=0; i--)
+            {
+                StagingArea.Add(WaitingRoom[i]);
+                WaitingRoom.RemoveAt(i);
+            }
+        }
+
+        /// <summary>
+        /// Moves a player from the staging area to the gameroom.
+        /// </summary>
+        private static void MovePlayersFromStagingToGame()
+        {
+            for (int i = GlobalSettings.PlayersPerGame - 1; i >= 0; i--)
+            {
+                StagingArea.RemoveAt(i);
+            }
+        }
+
+
+
+        /// <summary>
         /// The main thread routine for each game
         /// </summary>
         /// <param name="data"></param>
         private static void InitializeMatchup(object data)
         {
-            List<Player> players = new List<Player>();
             List<Player> temp = (List<Player>)data;
+            List<Player> players = new List<Player>();
 
             foreach (Player p in temp)
                 players.Add(p);
 
-            List<TcpClient> sockets = new List<TcpClient>();
+            // Move players to the gameroom
+            MovePlayersFromStagingToGame();
 
-            Player player1 = players[0];
-            Player player2 = players[1];
+            // Collect the sockets of the connected players
+            List<TcpClient> sockets = GatherPlayerSocketList(players);
 
-            StagingArea.Remove(player1);
-            StagingArea.Remove(player2);
-
-            // Once two players have connected, start the game with the two players.
-            foreach (Player item in players)
-            {
-                TcpClient socket = GetSocketByPlayerID(item.PlayerID);
-                Console.WriteLine("...... " + item.Name + " is " + item.IDType);
-                item.Socket = socket;  // save the socket reference for the game
-                sockets.Add(socket);
-            }
-
-            if(sockets.Count != GlobalSettings.PlayersPerGame)
+            if (sockets.Count != GlobalSettings.PlayersPerGame)
             {
                 Console.WriteLine("Error retrieving sockets for all players of this game.");
                 return;
-            } else
-            {
-                Console.WriteLine("... GameServer: Matchup pairing complete.");
             }
 
+            Console.WriteLine("... GameServer: Matchup pairing complete.");
+
             // Create the game instance and play the game between the two players...
-            ReversiGame game = new ReversiGame(player1, player2);
+            ReversiGame game = new ReversiGame(players);
             RunningGames.Add(game.GameID, game);  // add the game to the dictionary of running games
 
             Console.WriteLine("... GameServer: Creating game thread (id: " + game.GameID.ToString() + ") Beginning game...");
@@ -388,7 +407,7 @@ namespace ReversiServer
                     if (stream.DataAvailable)
                     {
                         ReversiGameMove move = DataTransmission.DeserializeData<ReversiGameMove>(client);
-                        Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Player ID# move request" + move.ByPlayer + " received");
+                        Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Player ID#" + move.ByPlayer + " move request received");
 
                         if(move.ByPlayer == game.CurrentPlayer)
                         { 
@@ -409,68 +428,22 @@ namespace ReversiServer
 
 
             }
-            //while (true)
-            //{
-            //    // Test receiving the serialized data....
-            //    ReversiGame newgame = DataTransmission.DeserializeData<ReversiGame>(playersSocketList[0]);
+        }
 
-            //    // TODO: Check for dropped players, or dead sockets.
-            //    Thread.Sleep(3000);
+        private static List<TcpClient> GatherPlayerSocketList(List<Player> p)
+        {
+            List<TcpClient> temp = new List<TcpClient>();
 
-            //    // Listen for game moves
-            //    Console.WriteLine("......(GameThread(id: " + Game.GameID.ToString() + ") Waiting to receive game move");
-            //    PacketInfo gameMovePacket;
+            // Once two players have connected, start the game with the two players.
+            foreach (Player item in p)
+            {
+                TcpClient socket = GetSocketByPlayerID(item.PlayerID);
+                Console.WriteLine("...... " + item.Name + " is " + item.IDType);
+                item.Socket = socket;  // save the socket reference for the game
+                temp.Add(socket);
+            }
 
-            //    // Ignore the opponent moves and send rejection message
-            //    if(game.CurrentOpponent.Socket.GetStream().DataAvailable)
-            //    {
-            //        Console.WriteLine("Checking for move from opponent...");
-            //        // If there was no data (or an UNDEFINED packet was returned), do nothing because the client isn't listening
-            //        // otherwise we send a MOVE_DENIED packet back to the opponent.
-            //        if (DataTransmission.ReceiveData(game.CurrentOpponent.Socket, out gameMovePacket))
-            //        {
-            //            if (gameMovePacket == null)
-            //            {
-            //                Console.WriteLine("Server: gameMovePacket was null for opponent");
-            //            }
-            //            else if (gameMovePacket.Type == PacketType.PACKET_UNDEFINED)
-            //            {
-            //                Console.WriteLine("Server: gameMovePacket type was UNDEFINED");
-            //            }
-            //            // send a denied response if a move was received
-            //            else if (gameMovePacket.Type == PacketType.PACKET_GAMEMOVE_REQUEST)
-            //            {
-            //                Console.WriteLine("Server: Move received");
-            //                DataTransmission.SendData(game.CurrentOpponent.Socket, new PacketInfo(-1, "It is not your move.", PacketType.PACKET_GAMEMOVE_DENIED));
-            //            } else
-            //            {
-            //                Console.WriteLine("Server: Invalid packet of type " + gameMovePacket.Type + " was received.");
-            //            }
-            //        }
-            //    }
-
-            //    // Now check the Current Player socket for a move
-            //    if (game.CurrentPlayer.Socket.GetStream().DataAvailable)
-            //    {
-            //        Console.WriteLine("Server: Checking for move from current player...");
-            //        DataTransmission.ReceiveData(game.CurrentPlayer.Socket, out gameMovePacket);
-
-            //        // If there was no data (or an UNDEFINED packet was returned, do nothing because the client isn't listening
-            //        // and cycle back to the beginning og the loop and continue listening
-            //        if ((gameMovePacket == null) || (gameMovePacket.Type == PacketType.PACKET_UNDEFINED))
-            //        {
-            //            // No data was received so we restart the listening cycle
-            //            continue;
-            //        }
-            //        else
-            //        {
-            //            // Determine if the move request was valid...
-            //            //TODO: Determine if move was valid...
-            //            DataTransmission.SendData(game.CurrentPlayer.Socket, new PacketInfo(-1, "Valid move detected.", 
-            //                PacketType.PACKET_GAMEMOVE_ACCEPTED));
-            //        }
-            //    }
-            //}
+            return temp;
         }
 
         #endregion
