@@ -10,33 +10,12 @@ namespace ReversiServer
 
         }
 
-
-        //static void Main()
-        //{
-        //    // Setup our statemachine for this game
-        //    //           ReversiStateMachine gs = new ReversiStateMachine();
-        //    //           ReversiStateMachine.TestStateMachine();
-
-        //    // Start the game server thread
-        //    ThreadStart gameStart = new ThreadStart(GameServerThread);
-        //    Thread gameThread = new Thread(gameStart);
-        //    Console.WriteLine("Starting game server...");
-        //    gameThread.Start();
-        //    GameThreads.Add(gameThread);
-
-        //    // Uncomment these lines to create the chat server thread
-        //    //// Start the chat server thread
-        //    //ThreadStart chatStart = new ThreadStart(ChatServerThread);
-        //    //Thread chatThread = new Thread(chatStart);
-        //    //Console.WriteLine("Starting chat server...");
-        //    //chatThread.Start();
-        //    //ChatThreads.Add(chatThread);
-
-        //    gameThread.Join();
-
-        //    // Uncomment this line to end the game when the chat thread completes.            
-        //    //chatThread.Join();
-        //}
-
+        /// <summary>
+        /// The main thread handle for this reversi server.
+        /// </summary>
+        public override void HandleServerThread()
+        {
+            // Check for enough clients to play the game
+        }
     }
 }

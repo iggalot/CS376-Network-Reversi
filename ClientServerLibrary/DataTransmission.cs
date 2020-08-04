@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ClientServerLibrary
 {
-
+    [Serializable]
     public class DataTransmission
     {
         #region Public Properties

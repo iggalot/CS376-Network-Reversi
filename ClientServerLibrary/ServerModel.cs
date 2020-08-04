@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using System.Threading;
 
 namespace ClientServerLibrary
@@ -12,7 +11,6 @@ namespace ClientServerLibrary
     public class ServerModel : ClientServerInfoModel
     {
         #region Private Properties
-
 
         /// <summary>
         /// The dictionary of client sockets that are connected to this server
@@ -40,7 +38,7 @@ namespace ClientServerLibrary
         /// <summary>
         /// The thread that controls the continuous update thread for the server instance
         /// </summary>
-        public Thread UpdateThread { get; set; }
+        [NonSerialized()] public Thread UpdateThread;
 
         /// <summary>
         /// The type of this server
@@ -89,8 +87,6 @@ namespace ClientServerLibrary
         /// The thread callback routine for this server
         /// </summary>
         public virtual void HandleServerThread() { }
-        public virtual void AcceptConnection(TcpClient client) { }
-        public virtual void RefuseConnection(TcpClient client) { return; }
 
         /// <summary>
         /// Start the server and start listening for connections
@@ -104,8 +100,6 @@ namespace ClientServerLibrary
         {
 //            Console.WriteLine("------- Checking for server updates on server " + ID.ToString());
         }
-
-
 
         #endregion
 

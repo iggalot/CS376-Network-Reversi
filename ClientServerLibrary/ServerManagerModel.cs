@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace ClientServerLibrary
 {
@@ -14,19 +15,11 @@ namespace ClientServerLibrary
         /// </summary>
         private Dictionary<int, ServerModel> serverList = new Dictionary<int, ServerModel>();
 
-        /// <summary>
-        /// The list of connected clients
-        /// </summary>
-        private Dictionary<int, TcpClient> connectedClientSocketList = new Dictionary<int, TcpClient>();
-
         #endregion
 
         #region Public Properties
 
-        public Dictionary<int, TcpClient> ConnectedClientSocketList
-        {
-            get => connectedClientSocketList;
-        }
+        public Dictionary<int, ClientModel> ConnectedClientModelList { get; } = new Dictionary<int, ClientModel>();
         #endregion
 
         #region Constructor
@@ -43,12 +36,13 @@ namespace ClientServerLibrary
         /// Adds a client socket to the connected sockets list
         /// </summary>
         /// <param name="clientSocket"></param>
-        public void AddClientSocketToConnectionList(TcpClient clientSocket)
+        public void AddClientModelToConnectionList(ClientModel clientModel)
         {
-            if (clientSocket == null)
+            if (clientModel == null)
                 return;
 
-            //connectedClientSocketList.Add(clientSocket);
+            if (ConnectedClientModelList.ContainsKey(clientModel.ID) == false)
+                ConnectedClientModelList.Add(clientModel.ID, clientModel);
         }
         /// <summary>
         /// Adds a server to the server list
@@ -91,16 +85,19 @@ namespace ClientServerLibrary
         /// <summary>
         /// Starts the server manager listening for connections
         /// </summary>
-        public void StartManager()
+        public TcpListener StartManager()
         {
             // Convert the string address to an IPAddress type
             IPAddress localAddr = IPAddress.Parse(Address);
 
             // TcpListener -- create the server socket
-            ListenerSocket = new TcpListener(localAddr, Port);
+            this.ListenerSocket = new TcpListener(localAddr, Port);
 
             // Start listening for connections
-            ListenerSocket.Start();
+            this.ListenerSocket.Start();
+
+            return ListenerSocket;
+
         }
 
         /// <summary>
@@ -124,21 +121,12 @@ namespace ClientServerLibrary
             base.StartServer();
 
             Console.WriteLine(" >> Server Manager started at " + Address + " on port " + Port.ToString());
-
-
        }
 
         #endregion
 
         #region Private Methods
-        private void AddClientToConnectedList(ClientModel clientModel)
-        {
-            if (clientModel == null)
-                return;
 
-            //if (connectedClientModelList.ContainsKey(clientModel.ID) == false)
-            //    connectedClientModelList.Add(clientModel.ID, clientModel);
-        }
 
         private void RemoveClientFromConnectedList(ClientModel clientModel)
         {
@@ -169,7 +157,7 @@ namespace ClientServerLibrary
         #endregion
 
         #region IConnectionHandler Interface Implementation
-        public void MakeConnection()
+        public override void MakeConnection()
         {
             throw new NotImplementedException();
         }
@@ -177,34 +165,59 @@ namespace ClientServerLibrary
         /// <summary>
         /// Disconnects the client and associated network stream
         /// </summary>
-        /// <param name="stream">The network stream to be used</param>
-        /// <param name="client">The client that should be disconnected.</param>
-        public void CloseConnection(NetworkStream stream, TcpClient client)
-        {
-            stream.Close();
-            client.Close();
-        }
-
-        public void AcceptConnection()
+        public override void CloseConnection()
         {
             throw new NotImplementedException();
         }
 
-        public void RefuseConnection()
+        /// <summary>
+        /// Accepts a connection request
+        /// </summary>
+        /// <param name="new_model"></param>
+        public override void AcceptConnection(ClientServerInfoModel new_model)
         {
-            throw new NotImplementedException();
+
+            // And immediately return it without updating the ID
+            new_model.CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_REFUSED;
+
+            try
+            {
+                DataTransmission.SerializeData<ClientModel>((ClientModel)new_model, new_model.ConnectionSocket);
+            }
+            catch
+            {
+                throw new SocketException();
+            }
+
+            Console.WriteLine("... GameServer: Connection accepted for client #" + new_model.ID);
         }
 
-        public void CloseConnection()
+        /// <summary>
+        /// Refuse a connection and close the socket
+        /// </summary>
+        /// <param name="new_model"></param>
+        public override void RefuseConnection(ClientServerInfoModel new_model)
         {
-            throw new NotImplementedException();
+            // And immediately return it without updating the ID
+            new_model.CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_REFUSED;
+
+            try
+            {
+                DataTransmission.SerializeData<ClientModel>((ClientModel)new_model, new_model.ConnectionSocket);
+            }
+            catch
+            {
+                throw new SocketException();
+            }
+
+            new_model.ConnectionSocket.Close();
         }
 
         /// <summary>
         /// Listen for Connections once the server has started
         /// </summary>
         /// <returns></returns>
-        public TcpClient ListenForConnections()
+        public override TcpClient ListenForConnections()
         {
             Console.WriteLine("Waiting for new connections...");
 
@@ -213,9 +226,58 @@ namespace ClientServerLibrary
 
             // Perform a blocking call to accept requests.
             // You could also use server.AcceptSocket() here.
-            clientSocket = ListenerSocket.AcceptTcpClient();
+            ConnectionSocket = ListenerSocket.AcceptTcpClient();
 
-            return clientSocket;
+            Console.WriteLine(" ==== New client connected on ServerManager " + ID);
+
+            return ConnectionSocket;
+        }
+
+        /// <summary>
+        /// Determines whether a connection should be accepted or refused
+        /// </summary>
+        /// <param name="model">The model to accept or refuse</param>
+        /// <param name="status">The returned status of this connection request</param>
+        public override void AcceptOrRefuseConnection(ClientServerInfoModel model, out ConnectionStatusTypes status)
+        {
+            ClientModel client = (ClientModel)model;
+
+            if ((model == null) || (client.ConnectionSocket == null))
+            {
+                status = ConnectionStatusTypes.STATUS_CONNECTION_ERROR;
+                return;
+            }
+
+            int timeoutCount = 0;
+            while ((timeoutCount > ServerSettings.MaxServerTimeoutCount) || (!client.ConnectionSocket.GetStream().DataAvailable))
+            {
+                Thread.Sleep(200);
+                timeoutCount++;
+            }
+
+            if (timeoutCount > ServerSettings.MaxServerTimeoutCount)
+            {
+                Console.WriteLine("Connection has timedout");
+                status = ConnectionStatusTypes.STATUS_CONNECTION_ERROR;
+                return;
+            }
+
+            // Deserialize the incoming data in the socket
+            ClientModel new_model = (ClientModel)DataTransmission.DeserializeData<ClientServerInfoModel>(client.ConnectionSocket);
+            new_model.ConnectionSocket = model.ConnectionSocket;  // copies the socket of the current connection to this new_model
+
+            // Send a connection declined message for too many connections
+            if (ConnectedClientModelList.Count > ServerSettings.MaxServerConnections)
+            {
+                RefuseConnection(new_model);
+                status = ConnectionStatusTypes.STATUS_CONNECTION_REFUSED;
+            }
+            // Otherwise accept the connection
+            else
+            {
+                AcceptConnection(new_model);
+                status = ConnectionStatusTypes.STATUS_CONNECTION_ACCEPTED;
+            }
         }
 
         #endregion

@@ -110,13 +110,18 @@ namespace ReversiClient
             }
 
             // Create our player object and send to the server
-            PlayerModel newPlayer = new PlayerModel(-1, Players.UNDEFINED, name, ThisClientVM.Model.ServerSocket);
-            ClientModel.SerializeData<PlayerModel>(newPlayer, ThisClientVM.Model.ServerSocket);
+            ClientModel model = new ClientModel(ThisClientVM.Model.ServerSocket, null);
 
-            // Retrieve the accepted player data from the server
-            ThisClientVM.ThisPlayer = DataTransmission.DeserializeData<PlayerModel>(ThisClientVM.Model.ServerSocket);
+            //PlayerModel newPlayer = new PlayerModel(-1, Players.UNDEFINED, name, ThisClientVM.Model.ServerSocket);
+            ClientModel.SerializeData<ClientModel>(model, ThisClientVM.Model.ServerSocket);
 
-            if(ThisClientVM.ThisPlayer.IDType == Players.UNDEFINED)
+            // Retrieve the data from the server
+            model = DataTransmission.DeserializeData<ClientModel>(ThisClientVM.Model.ServerSocket);
+
+            // TODO:  Create the player object from the client model object
+            ThisClientVM.ThisPlayer = null;
+
+            if (ThisClientVM.ThisPlayer.IDType == Players.UNDEFINED)
             {
                 // Update the UI
                 spMakeConnection.Visibility = Visibility.Visible;
@@ -125,9 +130,10 @@ namespace ReversiClient
                 ThisClientVM.ConnectionStatusString = "Connection refused by server.";
 
                 // close the socket
-                ThisClientVM.Model.ServerSocket.Close();  
+                ThisClientVM.Model.ServerSocket.Close();
                 return;
-            } else
+            }
+            else
             {
                 // Now make the game area visible
                 spMakeConnection.Visibility = Visibility.Collapsed;

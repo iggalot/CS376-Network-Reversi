@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Sockets;
-using System.Text;
 
 namespace ClientServerLibrary
 {
@@ -8,10 +7,11 @@ namespace ClientServerLibrary
     /// A generic client class utilizing the TcpClient protocol.  Requires a TcpListener 
     /// on the other end to create the socket before communications can start.
     /// </summary>
-    
+
     [Serializable]
     public class ClientModel : ClientServerInfoModel, IConnectionHandler
     {
+        #region Constructors
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -20,42 +20,47 @@ namespace ClientServerLibrary
 
         }
 
-        #region Public Methods
-        ///// <summary>
-        ///// Requests an id from its related server
-        ///// </summary>
-        ///// <returns></returns>
-        //public int RequestID()
-        //{
-        //    // TODO:  return a new ID from the server or servermanager.
-        //    return 0;
-        //}
+        /// <summary>
+        /// Creates a client model for a client socket
+        /// </summary>
+        /// <param name="client">The client socket</param>
+        public ClientModel(TcpClient client, TcpListener listener) : base(client, listener)
+        {
 
+        }
         #endregion
 
+
+
         #region IConnectionHandler Interface Implementation
-        public void AcceptConnection()
+        public override void AcceptConnection(ClientServerInfoModel model)
         {
-            throw new NotImplementedException();
+            // Do nothing since a client shouldnt have this functionality
         }
-        public void CloseConnection()
-        {
-            throw new NotImplementedException();
-        }
-
-        public TcpClient ListenForConnections()
+        public override void CloseConnection()
         {
             throw new NotImplementedException();
         }
 
-        public void MakeConnection()
+        public override TcpClient ListenForConnections()
         {
             throw new NotImplementedException();
         }
 
-        public void RefuseConnection()
+        public override void MakeConnection()
         {
             throw new NotImplementedException();
+        }
+
+        public override void RefuseConnection(ClientServerInfoModel model)
+        {
+            // Do nothing since a client shouldnt have this functionality
+        }
+
+        public override void AcceptOrRefuseConnection(ClientServerInfoModel model, out ConnectionStatusTypes status)
+        {
+            // Do nothing since a client shouldnt have this functionality
+            status = ConnectionStatusTypes.STATUS_CONNECTION_INCAPABLE;
         }
         #endregion
 

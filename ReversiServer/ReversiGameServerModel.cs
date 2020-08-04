@@ -91,7 +91,7 @@ namespace ReversiServer
         //}
 
 
-        public override void AcceptConnection(TcpClient client)
+        public override void AcceptConnection(ClientServerInfoModel model)
         {
             //    Player newplayer = DataTransmission.DeserializeData<Player>(client);
 
@@ -134,7 +134,7 @@ namespace ReversiServer
         /// Returns an UNDEFINED player packet
         /// </summary>
         /// <param name="client">The client socket</param>
-        public override void RefuseConnection(TcpClient client)
+        public override void RefuseConnection(ClientServerInfoModel model)
         {
             //PlayerModel newplayer = DataTransmission.DeserializeData<PlayerModel>(client);
 
@@ -171,8 +171,9 @@ namespace ReversiServer
         /// </summary>
         /// <param name="client">The client socket</param>
         /// <param name="packet">The packet of data created when the connection was first made in ListenForConnections</param>
-        public static void AcknowledgeConnection(TcpClient client)
+        public override void AcceptOrRefuseConnection(ClientServerInfoModel model, out ConnectionStatusTypes status)
         {
+            status = ConnectionStatusTypes.STATUS_CONNECTION_UNKNOWN;
             //int timeoutCount = 0;
             //while ((timeoutCount > 150) || (!client.GetStream().DataAvailable))
             //{
