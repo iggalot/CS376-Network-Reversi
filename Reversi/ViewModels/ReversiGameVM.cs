@@ -6,7 +6,7 @@ namespace Reversi.ViewModels
     public class ReversiGameVM : BaseViewModel
     {
         private ReversiGameboardVM _reversiGameboardVM;
-        private ReversiGame _reversiGame;
+        private ReversiGameModel _reversiGame;
 
         public ReversiGameboardVM GameboardVM { 
             get => _reversiGameboardVM;
@@ -23,7 +23,7 @@ namespace Reversi.ViewModels
         /// <summary>
         /// The game model object for this view model
         /// </summary>
-        public ReversiGame Model {
+        public ReversiGameModel Model {
             get => _reversiGame;
             private set
             {
@@ -44,7 +44,7 @@ namespace Reversi.ViewModels
         /// Constructor
         /// </summary>
         /// <param name="game"></param>
-        public ReversiGameVM(ReversiGame game)
+        public ReversiGameVM(ReversiGameModel game)
         {
             Model = game;
 

@@ -110,11 +110,11 @@ namespace ReversiClient
             }
 
             // Create our player object and send to the server
-            Player newPlayer = new Player(-1, Players.UNDEFINED, name, ThisClientVM.Model.ServerSocket);
-            Client.SerializeData<Player>(newPlayer, ThisClientVM.Model.ServerSocket);
+            PlayerModel newPlayer = new PlayerModel(-1, Players.UNDEFINED, name, ThisClientVM.Model.ServerSocket);
+            ClientModel.SerializeData<PlayerModel>(newPlayer, ThisClientVM.Model.ServerSocket);
 
             // Retrieve the accepted player data from the server
-            ThisClientVM.ThisPlayer = DataTransmission.DeserializeData<Player>(ThisClientVM.Model.ServerSocket);
+            ThisClientVM.ThisPlayer = DataTransmission.DeserializeData<PlayerModel>(ThisClientVM.Model.ServerSocket);
 
             if(ThisClientVM.ThisPlayer.IDType == Players.UNDEFINED)
             {
@@ -161,8 +161,8 @@ namespace ReversiClient
                 else
                 {
                     // Send move to server
-                    ThisClientVM.Model.LastMove = new GameMove(ThisClientVM.ThisPlayer.PlayerID, result);
-                    DataTransmission.SerializeData<GameMove>(ThisClientVM.Model.LastMove, ThisClientVM.Model.ServerSocket);
+                    ThisClientVM.Model.LastMove = new GameMoveModel(ThisClientVM.ThisPlayer.PlayerID, result);
+                    DataTransmission.SerializeData<GameMoveModel>(ThisClientVM.Model.LastMove, ThisClientVM.Model.ServerSocket);
 
                     // Create the packet info.
                     ThisClientVM.GameplayStatusString = "Processing Move. Waiting for response from Server...";

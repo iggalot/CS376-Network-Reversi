@@ -48,7 +48,7 @@ namespace ReversiClient.ViewModels
         /// <summary>
         /// The current game being controlled by this client
         /// </summary>
-        public ReversiGame CurrentGame
+        public ReversiGameModel CurrentGame
         {
             get => GetGame();
             set
@@ -86,7 +86,7 @@ namespace ReversiClient.ViewModels
         /// <summary>
         /// The player object associated with this UI
         /// </summary>
-        public Player ThisPlayer { 
+        public PlayerModel ThisPlayer { 
             get => Model.ClientPlayer;
             set
             {
@@ -181,7 +181,7 @@ namespace ReversiClient.ViewModels
         /// Set the game associated with this client
         /// </summary>
         /// <param name="game"></param>
-        private void SetGame(ReversiGame game)
+        private void SetGame(ReversiGameModel game)
         {
             Model.Game = game;
         }
@@ -190,7 +190,7 @@ namespace ReversiClient.ViewModels
         /// Retrtieve the underlying game object
         /// </summary>
         /// <returns></returns>
-        private ReversiGame GetGame()
+        private ReversiGameModel GetGame()
         {
             return Model.Game;
         }
@@ -199,7 +199,7 @@ namespace ReversiClient.ViewModels
         /// Set the player associated with this client
         /// </summary>
         /// <param name="player"></param>
-        private void SetPlayer(Player player)
+        private void SetPlayer(PlayerModel player)
         {
             Model.ClientPlayer = player;
         }
@@ -250,7 +250,7 @@ namespace ReversiClient.ViewModels
                     });
                     try
                     {
-                        CurrentGame = DataTransmission.DeserializeData<ReversiGame>(Model.ServerSocket);
+                        CurrentGame = DataTransmission.DeserializeData<ReversiGameModel>(Model.ServerSocket);
 
                         Application.Current.Dispatcher.Invoke(() =>
                         {
@@ -261,7 +261,7 @@ namespace ReversiClient.ViewModels
                     {
                         try
                         {
-                            Model.LastMove = DataTransmission.DeserializeData<GameMove>(Model.ServerSocket);
+                            Model.LastMove = DataTransmission.DeserializeData<GameMoveModel>(Model.ServerSocket);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 PacketStatusString = "GameMove data received";
@@ -269,7 +269,7 @@ namespace ReversiClient.ViewModels
                         }
                         catch
                         {
-                            ThisPlayer = DataTransmission.DeserializeData<Player>(Model.ServerSocket);
+                            ThisPlayer = DataTransmission.DeserializeData<PlayerModel>(Model.ServerSocket);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 PacketStatusString = "Player data received";

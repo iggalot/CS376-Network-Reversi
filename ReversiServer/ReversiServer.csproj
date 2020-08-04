@@ -43,8 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Application.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReversiServer.cs" />
+    <Compile Include="ReversiChatServerModel.cs" />
+    <Compile Include="ReversiGameServerModel.cs" />
+    <Compile Include="ReversiServerManagerModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

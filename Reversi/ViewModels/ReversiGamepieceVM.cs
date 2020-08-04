@@ -4,12 +4,12 @@ namespace Reversi.ViewModels
 {
     public class ReversiGamepieceVM
     {
-        private GamePiece _reversiGamepiece;
+        private GamePieceModel _reversiGamepiece;
 
         /// <summary>
         /// The model object for this view model
         /// </summary>
-        public GamePiece Model {
+        public GamePieceModel Model {
             get => _reversiGamepiece;
             set
             {
@@ -19,7 +19,7 @@ namespace Reversi.ViewModels
             }
         }
 
-        public ReversiGamepieceVM(GamePiece piece)
+        public ReversiGamepieceVM(GamePieceModel piece)
         {
             Model = piece;
         }

@@ -8,7 +8,7 @@ namespace Reversi.Models
     /// The Reversi Game class...
     /// </summary>
     [Serializable]
-    public class ReversiGame : Game
+    public class ReversiGameModel : GameModel
     {
         #region Public Properties
         /// <summary>
@@ -35,7 +35,7 @@ namespace Reversi.Models
         /// Constructor for our Reversi game
         /// </summary>
         /// <param name="list">The list of participating player objects</param>
-        public ReversiGame(List<Player> list) : base(list)
+        public ReversiGameModel(List<PlayerModel> list) : base(list)
         {
             // Setup the gameboard
             SetupGame();
@@ -88,7 +88,7 @@ namespace Reversi.Models
                     continue;
 
                 // Check if the neighbor is owned by the opponent
-                Player owner = Gameboard.Squares[tmp_index].Piece.Owner;
+                PlayerModel owner = Gameboard.Squares[tmp_index].Piece.Owner;
 
                 if (owner.PlayerID != opponent)
                 {
@@ -103,7 +103,7 @@ namespace Reversi.Models
                     // Otherwise continue searching in this direction to see if a 
                     // players piece is also in this direction.
                     int next_index = tmp_index;
-                    Player next_owner = owner;
+                    PlayerModel next_owner = owner;
 
                     // Continue searching so long as we don't reach the border (-1) and the next square is 
                     // owned by the opponent.
@@ -154,10 +154,10 @@ namespace Reversi.Models
         /// <param name="index">the index of the move being made</param>
         internal bool MakePlayerMove(int index)
         {
-            Player player = null; ;
+            PlayerModel player = null; ;
             bool playerFound = false;            
 
-            foreach(Player item in CurrentPlayersList)
+            foreach(PlayerModel item in CurrentPlayersList)
             {
                 if (item.PlayerID == CurrentPlayer)
                 {
@@ -172,7 +172,7 @@ namespace Reversi.Models
                     return false;
 
                 // Add a new game piece at the location
-                GamePiece piece = new GamePiece(Pieceshapes.ELLIPSE, player);
+                GamePieceModel piece = new GamePieceModel(Pieceshapes.ELLIPSE, player);
                 Gameboard.AddPiece(index, piece);
 
                 // Capture the opponents tiles
@@ -191,10 +191,10 @@ namespace Reversi.Models
         /// </summary>
         private void DoTurnTiles()
         {
-            Player player = null; ;
+            PlayerModel player = null; ;
             bool playerFound = false;
 
-            foreach (Player item in CurrentPlayersList)
+            foreach (PlayerModel item in CurrentPlayersList)
             {
                 if (item.PlayerID == CurrentPlayer)
                 {
@@ -225,10 +225,10 @@ namespace Reversi.Models
             var midpoint = Gameboard.Rows * Gameboard.Cols / 2;
 
             // Place the starting pieces
-            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
-            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
-            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 - 1, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
-            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 - 1, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
 
             // MessageBox.Show(Gameboard.DrawGameboard());
 
@@ -255,11 +255,11 @@ namespace Reversi.Models
             //            MakePlayerMove(Players[0], 12);
 
             // Test scenario for our board
-            Gameboard.AddPiece(18, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
-            Gameboard.AddPiece(17, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
-            Gameboard.AddPiece(19, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
-            Gameboard.AddPiece(21, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
-            Gameboard.AddPiece(12, new GamePiece(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(18, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(17, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
+            Gameboard.AddPiece(19, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(21, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(12, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
             //MessageBox.Show(Gameboard.DrawGameboard());
 
             //// The main game loop -- 
@@ -307,7 +307,7 @@ namespace Reversi.Models
     /// </summary>
     /// 
     [Serializable]
-    public class Game
+    public class GameModel
     {
         #region Private Properties
         private static int _nextId = 0;
@@ -344,12 +344,12 @@ namespace Reversi.Models
         /// <summary>
         /// A list of the players for our game
         /// </summary>
-        public Player[] CurrentPlayersList { get; set; }
+        public PlayerModel[] CurrentPlayersList { get; set; }
 
         /// <summary>
         /// The gameboard for our game
         /// </summary>
-        public Board Gameboard { get; set; }
+        public BoardModel Gameboard { get; set; }
 
 
         #endregion
@@ -359,16 +359,16 @@ namespace Reversi.Models
         /// The constructor for a game object
         /// </summary>
         /// <param name="list">List of players to join the game</param>
-        public Game(List<Player> list)
+        public GameModel(List<PlayerModel> list)
         {
             // Set our game id
             GameID = NextID();
 
             // create our gameboard
-            Gameboard = new Board(8, 8);
+            Gameboard = new BoardModel(8, 8);
 
             // Initialize our players list
-            CurrentPlayersList = new Player[list.Count];
+            CurrentPlayersList = new PlayerModel[list.Count];
 
             for(int i=0; i<list.Count; i++)
             {
@@ -401,9 +401,9 @@ namespace Reversi.Models
         /// </summary>
         /// <param name="id">The player id</param>
         /// <returns></returns>
-        public Player GetPlayerById(int id)
+        public PlayerModel GetPlayerById(int id)
         {
-            foreach(Player item in CurrentPlayersList)
+            foreach(PlayerModel item in CurrentPlayersList)
             {
                 if (item.PlayerID == id)
                     return item;
@@ -420,7 +420,7 @@ namespace Reversi.Models
         {
             List<TcpClient> list = new List<TcpClient>();
 
-            foreach(Player item in CurrentPlayersList)
+            foreach(PlayerModel item in CurrentPlayersList)
             {
                 list.Add(item.Socket);
             }

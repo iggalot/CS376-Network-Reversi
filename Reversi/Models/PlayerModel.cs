@@ -8,7 +8,7 @@ namespace Reversi.Models
     /// </summary>
     
     [Serializable]
-    public class Player
+    public class PlayerModel
     {
 
         #region Public Properties
@@ -39,7 +39,7 @@ namespace Reversi.Models
         /// <summary>
         /// Default constructor
         /// </summary>
-        public Player()
+        public PlayerModel()
         {
             PlayerID = -1;
             IDType = Players.UNDEFINED;
@@ -53,7 +53,7 @@ namespace Reversi.Models
         /// <param name="id">The player number</param>
         /// <param name="name">The name of the player</param>
         /// <param name="socket">The associated socket for this player</param>
-        public Player(int num, Players id, string name, TcpClient socket)
+        public PlayerModel(int num, Players id, string name, TcpClient socket)
         {
             PlayerID = num;
             IDType = id;

@@ -39,9 +39,9 @@ namespace Reversi.ViewModels
         /// <summary>
         /// The model object behind this view model
         /// </summary>
-        public Square Model { get; set; }
+        public SquareModel Model { get; set; }
 
-        public ReversiSquareVM(Square square)
+        public ReversiSquareVM(SquareModel square)
         {
             if (square == null)
                 return;

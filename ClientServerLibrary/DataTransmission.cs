@@ -1,16 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Threading;
 
 namespace ClientServerLibrary
 {
+
     public class DataTransmission
     {
+        #region Public Properties
+
+        #endregion
+
+        /// <summary>
+        /// Tells the server it should shutdown
+        /// </summary>
+        public bool ShouldShutdown { get; set; } = false;
+
+        /// <summary>
+        /// Connects our client to a TcpIp socket
+        /// </summary>
+        /// <param name="v">Address to connect to</param>
+        /// <param name="port">Port number to connect to</param>
+        /// <returns></returns>
+        public static TcpClient Connect(string v, Int32 port)
+        {
+            return new TcpClient(v, port);
+        }
+
+
+
+
+
+
+
+
+
+
         /// <summary>
         /// The max size of the read / write socket data array
         /// </summary>
@@ -25,8 +53,6 @@ namespace ClientServerLibrary
         /// Was the transmission deemed a success?
         /// </summary>
         public static bool SendSuccess = true;
-
-
 
         /// <summary>
         /// Receives data from a socket.

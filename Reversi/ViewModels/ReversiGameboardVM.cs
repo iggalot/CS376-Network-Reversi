@@ -6,7 +6,7 @@ namespace Reversi.ViewModels
     public class ReversiGameboardVM : BaseViewModel
     {
         private ObservableCollection<ReversiSquareVM> _reversiSquareCollection = new ObservableCollection<ReversiSquareVM>();
-        private Board _reversiGameboard;
+        private BoardModel _reversiGameboard;
 
         public static int GameboardSquareWidth { get; set; } = 50;
         public static int GameboardSquareHeight { get; set; } = 50;
@@ -20,7 +20,7 @@ namespace Reversi.ViewModels
         /// <summary>
         /// The board model for this view model
         /// </summary>
-        public Board Model 
+        public BoardModel Model 
         {
             get => _reversiGameboard;
             private set
@@ -52,7 +52,7 @@ namespace Reversi.ViewModels
         /// Constructor
         /// </summary>
         /// <param name="board"></param>
-        public ReversiGameboardVM(Board board)
+        public ReversiGameboardVM(BoardModel board)
         {
             if (board == null)
                 return;
@@ -63,7 +63,7 @@ namespace Reversi.ViewModels
 
             ReversiGameboardVMCollection = new ObservableCollection<ReversiSquareVM>();
 
-            foreach(Square square in board.Squares)
+            foreach(SquareModel square in board.Squares)
             {
                 this.AddSquareVM(square);
             }
@@ -73,7 +73,7 @@ namespace Reversi.ViewModels
         /// Creates a reversi square vm for a specified square model and adds it to the gameboard square collection
         /// </summary>
         /// <param name="s"></param>
-        private void AddSquareVM(Square s)
+        private void AddSquareVM(SquareModel s)
         {
             ReversiSquareVM square_vm = new ReversiSquareVM(s);
             ReversiGameboardVMCollection.Add(square_vm);

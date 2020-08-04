@@ -14,12 +14,12 @@ namespace Models.ReversiClient
         /// <summary>
         /// The game model associated with this client
         /// </summary>
-        public ReversiGame Game { get; set; }
+        public ReversiGameModel Game { get; set; }
 
         /// <summary>
         /// The player model associated with this client
         /// </summary>
-        public Player ClientPlayer { get; set; }
+        public PlayerModel ClientPlayer { get; set; }
 
         /// <summary>
         /// Flag to indicate if the client should shutdown
@@ -29,7 +29,7 @@ namespace Models.ReversiClient
         /// <summary>
         /// Stores the object data for the last move sent to the server.
         /// </summary>
-        public GameMove LastMove { get; set; }
+        public GameMoveModel LastMove { get; set; }
 
         /// <summary>
         /// Returns the socket connection to the game server
@@ -77,7 +77,7 @@ namespace Models.ReversiClient
             try
             {
                 // save the socket once the connection is made
-                ServerSocket = Client.Connect(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
+                ServerSocket = ClientModel.Connect(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
                 serverStream = ServerSocket.GetStream();
             }
             catch (ArgumentNullException excep)

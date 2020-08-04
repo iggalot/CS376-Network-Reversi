@@ -6,14 +6,14 @@ namespace Reversi.Models
     /// The class defining the gameboard characteristics.
     /// </summary>
     [Serializable]
-    public class Board
+    public class BoardModel
     {
 
         #region Public Properties
         /// <summary>
         /// the collection of squares that make up the gameboard
         /// </summary>
-        public Square[] Squares { get; set; }
+        public SquareModel[] Squares { get; set; }
 
         /// <summary>
         /// Rows in the board
@@ -33,7 +33,7 @@ namespace Reversi.Models
         /// </summary>
         /// <param name="index">The index on the gameboard</param>
         /// <param name="piece">The piece to add</param>
-        public void AddPiece(int index, GamePiece piece) {
+        public void AddPiece(int index, GamePieceModel piece) {
             Squares[index].Piece = piece;
         }
 
@@ -287,7 +287,7 @@ namespace Reversi.Models
         /// </summary>
         /// <param name="cols">Number of columns on the gameboard</param>
         /// <param name="rows">Number of rows on the gameboard</param>
-        public Board(int cols, int rows)
+        public BoardModel(int cols, int rows)
         {
             // Save our board parameters
             Cols = cols;
@@ -296,7 +296,7 @@ namespace Reversi.Models
             var numsquares = Rows * Cols;
 
             // Create our collection of game squares
-            Squares = new Square[numsquares];
+            Squares = new SquareModel[numsquares];
 
             // Create a game square object for each index
             for (int i = 0; i < Rows; i++)
@@ -304,7 +304,7 @@ namespace Reversi.Models
                 for (int j = 0; j < Cols; j++)
                 {
                     var index = i * Cols + j;
-                    var square = new Square(index);
+                    var square = new SquareModel(index);
                     square.Piece = null;   // no piece in the board originally
 
                     Squares[index] = square;
