@@ -13,6 +13,7 @@ namespace ReversiClient.ViewModels
         private string _gameplayStatusString = string.Empty;
         private string _connectionStatusString = string.Empty;
         private string _packetStatusString = string.Empty;
+        private bool _isConnectedToServer;
 
         // new
         private ReversiGameVM _reversiGameVM = null;
@@ -154,7 +155,19 @@ namespace ReversiClient.ViewModels
         /// <summary>
         /// Is waiting for a response from the server.
         /// </summary>
-        public bool IsConnectedToGameServer { get; set; } = false;
+        public bool IsConnectedToServer 
+        {
+            get => _isConnectedToServer;
+            set
+            {
+                if (value == _isConnectedToServer)
+                    return;
+
+                _isConnectedToServer = value;
+
+                OnPropertyChanged("IsConnectedToServer");
+            } 
+        }
 
         #endregion
 
@@ -210,7 +223,7 @@ namespace ReversiClient.ViewModels
         /// </summary>
         public void ListenServer()
         {
-            NetworkStream stream = Model.ServerSocket.GetStream();
+            NetworkStream stream = Model.ConnectionSocket.GetStream();
             Application.Current.Dispatcher.Invoke(() =>
             {
                 PacketStatusString = "Client:  Listen thread started.";
@@ -218,26 +231,26 @@ namespace ReversiClient.ViewModels
             );
 
             // The main listening loop
-            while (!Model.ClientShouldShutdown)
+            while (!Model.ShouldShutdown)
             {
                 // Check if the main thread of the client application is still alive
-                if (!Model.MainThread.IsAlive)
+                if (!Model.ClientMainThread.IsAlive)
                 {
-                    Model.ClientShouldShutdown = true;
+                    Model.ShouldShutdown = true;
                     continue;
                 }
 
                 // Check if the parent process is still running
-                if (Model.ReversiClientProcess.HasExited)
+                if (Model.ClientProcess.HasExited)
                 {
-                    Model.ClientShouldShutdown = true;
+                    Model.ShouldShutdown = true;
                     continue;
                 }
 
                 // Check if the Socket is still connected.  If not, exit and gracefully shutdown the thread.
-                if (!DataTransmission.SocketConnected(Model.ServerSocket.Client))
+                if (!DataTransmission.SocketConnected(Model.ConnectionSocket.Client))
                 {
-                    Model.ClientShouldShutdown = true;
+                    Model.ShouldShutdown = true;
                     continue;
                 }
 
@@ -250,7 +263,7 @@ namespace ReversiClient.ViewModels
                     });
                     try
                     {
-                        CurrentGame = DataTransmission.DeserializeData<ReversiGameModel>(Model.ServerSocket);
+                        CurrentGame = DataTransmission.DeserializeData<ReversiGameModel>(Model.ConnectionSocket);
 
                         Application.Current.Dispatcher.Invoke(() =>
                         {
@@ -261,7 +274,7 @@ namespace ReversiClient.ViewModels
                     {
                         try
                         {
-                            Model.LastMove = DataTransmission.DeserializeData<GameMoveModel>(Model.ServerSocket);
+                            Model.LastMove = DataTransmission.DeserializeData<GameMoveModel>(Model.ConnectionSocket);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 PacketStatusString = "GameMove data received";
@@ -269,7 +282,7 @@ namespace ReversiClient.ViewModels
                         }
                         catch
                         {
-                            ThisPlayer = DataTransmission.DeserializeData<PlayerModel>(Model.ServerSocket);
+                            ThisPlayer = DataTransmission.DeserializeData<PlayerModel>(Model.ConnectionSocket);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 PacketStatusString = "Player data received";

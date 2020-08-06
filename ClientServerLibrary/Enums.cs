@@ -1,5 +1,8 @@
-﻿namespace ClientServerLibrary
+﻿using System;
+
+namespace ClientServerLibrary
 {
+    [Serializable]
     public enum ServerTypes
     {
         SERVER_UNKNOWN = -1,
@@ -8,6 +11,7 @@
         SERVER_CHATSERVER = 2
     }
 
+    [Serializable]
     public enum ConnectionStatusTypes
     {
         STATUS_CONNECTION_INCAPABLE = -2,

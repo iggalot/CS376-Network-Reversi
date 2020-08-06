@@ -28,12 +28,6 @@ namespace Reversi.Models
         /// </summary>
         public string Name { get; set; }
 
-        /// <summary>
-        /// The socket for this players connection
-        /// /summary>
-
-        [NonSerialized()] public TcpClient Socket;
-
         #endregion
 
         /// <summary>
@@ -44,7 +38,6 @@ namespace Reversi.Models
             PlayerID = -1;
             IDType = Players.UNDEFINED;
             Name = "Some bloke...";
-            Socket = null;
         }
 
         /// <summary>
@@ -53,12 +46,11 @@ namespace Reversi.Models
         /// <param name="id">The player number</param>
         /// <param name="name">The name of the player</param>
         /// <param name="socket">The associated socket for this player</param>
-        public PlayerModel(int num, Players id, string name, TcpClient socket)
+        public PlayerModel(int num, Players id_type, string name)
         {
             PlayerID = num;
-            IDType = id;
+            IDType = id_type;
             Name = name;
-            Socket = socket;
         }
     }
 }

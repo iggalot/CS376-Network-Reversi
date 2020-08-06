@@ -19,7 +19,7 @@ namespace ClientServerLibrary
 
         #region Public Properties
 
-        public Dictionary<int, ClientModel> ConnectedClientModelList { get; } = new Dictionary<int, ClientModel>();
+
         #endregion
 
         #region Constructor
@@ -148,20 +148,26 @@ namespace ClientServerLibrary
 
         }
 
-        private void ShutdownServer(int id)
+        /// <summary>
+        /// Routine to shut down the manager.  First shuts down all servers controlled by this manager
+        /// and then finally shuts down itself.
+        /// </summary>
+        public override void Shutdown()
         {
-            throw new NotImplementedException();
+            // First shut down all running servers...
+            foreach(KeyValuePair<int, ServerModel> server in serverList)
+            {
+                server.Value.Shutdown();
+            }
+
+            // And then shuts down itself.
+            base.Shutdown();
         }
 
 
         #endregion
 
         #region IConnectionHandler Interface Implementation
-        public override void MakeConnection()
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Disconnects the client and associated network stream
         /// </summary>
@@ -174,7 +180,7 @@ namespace ClientServerLibrary
         /// Accepts a connection request
         /// </summary>
         /// <param name="new_model"></param>
-        public override void AcceptConnection(ClientServerInfoModel new_model)
+        public override void AcceptConnection(ClientModel new_model)
         {
 
             // And immediately return it without updating the ID
@@ -196,14 +202,14 @@ namespace ClientServerLibrary
         /// Refuse a connection and close the socket
         /// </summary>
         /// <param name="new_model"></param>
-        public override void RefuseConnection(ClientServerInfoModel new_model)
+        public override void RefuseConnection(ClientModel new_model)
         {
             // And immediately return it without updating the ID
             new_model.CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_REFUSED;
 
             try
             {
-                DataTransmission.SerializeData<ClientModel>((ClientModel)new_model, new_model.ConnectionSocket);
+                DataTransmission.SerializeData<ClientModel>(new_model, new_model.ConnectionSocket);
             }
             catch
             {
@@ -221,9 +227,6 @@ namespace ClientServerLibrary
         {
             Console.WriteLine("Waiting for new connections...");
 
-            // Create a default client socket to be used by each thread.
-            TcpClient clientSocket = default(TcpClient);
-
             // Perform a blocking call to accept requests.
             // You could also use server.AcceptSocket() here.
             ConnectionSocket = ListenerSocket.AcceptTcpClient();
@@ -238,7 +241,7 @@ namespace ClientServerLibrary
         /// </summary>
         /// <param name="model">The model to accept or refuse</param>
         /// <param name="status">The returned status of this connection request</param>
-        public override void AcceptOrRefuseConnection(ClientServerInfoModel model, out ConnectionStatusTypes status)
+        public override void AcceptOrRefuseConnection(ClientModel model, out ConnectionStatusTypes status)
         {
             ClientModel client = (ClientModel)model;
 
@@ -263,7 +266,7 @@ namespace ClientServerLibrary
             }
 
             // Deserialize the incoming data in the socket
-            ClientModel new_model = (ClientModel)DataTransmission.DeserializeData<ClientServerInfoModel>(client.ConnectionSocket);
+            ClientModel new_model = DataTransmission.DeserializeData<ClientModel>(client.ConnectionSocket);
             new_model.ConnectionSocket = model.ConnectionSocket;  // copies the socket of the current connection to this new_model
 
             // Send a connection declined message for too many connections

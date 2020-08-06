@@ -5,17 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ReversiClient"
         xmlns:view="clr-namespace:ReversiClient.Views"
+        xmlns:convert="clr-namespace:ReversiClient.ValueConverters"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <convert:BoolToVisibilityValueConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+    
     <Grid>
         <StackPanel Orientation="Vertical">
-            <StackPanel Name="spMakeConnection" Orientation="Vertical" Visibility="Visible">
+            <StackPanel Name="spMakeConnection" Orientation="Vertical" 
+                        Visibility="{Binding IsConnectedToServer, 
+                            Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=INVERT}">
                 <Label Content="Enter name: "/>
                 <TextBox Name="tbPlayerName" FontSize="12"/>
                 <Label Content="{Binding ConnectionStatusString}"></Label>
                 <Button Content="Connect to Server" HorizontalAlignment="Left" Width="300" Click="Button_ConnectClick"></Button>
             </StackPanel>
-            <StackPanel Name="spActiveGameRegion" Width="800" Height="500" Visibility="Collapsed" 
+            <StackPanel Name="spActiveGameRegion" Width="800" Height="500" 
+                        Visibility="{Binding IsConnectedToServer, 
+                        Converter={StaticResource BoolToVisibilityConverter}}" 
                         Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Vertical" Background="Orange">

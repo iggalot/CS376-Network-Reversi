@@ -53,7 +53,7 @@ namespace ReversiServer
 
 
             // Shutdown the server manager
-            Manager.ServerShutdown();           
+            Manager.Shutdown();           
         }
     }
 }

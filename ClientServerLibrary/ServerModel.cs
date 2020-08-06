@@ -13,10 +13,9 @@ namespace ClientServerLibrary
         #region Private Properties
 
         /// <summary>
-        /// The dictionary of client sockets that are connected to this server
+        /// The dictionary of all known connections to this server / server manager
         /// </summary>
-        private Dictionary<int, ClientModel> participantClientList = new Dictionary<int, ClientModel>();
-
+        public Dictionary<int, ClientModel> ConnectedClientModelList { get; } = new Dictionary<int, ClientModel>();
         /// <summary>
         /// The list of threads associated with this server
         /// </summary>
@@ -121,7 +120,7 @@ namespace ClientServerLibrary
             if (clientModel == null)
                 return;
 
-            participantClientList.Add(clientModel.ID, clientModel);
+            ConnectedClientModelList.Add(clientModel.ID, clientModel);
         }
 
         /// <summary>
@@ -133,8 +132,8 @@ namespace ClientServerLibrary
             if (clientModel == null)
                 return;
 
-            if(participantClientList.ContainsKey(clientModel.ID))
-                participantClientList.Remove(clientModel.ID);
+            if(ConnectedClientModelList.ContainsKey(clientModel.ID))
+                ConnectedClientModelList.Remove(clientModel.ID);
         }
 
 
@@ -147,11 +146,11 @@ namespace ClientServerLibrary
         /// <summary>
         /// A function for shutting down the server.
         /// </summary>
-        public void ServerShutdown()
+        public virtual void Shutdown()
         {
             //// Shutdown and end connection         
             ListenerSocket.Stop();
-            Console.WriteLine(" >> " + "exit");
+            Console.WriteLine(" >> Server " + ID + " is shutting down...");
             Console.ReadLine();
         }
 
@@ -203,9 +202,15 @@ namespace ClientServerLibrary
             Console.WriteLine("- Update thread for server " + ID + " created");
             while (!ShouldShutdown)
             {
-                Console.WriteLine("Updating server " + ID);
-                this.Update();
-                Thread.Sleep(2000);
+                // If we have clients currently connected, check for updates
+                if(ConnectedClientModelList.Count > 0)
+                {
+                    Console.WriteLine("Updating server " + ID);
+                    this.Update();
+                }
+
+                // Cause the the update thread to sleep for a specified duration
+                Thread.Sleep(ServerSettings.ServerUpdatePulseDelay);
 
             }
 

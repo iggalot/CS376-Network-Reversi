@@ -412,21 +412,21 @@ namespace Reversi.Models
             return null;
         }
 
-        /// <summary>
-        /// Make a list of the current player sockets for the game.
-        /// </summary>
-        /// <returns></returns>
-        public List<TcpClient> GetPlayersSocketList()
-        {
-            List<TcpClient> list = new List<TcpClient>();
+        ///// <summary>
+        ///// Make a list of the current player sockets for the game.
+        ///// </summary>
+        ///// <returns></returns>
+        //public List<TcpClient> GetPlayersSocketList()
+        //{
+        //    List<TcpClient> list = new List<TcpClient>();
 
-            foreach(PlayerModel item in CurrentPlayersList)
-            {
-                list.Add(item.Socket);
-            }
+        //    foreach(PlayerModel item in CurrentPlayersList)
+        //    {
+        //        list.Add(item.Socket);
+        //    }
 
-            return list;
-        }
+        //    return list;
+        //}
         #endregion
     }
 }

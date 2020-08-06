@@ -2,13 +2,12 @@
 using Reversi.Models;
 using Settings;
 using System;
-using System.Diagnostics;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace Models.ReversiClient
 {
-    public class ReversiClientModel
+    [Serializable]
+    public class ReversiClientModel : ClientModel
     {
         #region Public  Properties
         /// <summary>
@@ -22,85 +21,43 @@ namespace Models.ReversiClient
         public PlayerModel ClientPlayer { get; set; }
 
         /// <summary>
-        /// Flag to indicate if the client should shutdown
-        /// </summary>
-        public bool ClientShouldShutdown = false;
-
-        /// <summary>
         /// Stores the object data for the last move sent to the server.
         /// </summary>
         public GameMoveModel LastMove { get; set; }
 
-        /// <summary>
-        /// Returns the socket connection to the game server
-        /// </summary>
-        public TcpClient ServerSocket { get; private set; }
 
-        /// <summary>
-        /// The listener thread for this client
-        /// </summary>
-        public Thread ListenThread { get; set; }
-
-        /// <summary>
-        /// The main application thread for this client
-        /// </summary>
-        public Thread MainThread { get; set; }
-        /// <summary>
-        /// Stores the process id for this client.
-        /// </summary>
-        public Process ReversiClientProcess = null;
         #endregion
 
         #region Constructor
+        /// <summary>
+        /// A default constructor
+        /// </summary>
+        public ReversiClientModel() : base(null, null) { }
 
-        public ReversiClientModel()
+        /// <summary>
+        /// The more formal connected client model structor
+        /// </summary>
+        /// <param name="clientSocket"></param>
+        /// <param name="listenerSocket"></param>
+        public ReversiClientModel(TcpClient clientSocket, TcpListener listenerSocket) : base(clientSocket, listenerSocket)
         {
-            // Store the client process
-            ReversiClientProcess = Process.GetCurrentProcess();
-            MainThread = Thread.CurrentThread;
+            Game = null;
+            LastMove = null;
+            ClientPlayer = new PlayerModel();
+        }
+
+        public ReversiClientModel(ClientModel clientModel, string name)
+        {
+            Game = null;
+            LastMove = null;
+            ClientPlayer = new PlayerModel(clientModel.ID, Players.UNDEFINED, name);
         }
 
         #endregion
 
         #region Public Methods
 
-        /// <summary>
-        /// Function to establish a connection between this client and the game server
-        /// </summary>
-        /// <param name="status">Status message of the connection attempt</param>
-        /// <returns></returns>
-        public bool MakeConnection(out string status)
-        {
-            NetworkStream serverStream;
 
-            // Otherwise try to make the connection
-            try
-            {
-                // save the socket once the connection is made
-                ServerSocket = ClientModel.Connect(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
-                serverStream = ServerSocket.GetStream();
-            }
-            catch (ArgumentNullException excep)
-            {
-                status = "ArgumentNullException: {0}";
-                Console.WriteLine(status, excep);
-                return false;
-            }
-            catch (SocketException excep)
-            {
-                status = "SocketException: {0}"; 
-                Console.WriteLine(status, excep);
-                return false;
-            } catch
-            {
-                status = "Unable to connect to socket..";
-                Console.WriteLine(status);
-                return false;
-            }
-
-            status = "Connected to server...";
-            return true;
-        }
         #endregion
 
     }

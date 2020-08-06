@@ -28,6 +28,11 @@ namespace ClientServerLibrary
         /// </summary>
         [NonSerialized()] public TcpListener ListenerSocket = null;
 
+        /// <summary>
+        /// Tells the server / client it should shutdown
+        /// </summary>
+        public bool ShouldShutdown { get; set; } = false;
+
         public int NextID() 
         {
             nextId++;
@@ -48,19 +53,25 @@ namespace ClientServerLibrary
 
         #region IConnectionHandler Implementation
 
-        public virtual void AcceptConnection(ClientServerInfoModel model)
+        public virtual void AcceptConnection(ClientModel model)
         {
             throw new System.NotImplementedException();
         }
 
-        public virtual void RefuseConnection(ClientServerInfoModel model)
+        public virtual void RefuseConnection(ClientModel model)
         {
             throw new System.NotImplementedException();
         }
 
-        public virtual void MakeConnection()
+        /// <summary>
+        /// Connects our client to a TcpIp socket
+        /// </summary>
+        /// <param name="v">Address to connect to</param>
+        /// <param name="port">Port number to connect to</param>
+        /// <returns></returns>
+        public TcpClient MakeConnection(string v, Int32 port)
         {
-            throw new System.NotImplementedException();
+            return new TcpClient(v, port);
         }
 
         public virtual void CloseConnection()
@@ -73,7 +84,7 @@ namespace ClientServerLibrary
             throw new System.NotImplementedException();
         }
 
-        public virtual void AcceptOrRefuseConnection(ClientServerInfoModel model, out ConnectionStatusTypes status)
+        public virtual void AcceptOrRefuseConnection(ClientModel model, out ConnectionStatusTypes status)
         {
             throw new System.NotImplementedException();
         }

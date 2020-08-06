@@ -6,12 +6,12 @@ namespace ClientServerLibrary
 
     public interface IConnectionHandler
     {
-        void AcceptConnection(ClientServerInfoModel client);
-        void RefuseConnection(ClientServerInfoModel client);
+        void AcceptConnection(ClientModel client);
+        void RefuseConnection(ClientModel client);
 
-        void AcceptOrRefuseConnection(ClientServerInfoModel client, out ConnectionStatusTypes status);
+        void AcceptOrRefuseConnection(ClientModel client, out ConnectionStatusTypes status);
 
-        void MakeConnection();
+        TcpClient MakeConnection(string v, Int32 port);
         void CloseConnection();
         TcpClient ListenForConnections();
 
