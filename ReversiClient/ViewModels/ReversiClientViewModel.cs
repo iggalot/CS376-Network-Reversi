@@ -1,5 +1,4 @@
 ﻿using ClientServerLibrary;
-using Models.ReversiClient;
 using Reversi.Models;
 using Reversi.ViewModels;
 using System.Net.Sockets;

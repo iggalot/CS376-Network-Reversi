@@ -79,7 +79,7 @@ namespace ReversiServer
             // TODO:  Create game model
         }
 
-        public override void AcceptConnection(ClientModel model)
+        public ReversiClientModel AcceptConnection(ReversiClientModel model)
         {
             //    Player newplayer = DataTransmission.DeserializeData<Player>(client);
 
@@ -115,6 +115,7 @@ namespace ReversiServer
             //        // Add the player to the waiting room
             //        WaitingRoom.Add(newplayer);
             //    }
+            return model;
         }
 
         /// <summary>
@@ -122,7 +123,7 @@ namespace ReversiServer
         /// Returns an UNDEFINED player packet
         /// </summary>
         /// <param name="client">The client socket</param>
-        public override void RefuseConnection(ClientModel model)
+        public ReversiClientModel RefuseConnection(ReversiClientModel model)
         {
             //PlayerModel newplayer = DataTransmission.DeserializeData<PlayerModel>(client);
 
@@ -152,6 +153,7 @@ namespace ReversiServer
             //}
 
             //client.Close();                   // close the socket
+            return model;
         }
 
         /// <summary>
@@ -159,7 +161,7 @@ namespace ReversiServer
         /// </summary>
         /// <param name="client">The client socket</param>
         /// <param name="packet">The packet of data created when the connection was first made in ListenForConnections</param>
-        public override void AcceptOrRefuseConnection(ClientModel model, out ConnectionStatusTypes status)
+        public ReversiClientModel AcceptOrRefuseConnection(ReversiClientModel model, out ConnectionStatusTypes status)
         {
             status = ConnectionStatusTypes.STATUS_CONNECTION_UNKNOWN;
             //int timeoutCount = 0;
@@ -185,6 +187,7 @@ namespace ReversiServer
             //{
             //    AcceptConnection(client);
             //}
+            return model;
         }
 
 

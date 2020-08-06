@@ -41,8 +41,14 @@ namespace ClientServerLibrary
             if (clientModel == null)
                 return;
 
-            if (ConnectedClientModelList.ContainsKey(clientModel.ID) == false)
-                ConnectedClientModelList.Add(clientModel.ID, clientModel);
+            if (ConnectedClientModelList.ContainsKey(clientModel.ID) == true)
+            {
+                Console.WriteLine("This client ID already exists.");
+                return;
+            }
+                
+            ConnectedClientModelList.Add(clientModel.ID, clientModel);
+
         }
         /// <summary>
         /// Adds a server to the server list
@@ -164,7 +170,22 @@ namespace ClientServerLibrary
             base.Shutdown();
         }
 
+        /// <summary>
+        /// Display the connected clients information
+        /// </summary>
+        /// <returns></returns>
+        public string ListConnectedClients()
+        {
+            string str = string.Empty;
+            str += " ---------------------------------------------------\n";
+            foreach(KeyValuePair<int,ClientModel> item in ConnectedClientModelList)
+            {
+                str += item.Key.ToString() + " --- " + item.Value.ListInfo() + "\n";
+            }
+            str += " ---------------------------------------------------\n";
 
+            return str;
+        }
         #endregion
 
         #region IConnectionHandler Interface Implementation
@@ -176,48 +197,6 @@ namespace ClientServerLibrary
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Accepts a connection request
-        /// </summary>
-        /// <param name="new_model"></param>
-        public override void AcceptConnection(ClientModel new_model)
-        {
-
-            // And immediately return it without updating the ID
-            new_model.CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_REFUSED;
-
-            try
-            {
-                DataTransmission.SerializeData<ClientModel>((ClientModel)new_model, new_model.ConnectionSocket);
-            }
-            catch
-            {
-                throw new SocketException();
-            }
-
-            Console.WriteLine("... GameServer: Connection accepted for client #" + new_model.ID);
-        }
-
-        /// <summary>
-        /// Refuse a connection and close the socket
-        /// </summary>
-        /// <param name="new_model"></param>
-        public override void RefuseConnection(ClientModel new_model)
-        {
-            // And immediately return it without updating the ID
-            new_model.CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_REFUSED;
-
-            try
-            {
-                DataTransmission.SerializeData<ClientModel>(new_model, new_model.ConnectionSocket);
-            }
-            catch
-            {
-                throw new SocketException();
-            }
-
-            new_model.ConnectionSocket.Close();
-        }
 
         /// <summary>
         /// Listen for Connections once the server has started
@@ -236,52 +215,6 @@ namespace ClientServerLibrary
             return ConnectionSocket;
         }
 
-        /// <summary>
-        /// Determines whether a connection should be accepted or refused
-        /// </summary>
-        /// <param name="model">The model to accept or refuse</param>
-        /// <param name="status">The returned status of this connection request</param>
-        public override void AcceptOrRefuseConnection(ClientModel model, out ConnectionStatusTypes status)
-        {
-            ClientModel client = (ClientModel)model;
-
-            if ((model == null) || (client.ConnectionSocket == null))
-            {
-                status = ConnectionStatusTypes.STATUS_CONNECTION_ERROR;
-                return;
-            }
-
-            int timeoutCount = 0;
-            while ((timeoutCount > ServerSettings.MaxServerTimeoutCount) || (!client.ConnectionSocket.GetStream().DataAvailable))
-            {
-                Thread.Sleep(200);
-                timeoutCount++;
-            }
-
-            if (timeoutCount > ServerSettings.MaxServerTimeoutCount)
-            {
-                Console.WriteLine("Connection has timedout");
-                status = ConnectionStatusTypes.STATUS_CONNECTION_ERROR;
-                return;
-            }
-
-            // Deserialize the incoming data in the socket
-            ClientModel new_model = DataTransmission.DeserializeData<ClientModel>(client.ConnectionSocket);
-            new_model.ConnectionSocket = model.ConnectionSocket;  // copies the socket of the current connection to this new_model
-
-            // Send a connection declined message for too many connections
-            if (ConnectedClientModelList.Count > ServerSettings.MaxServerConnections)
-            {
-                RefuseConnection(new_model);
-                status = ConnectionStatusTypes.STATUS_CONNECTION_REFUSED;
-            }
-            // Otherwise accept the connection
-            else
-            {
-                AcceptConnection(new_model);
-                status = ConnectionStatusTypes.STATUS_CONNECTION_ACCEPTED;
-            }
-        }
 
         #endregion
     }

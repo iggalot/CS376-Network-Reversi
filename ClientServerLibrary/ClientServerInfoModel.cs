@@ -16,7 +16,7 @@ namespace ClientServerLibrary
         /// <summary>
         /// The id for this client
         /// </summary>
-        public int ID { get; private set; }
+        public int ID { get; set; }
 
         /// <summary>
         /// The connection this object has to its server
@@ -39,9 +39,30 @@ namespace ClientServerLibrary
             return nextId;
         }
 
+        public string ListInfo()
+        {
+            return (ID + " : " + CurrentStatus + " : " + ShouldShutdown);
+        }
 
-        
+
+
         #region Constructor
+        /// <summary>
+        /// Default empty constructor
+        /// </summary>
+        public ClientServerInfoModel()
+        {
+            ID = -1;
+            ConnectionSocket = null;
+            ListenerSocket = null;
+            CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_UNKNOWN;
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="listener"></param>
         public ClientServerInfoModel(TcpClient connection, TcpListener listener)
         {
             ID = NextID();
@@ -52,16 +73,6 @@ namespace ClientServerLibrary
         #endregion
 
         #region IConnectionHandler Implementation
-
-        public virtual void AcceptConnection(ClientModel model)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public virtual void RefuseConnection(ClientModel model)
-        {
-            throw new System.NotImplementedException();
-        }
 
         /// <summary>
         /// Connects our client to a TcpIp socket
@@ -84,10 +95,6 @@ namespace ClientServerLibrary
             throw new System.NotImplementedException();
         }
 
-        public virtual void AcceptOrRefuseConnection(ClientModel model, out ConnectionStatusTypes status)
-        {
-            throw new System.NotImplementedException();
-        }
 
         #endregion
 

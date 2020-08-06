@@ -192,9 +192,18 @@ namespace ClientServerLibrary
 
             NetworkStream stream = client.GetStream();
 
+            // Serialize the data
             IFormatter formatter = new BinaryFormatter();
-            formatter.Serialize(stream, data);
-            //stream.Close();
+            try
+            {
+                formatter.Serialize(stream, data);
+            } catch (SerializationException e)
+            {
+                Console.WriteLine("Failed to serialize. Reason: " + e.Message);
+                throw;
+            }
+            // And send it across the stream
+
         }
 
         /// <summary>
@@ -205,14 +214,24 @@ namespace ClientServerLibrary
         /// <returns></returns>
         public static T DeserializeData<T>(TcpClient client) where T: class
         {
-            if(!client.Connected)
-            {
-                throw new SocketException();
-            }
             NetworkStream stream = client.GetStream();
 
-            IFormatter formatter = new BinaryFormatter();
-            T objnew = (T)formatter.Deserialize(stream);
+            // Read from the stream
+
+            T objnew;
+
+            // Then deserialize the data stream
+            try
+            {
+                IFormatter formatter = new BinaryFormatter();
+                objnew = (T)formatter.Deserialize(stream);
+            } catch (SerializationException e) {
+                Console.WriteLine("Failed to deserialize. Reason: " + e.Message);
+                throw;
+            }
+
+            stream.Flush();
+
             return objnew;
         }
 

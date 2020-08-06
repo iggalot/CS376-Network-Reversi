@@ -51,6 +51,20 @@ namespace ClientServerLibrary
             ClientProcess = Process.GetCurrentProcess();
             ClientMainThread = Thread.CurrentThread;
         }
+
+        /// <summary>
+        /// A basic copy constructor of a clientModel
+        /// </summary>
+        /// <param name="clientModel"></param>
+        public ClientModel(ClientModel clientModel) : base()
+        {
+            ClientProcess = clientModel.ClientProcess;
+            ClientMainThread = clientModel.ClientMainThread;
+            ID = clientModel.ID;
+            CurrentStatus = clientModel.CurrentStatus;
+            ShouldShutdown = clientModel.ShouldShutdown;
+
+        }
         #endregion
 
         #region Public Methods
@@ -95,34 +109,6 @@ namespace ClientServerLibrary
         }
         #endregion
 
-
-
-        #region IConnectionHandler Interface Implementation
-        public override void AcceptConnection(ClientModel model)
-        {
-            // Do nothing since a client shouldnt have this functionality
-        }
-        public override void CloseConnection()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override TcpClient ListenForConnections()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void RefuseConnection(ClientModel model)
-        {
-            // Do nothing since a client shouldnt have this functionality
-        }
-
-        public override void AcceptOrRefuseConnection(ClientModel model, out ConnectionStatusTypes status)
-        {
-            // Do nothing since a client shouldnt have this functionality
-            status = ConnectionStatusTypes.STATUS_CONNECTION_INCAPABLE;
-        }
-        #endregion
 
     }
 }

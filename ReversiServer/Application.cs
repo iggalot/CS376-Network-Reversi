@@ -1,4 +1,5 @@
 ﻿using ClientServerLibrary;
+using Reversi.Models;
 using Settings;
 using System;
 using System.Net.Sockets;
@@ -14,7 +15,7 @@ namespace ReversiServer
         /// <summary>
         /// The primary server manager for this application
         /// </summary>
-        public static ServerManagerModel Manager { get; set; }
+        public static ReversiServerManagerModel Manager { get; set; }
         static void Main()
         {
             Console.WriteLine("Launching Application");
@@ -28,27 +29,30 @@ namespace ReversiServer
             // The server managers HandleServerThread will assign them to appropriate game and/or chat servers.
             while (!Manager.ShouldShutdown)
             {
+                // Listen for connections
                 TcpClient newTcpClientSocket = Manager.ListenForConnections();
-                ClientModel newTcpClientModel = new ClientModel(newTcpClientSocket, null);
+                ReversiClientModel newTcpClientModel = new ReversiClientModel(newTcpClientSocket, null);
 
                 // Determine what we should do with the connection and send the appropriate response
                 ConnectionStatusTypes status;
-                Manager.AcceptOrRefuseConnection(newTcpClientModel, out status);
+                newTcpClientModel = Manager.AcceptOrRefuseConnection(newTcpClientModel, out status);
 
                 // If the connection was accepted then add the model to the connected models list
-                if(status==ConnectionStatusTypes.STATUS_CONNECTION_ACCEPTED)
+                if (status == ConnectionStatusTypes.STATUS_CONNECTION_ACCEPTED)
                 {
                     Manager.AddClientModelToConnectionList(newTcpClientModel);
                     Console.WriteLine("Server manager #" + Manager.ID + " has accepted client " + newTcpClientModel.ID + ".");
-                } else if (status==ConnectionStatusTypes.STATUS_CONNECTION_REFUSED)
+                }
+                else if (status == ConnectionStatusTypes.STATUS_CONNECTION_REFUSED)
                 {
                     Console.WriteLine("Server manager #" + Manager.ID + " has refused client" + newTcpClientModel.ID + ".");
                 }
 
-                // TODO:  Why is client being closed at this point?
+                // List our connected clients for testing.
+                Console.WriteLine(Manager.ListConnectedClients());
 
-                Console.WriteLine ("Connections to application: " + Manager.ConnectedClientModelList.Count);
-                Console.WriteLine(" -- New client model created with ID: " + newTcpClientModel.ID);
+                // Dispose of the temporary client
+                newTcpClientModel = null;
             }
 
 

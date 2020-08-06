@@ -1,10 +1,8 @@
 ﻿using ClientServerLibrary;
-using Reversi.Models;
-using Settings;
 using System;
 using System.Net.Sockets;
 
-namespace Models.ReversiClient
+namespace Reversi.Models
 {
     [Serializable]
     public class ReversiClientModel : ClientModel
@@ -46,11 +44,13 @@ namespace Models.ReversiClient
             ClientPlayer = new PlayerModel();
         }
 
-        public ReversiClientModel(ClientModel clientModel, string name)
+        public ReversiClientModel(ClientModel clientModel, string name) : base(clientModel)
         {
             Game = null;
             LastMove = null;
             ClientPlayer = new PlayerModel(clientModel.ID, Players.UNDEFINED, name);
+            this.ClientProcess = clientModel.ClientProcess;
+            this.ClientMainThread = clientModel.ClientMainThread;
         }
 
         #endregion

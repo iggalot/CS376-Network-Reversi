@@ -1,5 +1,4 @@
 ﻿using ClientServerLibrary;
-using Models.ReversiClient;
 using Reversi.Models;
 using ReversiClient.ViewModels;
 using Settings;
@@ -97,24 +96,25 @@ namespace ReversiClient
             }
 
             // If our socket is not connected, or we have lost link... 
-            if (!ThisClientVM.Model.ConnectionSocket.Connected)
+            if (DataTransmission.SocketConnected(ThisClientVM.Model.ConnectionSocket.Client) == false)
             {
                 ThisClientVM.ConnectionStatusString = "Error connecting to socket.";
                 return;
             }
 
             // Create our player object and send to the server
-            ClientModel model = new ClientModel(ThisClientVM.Model.ConnectionSocket, null);
+            ReversiClientModel model = new ReversiClientModel(ThisClientVM.Model.ConnectionSocket, null);
+            model.CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_ACCEPTED;
 
             //PlayerModel newPlayer = new PlayerModel(-1, Players.UNDEFINED, name, ThisClientVM.Model.ServerSocket);
-            ClientModel.SerializeData<ClientModel>(model, ThisClientVM.Model.ConnectionSocket);
+            ReversiClientModel.SerializeData<ReversiClientModel>(model, ThisClientVM.Model.ConnectionSocket);
 
             // Retrieve the data from the server
-            model = DataTransmission.DeserializeData<ClientModel>(ThisClientVM.Model.ConnectionSocket);
-            model.ConnectionSocket = ThisClientVM.Model.ConnectionSocket; // Must readd the Connection socket as a parameter on this Client Model
+            model = DataTransmission.DeserializeData<ReversiClientModel>(ThisClientVM.Model.ConnectionSocket);
+            model.ConnectionSocket = ThisClientVM.Model.ConnectionSocket; // Must readd the Connection socket as a parameter on this Client Model since it isnt serialized
 
             // Create a ReversiClientModel from the received client model
-            // This sets the PlayerID that was assigned
+            // This sets the PlayerID that was assigned to the client model
             ReversiClientModel temp = new ReversiClientModel(model, name);
 
             // TODO:  Create the player object from the client model object
