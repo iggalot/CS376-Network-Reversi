@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -19,6 +21,17 @@ namespace ClientServerLibrary
 
         #region Public Properties
 
+        public Dictionary<int, ServerModel> ServerList 
+        {
+            get => serverList; 
+            set
+            {
+                if (value == null)
+                    return;
+
+                serverList = value;
+            }
+        }
 
         #endregion
 
@@ -54,7 +67,7 @@ namespace ClientServerLibrary
         /// Adds a server to the server list
         /// </summary>
         /// <param name="server"></param>
-        public void AddServer(ServerModel server)
+        public void AddServerToManager(ServerModel server)
         {
             if (server == null)
                 return;
@@ -72,13 +85,16 @@ namespace ClientServerLibrary
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ServerModel GetServerByID(int id)
+        public ServerModel GetServerFromListByID(int id)
         {
             ServerModel model;
             if(serverList.TryGetValue(id, out model))
                 return model;
             return null;
         }
+
+        public virtual ServerModel GetAvailableServer(ServerTypes server_type) { return null; }
+
 
         /// <summary>
         /// Configure any options for the server manager here
@@ -111,7 +127,8 @@ namespace ClientServerLibrary
         /// </summary>
         public override void HandleServerThread()
         {
-            base.HandleServerThread();
+            Console.WriteLine("(ServerManagerModel:) HandleServerThread");
+            //base.HandleServerThread();
 
         }
 
@@ -124,19 +141,21 @@ namespace ClientServerLibrary
         /// </summary>
         public override void StartServer()
         {
+            Console.WriteLine(" >> (ServerManagerModel:) Server Manager started at " + Address + " on port " + Port.ToString());
             base.StartServer();
-
-            Console.WriteLine(" >> Server Manager started at " + Address + " on port " + Port.ToString());
-       }
+        }
 
         #endregion
 
         #region Private Methods
 
 
-        private void RemoveClientFromConnectedList(ClientModel clientModel)
+        public void RemoveClientModelFromConnectedList(ClientModel clientModel)
         {
-            throw new NotImplementedException();
+            if (clientModel == null)
+                return;
+
+            ConnectedClientModelList.Remove(clientModel.ID);
         }
 
 
@@ -169,6 +188,7 @@ namespace ClientServerLibrary
             // And then shuts down itself.
             base.Shutdown();
         }
+
 
         /// <summary>
         /// Display the connected clients information

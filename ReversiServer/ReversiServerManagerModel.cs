@@ -2,6 +2,8 @@
 using Reversi.Models;
 using Settings;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -117,7 +119,80 @@ namespace ReversiServer
         /// </summary>
         public override void HandleServerThread()
         {
-            // Check for enough clients to play the game
+            Console.WriteLine("Server " + ID + ":  Starting HandleServerThread");
+
+            while(!ShouldShutdown)
+            {
+                if (ConnectedClientModelList.Count == 0)
+                {
+                    Console.WriteLine("No clients on ReversiServerManager " + ID);
+                    Thread.Sleep(ServerSettings.ServerUpdatePulseDelay);
+                    continue;
+                } else
+                {
+                    // Check for enough clients to place on a server
+                    Console.WriteLine("RSM currently has " + ConnectedClientModelList + " connected to it...");
+                }
+
+                // Get the oldest client
+                ReversiClientModel oldest_client_model = (ReversiClientModel)GetOldestClientModelFromConnectedList();
+                Console.WriteLine("-- Oldest available client is: " + oldest_client_model.ID);
+
+                // Find an available game server or create a new one
+                ReversiGameServerModel availableServer = (ReversiGameServerModel)GetAvailableServer(ServerTypes.SERVER_GAMESERVER);
+                Console.WriteLine("-- Available server is: " + availableServer.ID);
+
+                // Move the client model to a reversi game server....
+                availableServer.AddClientModelToServer(oldest_client_model);
+                Console.WriteLine("-- Adding client " + oldest_client_model.ID + " to game server " + availableServer.ID);
+
+                // And remove it from the connected list
+                RemoveClientModelFromConnectedList(oldest_client_model);
+                Console.WriteLine("-- Client removed from ReversiServerManager list");
+
+            }
         }
+
+        /// <summary>
+        /// Function that finds a server with space for additional clients to be added.
+        /// </summary>
+        /// <param name="server_type">The type of server to search for</param>
+        /// <returns></returns>
+        public override ServerModel GetAvailableServer(ServerTypes server_type)
+        {
+            // Is there a server with room on it?
+            bool available = false;
+            int available_server_index = -1;
+            foreach (KeyValuePair<int, ServerModel> server in ServerList)
+            {
+                if (server.Value.ConnectedClientModelList.Count < ReversiSettings.MaxReversiServerConnections - 1)
+                {
+                    // Make sure it's a game server
+                    if (server.Value.Type == server_type)
+                    {
+                        available = true;
+                        available_server_index = server.Key;
+                        break;
+                    }
+                }
+            }
+
+            // If no servers are available, create a new server;
+            ServerModel new_server;
+            if (!available)
+            {
+                // TODO:  Will this crash if there is alreadt a reversi game server running?
+                new_server = new ReversiGameServerModel(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
+                AddServerToManager(new_server);
+            }
+            else
+            {
+                // Retrieve the server by its index value
+                new_server = GetServerFromListByID(available_server_index);
+            }
+
+            return new_server;
+        }
+
     }
 }

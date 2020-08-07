@@ -19,9 +19,6 @@ namespace Settings
         /// </summary>
         public static Int32 Port_ChatServer { get; set; } = 1235;
 
-        /// <summary>
-        /// The number of players in allowed in a game.
-        /// </summary>
-        public const int PlayersPerGame = 2;
+
     }
 }

@@ -320,7 +320,7 @@ namespace ReversiServer
         /// </summary>
         private static void MovePlayersFromWaitingToStaging()
         {
-            for(int i = GlobalSettings.PlayersPerGame - 1; i>=0; i--)
+            for(int i = ReversiSettings.ReversiPlayersPerGame - 1; i>=0; i--)
             {
                 StagingArea.Add(WaitingRoom[i]);
                 WaitingRoom.RemoveAt(i);
@@ -332,7 +332,7 @@ namespace ReversiServer
         /// </summary>
         private static void MovePlayersFromStagingToGame()
         {
-            for (int i = GlobalSettings.PlayersPerGame - 1; i >= 0; i--)
+            for (int i = ReversiSettings.ReversiPlayersPerGame - 1; i >= 0; i--)
             {
                 StagingArea.RemoveAt(i);
             }
@@ -445,6 +445,28 @@ namespace ReversiServer
         //    }
 
         //    return temp;
+        //}
+
+        //private void RunUpdateThread()
+        //{
+        //    Console.WriteLine("- Update thread for server " + ID + " created");
+        //    while (!ShouldShutdown)
+        //    {
+        //        // If we have clients currently connected, check for updates
+        //        if (ConnectedClientModelList.Count > 0)
+        //        {
+        //            Console.WriteLine("Updating server " + ID);
+        //            this.Update();
+        //        }
+
+        //        // Cause the the update thread to sleep for a specified duration
+        //        Thread.Sleep(ServerSettings.ServerUpdatePulseDelay);
+
+        //    }
+
+        //    // End the running thread
+
+        //    UpdateThread.Join();
         //}
 
         #endregion

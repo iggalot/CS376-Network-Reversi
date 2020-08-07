@@ -85,7 +85,10 @@ namespace ClientServerLibrary
         /// <summary>
         /// The thread callback routine for this server
         /// </summary>
-        public virtual void HandleServerThread() { }
+        public virtual void HandleServerThread() 
+        {
+            Console.WriteLine("(ServerModel:) HandleServerThread");
+        }
 
         /// <summary>
         /// Start the server and start listening for connections
@@ -93,7 +96,14 @@ namespace ClientServerLibrary
         public virtual void StartServer() 
         {
             IsRunning = true;
-            Console.WriteLine("------ Starting server #" + ID.ToString());
+            Console.WriteLine("------ (ServerModel:) Starting server #" + ID.ToString());
+
+            Console.WriteLine("ServerModel: Starting the main HandleServerThread()");
+
+            Thread handleThread = new Thread(HandleServerThread);
+            handleThread.Start();
+
+
         }
         public virtual void Update()
         {
@@ -135,6 +145,33 @@ namespace ClientServerLibrary
             if(ConnectedClientModelList.ContainsKey(clientModel.ID))
                 ConnectedClientModelList.Remove(clientModel.ID);
         }
+
+        /// <summary>
+        /// Gets the oldest client model (lowest ID) from the list.
+        /// </summary>
+        /// <returns></returns>
+        public ClientModel GetOldestClientModelFromConnectedList()
+        {
+            // Create a list of the keys
+            List<int> list = new List<int>(ConnectedClientModelList.Keys);
+
+            // Check that there is at least on item in the list
+            if (list.Count == 0)
+                return null;
+
+            // Sort the list in ascending order
+            list.Sort();
+
+            // Retrieve the first (oldest) item in the list by smallest key value
+            int oldest_index = list[0];
+
+            // Now retrieve the model from the dictionary
+            ClientModel result;
+            ConnectedClientModelList.TryGetValue(oldest_index, out result);
+
+            return result;
+        }
+
 
 
 
@@ -197,7 +234,7 @@ namespace ClientServerLibrary
         //    }
         //}
 
-        private void RunUpdateThread()
+        public virtual void RunUpdateThread()
         {
             Console.WriteLine("- Update thread for server " + ID + " created");
             while (!ShouldShutdown)

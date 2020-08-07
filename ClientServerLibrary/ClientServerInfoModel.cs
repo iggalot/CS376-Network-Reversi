@@ -14,6 +14,11 @@ namespace ClientServerLibrary
         public ConnectionStatusTypes CurrentStatus { get; set; }
 
         /// <summary>
+        /// Thhe time at which this client was created.
+        /// </summary>
+        public DateTime TimeCreated { get; set; }
+
+        /// <summary>
         /// The id for this client
         /// </summary>
         public int ID { get; set; }
@@ -56,6 +61,7 @@ namespace ClientServerLibrary
             ConnectionSocket = null;
             ListenerSocket = null;
             CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_UNKNOWN;
+            TimeCreated = DateTime.Now;
         }
 
         /// <summary>
@@ -68,7 +74,8 @@ namespace ClientServerLibrary
             ID = NextID();
             ConnectionSocket = connection;
             ListenerSocket = listener;
-            CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_UNKNOWN; 
+            CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_UNKNOWN;
+            TimeCreated = DateTime.Now;
         }
         #endregion
 
