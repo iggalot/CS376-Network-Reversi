@@ -1,8 +1,4 @@
-﻿using Reversi.Models;
-using ReversiClient.ViewModels;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Shapes;
+﻿using System.Windows.Controls;
 
 namespace ReversiClient.Views
 {

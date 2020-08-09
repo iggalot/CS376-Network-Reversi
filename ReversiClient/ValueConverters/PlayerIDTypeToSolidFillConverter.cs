@@ -1,6 +1,5 @@
 ﻿using Reversi.Models;
 using System;
-using System.Configuration;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -12,24 +11,18 @@ namespace ReversiClient.ValueConverters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             Players type = (Players)value;
-            SolidColorBrush brush;
 
             switch (type)
             {
-                case Players.UNDEFINED:
-                    brush = Brushes.Transparent;
-                    break;
-                case Players.PLAYER1:
-                    brush = Brushes.White;
-                    break;
-                case Players.PLAYER2:
-                    brush = Brushes.Black;
-                    break;
+                case Players.Undefined:
+                    return Brushes.Transparent;
+                case Players.Player1:
+                    return Brushes.White;
+                case Players.Player2:
+                    return Brushes.Black;
                 default:
-                    brush = Brushes.Transparent;
-                    break;
+                    return Brushes.Transparent;
             }
-            return brush;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

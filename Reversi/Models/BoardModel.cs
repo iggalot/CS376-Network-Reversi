@@ -48,8 +48,8 @@ namespace Reversi.Models
         /// <summary>
         /// Moves a piece from one square to another
         /// </summary>
-        /// <param name="from">Moving from...</param>
-        /// <param name="end"></param>
+        /// <param name="from">Moving from index...</param>
+        /// <param name="to">Moving to index...</param>
         public void MovePiece(int from, int to) {
             Squares[to].Piece = Squares[from].Piece;
             Squares[from].Piece = null;
@@ -59,7 +59,7 @@ namespace Reversi.Models
         /// Draws the gameboard and its pieces
         /// </summary>
         public string DrawGameboardString() {
-            string str = "";
+            string str = String.Empty;
             for (int i = 0; i < Rows; i++)
             {
                 for (int j = 0; j < Cols; j++)
@@ -74,21 +74,25 @@ namespace Reversi.Models
                     }
 
                     // Otherwise determine the owner of the piece
-                    switch(Squares[index].Piece.Owner.IDType)
+                    switch(Squares[index].Piece.Owner.IdType)
                     {
-                        case Players.PLAYER1:
+                        case Players.Player1:
                             {
                                 str += " 1 ";
                                 break;
                             }
-                        case Players.PLAYER2:
+                        case Players.Player2:
                             {
                                 str += " 2 ";
                                 break;
                             }
 
+                        case Players.Undefined:
+                            str += " Undefined ";
+                            break;
+
                         default:
-                            str += " ? ";
+                            str += " ERROR in Enum ";
                             break;
                     }
                 }
@@ -104,7 +108,7 @@ namespace Reversi.Models
         /// Unpackets a gameboard packet string and reinserts the new line characters for displaying
         /// /// Packet:  NumCols ### Board Info 
         /// </summary>
-        /// <param name="str">The gameboard string to unpacket</param>
+        /// <param name="gameboardPacketString">The gameboard string to unpacket</param>
         /// <returns></returns>
         public static string UnpackGameboardPacketString(string gameboardPacketString)
         {
@@ -163,14 +167,14 @@ namespace Reversi.Models
                     }
 
                     // Otherwise determine the owner of the piece
-                    switch (Squares[index].Piece.Owner.IDType)
+                    switch (Squares[index].Piece.Owner.IdType)
                     {
-                        case Players.PLAYER1:
+                        case Players.Player1:
                             {
                                 str += "1";
                                 break;
                             }
-                        case Players.PLAYER2:
+                        case Players.Player2:
                             {
                                 str += "2";
                                 break;
@@ -193,28 +197,28 @@ namespace Reversi.Models
         /// Returns an index on the gameboard based on a row or column offset
         /// </summary>
         /// <param name="index">The initial index</param>
-        /// <param name="r">The row offset</param>
-        /// <param name="c">The column offset</param>
+        /// <param name="rowOffset">The row offset</param>
+        /// <param name="colOffset">The column offset</param>
         /// <returns></returns>
-        public int GetIndexByOffsets(int index, int row_offset, int col_offset)
+        public int GetIndexByOffsets(int index, int rowOffset, int colOffset)
         {
             // determine current row and column from index
             int row = index / Cols;
             int col = index % Cols;
 
-            int newRow = row + row_offset;
-            int newcol = col + col_offset;
+            int newRow = row + rowOffset;
+            int newCol = col + colOffset;
 
             // If we are out of bounds on the rows
             if ((newRow < 0) || (newRow >= Rows))
                 return -1;
 
             // If we are out of bounds on the columns
-            if ((newcol < 0) || (newcol >= Cols))
+            if ((newCol < 0) || (newCol >= Cols))
                 return -1;
 
             // Otherwise, return the value;
-            return index + row_offset * Cols + col_offset;
+            return index + rowOffset * Cols + colOffset;
         }
 
         /// <summary>
@@ -304,8 +308,11 @@ namespace Reversi.Models
                 for (int j = 0; j < Cols; j++)
                 {
                     var index = i * Cols + j;
-                    var square = new SquareModel(index);
-                    square.Piece = null;   // no piece in the board originally
+                    var square = new SquareModel(index)
+                    {
+                        // no piece in the board originally
+                        Piece = null
+                    };
 
                     Squares[index] = square;
                 }                

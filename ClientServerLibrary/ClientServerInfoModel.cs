@@ -6,7 +6,7 @@ namespace ClientServerLibrary
     [Serializable]
     public class ClientServerInfoModel : DataTransmission, IConnectionHandler
     {
-        private static int nextId = 0;
+        private static int _nextId = 0;
         
         /// <summary>
         /// The current status for this model object
@@ -21,7 +21,7 @@ namespace ClientServerLibrary
         /// <summary>
         /// The id for this client
         /// </summary>
-        public int ID { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// The connection this object has to its server
@@ -38,15 +38,15 @@ namespace ClientServerLibrary
         /// </summary>
         public bool ShouldShutdown { get; set; } = false;
 
-        public int NextID() 
+        public int NextId() 
         {
-            nextId++;
-            return nextId;
+            _nextId++;
+            return _nextId;
         }
 
         public string ListInfo()
         {
-            return (ID + " : " + CurrentStatus + " : " + ShouldShutdown);
+            return (Id + " : " + CurrentStatus + " : " + ShouldShutdown);
         }
 
 
@@ -57,10 +57,10 @@ namespace ClientServerLibrary
         /// </summary>
         public ClientServerInfoModel()
         {
-            ID = -1;
+            Id = -1;
             ConnectionSocket = null;
             ListenerSocket = null;
-            CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_UNKNOWN;
+            CurrentStatus = ConnectionStatusTypes.StatusConnectionUnknown;
             TimeCreated = DateTime.Now;
         }
 
@@ -71,10 +71,10 @@ namespace ClientServerLibrary
         /// <param name="listener"></param>
         public ClientServerInfoModel(TcpClient connection, TcpListener listener)
         {
-            ID = NextID();
+            Id = NextId();
             ConnectionSocket = connection;
             ListenerSocket = listener;
-            CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_UNKNOWN;
+            CurrentStatus = ConnectionStatusTypes.StatusConnectionUnknown;
             TimeCreated = DateTime.Now;
         }
         #endregion

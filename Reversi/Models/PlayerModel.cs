@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Net.Sockets;
 
 namespace Reversi.Models
 {
     /// <summary>
     /// A class that defines the basic game player
     /// </summary>
-    
+
     [Serializable]
     public class PlayerModel
     {
@@ -15,12 +14,12 @@ namespace Reversi.Models
         /// <summary>
         /// 
         /// </summary>
-        public int PlayerID { get; set; } = -1;
+        public int PlayerId { get; set; } = -1;
 
         /// <summary>
         /// The IDType of our player as a player type
         /// </summary>
-        public Players IDType { get; set; }
+        public Players IdType { get; set; }
 
 
         /// <summary>
@@ -35,8 +34,8 @@ namespace Reversi.Models
         /// </summary>
         public PlayerModel()
         {
-            PlayerID = -1;
-            IDType = Players.UNDEFINED;
+            PlayerId = -1;
+            IdType = Players.Undefined;
             Name = "Some bloke...";
         }
 
@@ -45,11 +44,11 @@ namespace Reversi.Models
         /// </summary>
         /// <param name="id">The player number</param>
         /// <param name="name">The name of the player</param>
-        /// <param name="socket">The associated socket for this player</param>
-        public PlayerModel(int num, Players id_type, string name)
+        /// <param name="idType">The player type for this player</param>
+        public PlayerModel(int id, Players idType, string name)
         {
-            PlayerID = num;
-            IDType = id_type;
+            PlayerId = id;
+            IdType = idType;
             Name = name;
         }
     }

@@ -43,15 +43,12 @@ namespace Reversi.ViewModels
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game"></param>
+        /// <param name="game">The game model</param>
         public ReversiGameVM(ReversiGameModel game)
         {
             Model = game;
 
-            if (game == null)
-                return;
-
-            if (game.Gameboard == null)
+            if (game?.Gameboard == null)
                 return;
 
             GameboardVM = new ReversiGameboardVM(game.Gameboard);

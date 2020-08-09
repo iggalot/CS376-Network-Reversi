@@ -19,13 +19,13 @@ namespace ClientServerLibrary
         /// <summary>
         /// The list of threads associated with this server
         /// </summary>
-        private Dictionary<int, Thread> threadsList = new Dictionary<int, Thread>();
+        private Dictionary<int, Thread> _threadsList = new Dictionary<int, Thread>();
 
 
         /// <summary>
         /// The type of this server <see cref="ServerTypes"/>
         /// </summary>
-        private ServerTypes serverType { get; set; } = ServerTypes.SERVER_UNKNOWN;
+        private ServerTypes ServerType { get; set; } = ServerTypes.ServerUnknown;
 
 
 
@@ -66,16 +66,16 @@ namespace ClientServerLibrary
         /// <summary>
         /// The constructor for this server
         /// </summary>
-        /// <param name="server_type">The type of server</param>
+        /// <param name="serverType">The type of server</param>
         /// <param name="address">The address for this server</param>
         /// <param name="port">The port for this server</param>
-        public ServerModel(ServerTypes server_type, string address, Int32 port) : base(null, null)
+        public ServerModel(ServerTypes serverType, string address, Int32 port) : base(null, null)
         {
-            Type = server_type;
+            Type = serverType;
             Address = address;
             Port = port;
 
-            Console.WriteLine("-- Creating server of type " + server_type + " on " + address + ": " + port);
+            Console.WriteLine("-- Creating server of type " + serverType + " on " + address + ": " + port);
 
             LaunchUpdateServerThread();
         }
@@ -96,7 +96,7 @@ namespace ClientServerLibrary
         public virtual void StartServer() 
         {
             IsRunning = true;
-            Console.WriteLine("------ (ServerModel:) Starting server #" + ID.ToString());
+            Console.WriteLine("------ (ServerModel:) Starting server #" + Id.ToString());
 
             Console.WriteLine("ServerModel: Starting the main HandleServerThread()");
 
@@ -115,14 +115,14 @@ namespace ClientServerLibrary
         #region Public Methods
         public void LaunchUpdateServerThread()
         {
-            Console.WriteLine("------- Launching server " + ID + " update thread");
+            Console.WriteLine("------- Launching server " + Id + " update thread");
             UpdateThread = new Thread(RunUpdateThread);
             UpdateThread.Start();
         }
 
 
         /// <summary>
-        /// Adds a client model to this servers partipant list
+        /// Adds a client model to this servers participant list
         /// </summary>
         /// <param name="clientModel"></param>
         public void AddClientModelToServer(ClientModel clientModel)
@@ -130,7 +130,7 @@ namespace ClientServerLibrary
             if (clientModel == null)
                 return;
 
-            ConnectedClientModelList.Add(clientModel.ID, clientModel);
+            ConnectedClientModelList.Add(clientModel.Id, clientModel);
         }
 
         /// <summary>
@@ -142,8 +142,8 @@ namespace ClientServerLibrary
             if (clientModel == null)
                 return;
 
-            if(ConnectedClientModelList.ContainsKey(clientModel.ID))
-                ConnectedClientModelList.Remove(clientModel.ID);
+            if(ConnectedClientModelList.ContainsKey(clientModel.Id))
+                ConnectedClientModelList.Remove(clientModel.Id);
         }
 
         /// <summary>
@@ -163,11 +163,10 @@ namespace ClientServerLibrary
             list.Sort();
 
             // Retrieve the first (oldest) item in the list by smallest key value
-            int oldest_index = list[0];
+            int oldestIndex = list[0];
 
             // Now retrieve the model from the dictionary
-            ClientModel result;
-            ConnectedClientModelList.TryGetValue(oldest_index, out result);
+            ConnectedClientModelList.TryGetValue(oldestIndex, out var result);
 
             return result;
         }
@@ -187,7 +186,7 @@ namespace ClientServerLibrary
         {
             //// Shutdown and end connection         
             ListenerSocket.Stop();
-            Console.WriteLine(" >> Server " + ID + " is shutting down...");
+            Console.WriteLine(" >> Server " + Id + " is shutting down...");
             Console.ReadLine();
         }
 
@@ -236,13 +235,13 @@ namespace ClientServerLibrary
 
         public virtual void RunUpdateThread()
         {
-            Console.WriteLine("- Update thread for server " + ID + " created");
+            Console.WriteLine("- Update thread for server " + Id + " created");
             while (!ShouldShutdown)
             {
                 // If we have clients currently connected, check for updates
                 if(ConnectedClientModelList.Count > 0)
                 {
-                    Console.WriteLine("Updating server " + ID);
+                    Console.WriteLine("Updating server " + Id);
                     this.Update();
                 }
 
@@ -263,7 +262,7 @@ namespace ClientServerLibrary
     //public class handleClient
     //{
     //    TcpClient clientSocket;
-    //    // The server thart created this client thread
+    //    // The server that created this client thread
     //    Hashtable clientsList;
     //    string clientNum;
 

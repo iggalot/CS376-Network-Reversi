@@ -45,6 +45,7 @@ namespace ClientServerLibrary
         /// Creates a client model for a client socket
         /// </summary>
         /// <param name="client">The client socket</param>
+        /// <param name="listener">The server listener</param>
         public ClientModel(TcpClient client, TcpListener listener) : base(client, listener)
         {
             // Store the client process
@@ -60,7 +61,7 @@ namespace ClientServerLibrary
         {
             ClientProcess = clientModel.ClientProcess;
             ClientMainThread = clientModel.ClientMainThread;
-            ID = clientModel.ID;
+            Id = clientModel.Id;
             CurrentStatus = clientModel.CurrentStatus;
             ShouldShutdown = clientModel.ShouldShutdown;
 
@@ -68,43 +69,44 @@ namespace ClientServerLibrary
         #endregion
 
         #region Public Methods
+
         /// <summary>
         /// Function to establish a connection between this client and the game server
         /// that returns the status of the connection
         /// </summary>
-        /// <param name="status_message">Status message of the connection attempt</param>
+        /// <param name="port">Server port</param>
+        /// <param name="statusMessage">Status message of the connection attempt</param>
+        /// <param name="address">Server address</param>
         /// <returns></returns>
-        public bool ConnectClient(string address, Int32 port, out string status_message)
+        public bool ConnectClient(string address, Int32 port, out string statusMessage)
         {
-            NetworkStream serverStream;
-
             // Otherwise try to make the connection
             try
             {
                 // save the socket once the connection is made
                 ConnectionSocket = MakeConnection(address, port);
-                serverStream = ConnectionSocket.GetStream();
+                ConnectionSocket.GetStream();
             }
-            catch (ArgumentNullException excep)
+            catch (ArgumentNullException e)
             {
-                status_message = "ArgumentNullException: {0}";
-                Console.WriteLine(status_message, excep);
+                statusMessage = "ArgumentNullException: {0}";
+                Console.WriteLine(statusMessage, e);
                 return false;
             }
-            catch (SocketException excep)
+            catch (SocketException e)
             {
-                status_message = "SocketException: {0}";
-                Console.WriteLine(status_message, excep);
+                statusMessage = "SocketException: {0}";
+                Console.WriteLine(statusMessage, e);
                 return false;
             }
             catch
             {
-                status_message = "Unable to connect to socket..";
-                Console.WriteLine(status_message);
+                statusMessage = "Unable to connect to socket..";
+                Console.WriteLine(statusMessage);
                 return false;
             }
 
-            status_message = "Connected to server...";
+            statusMessage = "Connected to server...";
             return true;
         }
         #endregion

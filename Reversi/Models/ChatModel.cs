@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ClientServerLibrary;
 
 namespace Reversi.Models
 {
@@ -40,7 +41,7 @@ namespace Reversi.Models
 
 
     [Serializable]
-    public class ChatModel
+    public class ChatModel : ClientServerInfoModel
     {
         #region Private Properties
         private static int _nextId = 0;
@@ -51,7 +52,7 @@ namespace Reversi.Models
         /// <summary>
         /// The game ID for this game
         /// </summary>
-        public int ChatID { get; private set; } = -20;
+        public int ChatId { get; private set; }
 
         /// <summary>
         /// A list of the players in the chat session
@@ -68,7 +69,7 @@ namespace Reversi.Models
         public ChatModel(List<PlayerModel> list)
         {
             // Set our game id
-            ChatID = NextID();
+            ChatId = NextId();
 
             // Initialize our players list
             CurrentPlayersList = new PlayerModel[list.Count];
@@ -82,12 +83,5 @@ namespace Reversi.Models
 
         #endregion
 
-        #region Private Methods
-        private int NextID()
-        {
-            _nextId++;
-            return _nextId;
-        }
-        #endregion
     }
 }

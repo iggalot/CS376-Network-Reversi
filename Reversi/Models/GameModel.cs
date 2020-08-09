@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 
 namespace Reversi.Models
 {
@@ -58,7 +57,7 @@ namespace Reversi.Models
             Console.WriteLine("Index: " + index);
             // Determine our opponent
             int player = CurrentPlayer;
-            int opponent = (player == CurrentPlayersList[0].PlayerID) ? CurrentPlayersList[1].PlayerID : CurrentPlayersList[0].PlayerID;
+            int opponent = (player == CurrentPlayersList[0].PlayerId) ? CurrentPlayersList[1].PlayerId : CurrentPlayersList[0].PlayerId;
 
             // Make sure that we are within acceptable index ranges, otherwise return
             if (index < 0 || index >= Gameboard.Squares.Length)
@@ -90,7 +89,7 @@ namespace Reversi.Models
                 // Check if the neighbor is owned by the opponent
                 PlayerModel owner = Gameboard.Squares[tmp_index].Piece.Owner;
 
-                if (owner.PlayerID != opponent)
+                if (owner.PlayerId != opponent)
                 {
                     // Neighbor isn't the opponent so not a valid move
                     continue;
@@ -102,34 +101,34 @@ namespace Reversi.Models
 
                     // Otherwise continue searching in this direction to see if a 
                     // players piece is also in this direction.
-                    int next_index = tmp_index;
-                    PlayerModel next_owner = owner;
+                    int nextIndex = tmp_index;
+                    PlayerModel nextOwner = owner;
 
                     // Continue searching so long as we don't reach the border (-1) and the next square is 
                     // owned by the opponent.
-                    while ((next_index != -1) && (next_owner.PlayerID == opponent))
+                    while ((nextIndex != -1) && (nextOwner.PlayerId == opponent))
                     {
                         // Add our element to the list.
-                        tmpList.Add(next_index);
+                        tmpList.Add(nextIndex);
 
-                        Console.WriteLine("...searching " + next_index + " to " + dv);
+                        Console.WriteLine("...searching " + nextIndex + " to " + dv);
 
-                        next_index = Gameboard.GetIndexByOffsets(next_index, dv);
+                        nextIndex = Gameboard.GetIndexByOffsets(nextIndex, dv);
 
 
                         // Did we find the border? Is there a valid piece in this square? 
                         // If not, stop searching
-                        if ((next_index == -1) || (Gameboard.Squares[next_index].Piece == null))
+                        if ((nextIndex == -1) || (Gameboard.Squares[nextIndex].Piece == null))
                         {
                             tmpList.Clear(); // clear the temp list
                             break;
                         }
 
-                        next_owner = Gameboard.Squares[next_index].Piece.Owner;
+                        nextOwner = Gameboard.Squares[nextIndex].Piece.Owner;
 
                         // If neighbor to the neighbor in this direction is the same as the player,
                         // the move is valid.
-                        if (next_owner.PlayerID == player)
+                        if (nextOwner.PlayerId == player)
                         {
                             isValidMove = true;
                             break;
@@ -145,7 +144,7 @@ namespace Reversi.Models
                 }
             }
 
-            return true;
+            return isValidMove;
         }
 
         /// <summary>
@@ -159,20 +158,22 @@ namespace Reversi.Models
 
             foreach(PlayerModel item in CurrentPlayersList)
             {
-                if (item.PlayerID == CurrentPlayer)
+                if (item.PlayerId == CurrentPlayer)
                 {
                     player = item;
                     playerFound = true;
                 }                    
             }
 
+            if (player == null)
+                return false;
+
             if (playerFound && ValidatePlacement(index))
             {
-                if (player == null)
-                    return false;
+
 
                 // Add a new game piece at the location
-                GamePieceModel piece = new GamePieceModel(Pieceshapes.ELLIPSE, player);
+                GamePieceModel piece = new GamePieceModel(Pieceshapes.Ellipse, player);
                 Gameboard.AddPiece(index, piece);
 
                 // Capture the opponents tiles
@@ -196,7 +197,7 @@ namespace Reversi.Models
 
             foreach (PlayerModel item in CurrentPlayersList)
             {
-                if (item.PlayerID == CurrentPlayer)
+                if (item.PlayerId == CurrentPlayer)
                 {
                     player = item;
                     playerFound = true;
@@ -225,15 +226,15 @@ namespace Reversi.Models
             var midpoint = Gameboard.Rows * Gameboard.Cols / 2;
 
             // Place the starting pieces
-            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
-            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
-            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 - 1, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
-            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 - 1, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[0]));
 
             // MessageBox.Show(Gameboard.DrawGameboard());
 
             // Set the First player to be the current player
-            CurrentPlayer = CurrentPlayersList[0].PlayerID;
+            CurrentPlayer = CurrentPlayersList[0].PlayerId;
         }
 
 
@@ -255,11 +256,11 @@ namespace Reversi.Models
             //            MakePlayerMove(Players[0], 12);
 
             // Test scenario for our board
-            Gameboard.AddPiece(18, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
-            Gameboard.AddPiece(17, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[0]));
-            Gameboard.AddPiece(19, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
-            Gameboard.AddPiece(21, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
-            Gameboard.AddPiece(12, new GamePieceModel(Pieceshapes.ELLIPSE, CurrentPlayersList[1]));
+            Gameboard.AddPiece(18, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
+            Gameboard.AddPiece(17, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[0]));
+            Gameboard.AddPiece(19, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
+            Gameboard.AddPiece(21, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
+            Gameboard.AddPiece(12, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
             //MessageBox.Show(Gameboard.DrawGameboard());
 
             //// The main game loop -- 
@@ -318,7 +319,7 @@ namespace Reversi.Models
         /// <summary>
         /// The game ID for this game
         /// </summary>
-        public int GameID { get; private set; } = -20;
+        public int GameId { get; private set; } 
 
         /// <summary>
         /// Flag to determine if the game is over
@@ -362,7 +363,7 @@ namespace Reversi.Models
         public GameModel(List<PlayerModel> list)
         {
             // Set our game id
-            GameID = NextID();
+            GameId = NextId();
 
             // create our gameboard
             Gameboard = new BoardModel(8, 8);
@@ -380,7 +381,7 @@ namespace Reversi.Models
         #endregion
 
         #region Private Methods
-        private int NextID()
+        private int NextId()
         {
             _nextId++;
             return _nextId;
@@ -393,7 +394,7 @@ namespace Reversi.Models
         /// </summary>
         public void NextPlayer()
         {
-            CurrentPlayer = (CurrentPlayer == CurrentPlayersList[0].PlayerID) ? CurrentPlayersList[1].PlayerID : CurrentPlayersList[0].PlayerID;
+            CurrentPlayer = (CurrentPlayer == CurrentPlayersList[0].PlayerId) ? CurrentPlayersList[1].PlayerId : CurrentPlayersList[0].PlayerId;
         }
 
         /// <summary>
@@ -405,7 +406,7 @@ namespace Reversi.Models
         {
             foreach(PlayerModel item in CurrentPlayersList)
             {
-                if (item.PlayerID == id)
+                if (item.PlayerId == id)
                     return item;
             }
 

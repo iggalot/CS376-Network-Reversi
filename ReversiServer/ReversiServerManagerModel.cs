@@ -1,17 +1,16 @@
 ﻿using ClientServerLibrary;
 using Reversi.Models;
-using Settings;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
+using Settings;
 
 namespace ReversiServer
 {
     public class ReversiServerManagerModel : ServerManagerModel
     {
-        public ReversiServerManagerModel() : base(ServerTypes.SERVER_SERVERMANAGER,GlobalSettings.ServerAddress,GlobalSettings.Port_GameServer)
+        public ReversiServerManagerModel() : base(ServerTypes.ServerServermanager,GlobalSettings.ServerAddress,GlobalSettings.Port_GameServer)
         {
 
         }
@@ -19,46 +18,46 @@ namespace ReversiServer
         /// <summary>
         /// Accepts a connection request
         /// </summary>
-        /// <param name="new_model"></param>
-        public ReversiClientModel AcceptConnection(ReversiClientModel new_model)
+        /// <param name="newModel"></param>
+        public ReversiClientModel AcceptConnection(ReversiClientModel newModel)
         {
 
             // And immediately return it without updating the ID
-            new_model.CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_ACCEPTED;
+            newModel.CurrentStatus = ConnectionStatusTypes.StatusConnectionAccepted;
 
             try
             {
-                DataTransmission.SerializeData<ReversiClientModel>(new_model, new_model.ConnectionSocket);
-                Console.WriteLine("... GameServer: Connection accepted for client #" + new_model.ID);
+                DataTransmission.SerializeData<ReversiClientModel>(newModel, newModel.ConnectionSocket);
+                Console.WriteLine("... GameServer: Connection accepted for client #" + newModel.Id);
             }
             catch
             {
-                new_model.CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_ERROR;
+                newModel.CurrentStatus = ConnectionStatusTypes.StatusConnectionError;
             }
 
-            return new_model;
+            return newModel;
         }
 
         /// <summary>
         /// Refuse a connection and close the socket
         /// </summary>
-        /// <param name="new_model"></param>
-        public ReversiClientModel RefuseConnection(ReversiClientModel new_model)
+        /// <param name="newModel"></param>
+        public ReversiClientModel RefuseConnection(ReversiClientModel newModel)
         {
             // And immediately return it without updating the ID
-            new_model.CurrentStatus = ConnectionStatusTypes.STATUS_CONNECTION_REFUSED;
+            newModel.CurrentStatus = ConnectionStatusTypes.StatusConnectionRefused;
 
             try
             {
-                DataTransmission.SerializeData<ReversiClientModel>(new_model, new_model.ConnectionSocket);
+                DataTransmission.SerializeData<ReversiClientModel>(newModel, newModel.ConnectionSocket);
             }
             catch
             {
                 throw new SocketException();
             }
 
-            new_model.ConnectionSocket.Close();
-            return new_model;
+            newModel.ConnectionSocket.Close();
+            return newModel;
         }
 
 
@@ -72,14 +71,14 @@ namespace ReversiServer
             string str = model.ConnectionSocket.Client.Handle.ToString();
             Console.WriteLine(str);
 
-            if ((model == null) || (model.ConnectionSocket == null))
+            if ((model.ConnectionSocket == null))
             {
-                status = ConnectionStatusTypes.STATUS_CONNECTION_ERROR;
+                status = ConnectionStatusTypes.StatusConnectionError;
                 return null;
             }
 
             int timeoutCount = 0;
-            while ((timeoutCount > ServerSettings.MaxServerTimeoutCount) || (!model.ConnectionSocket.GetStream().DataAvailable))
+            while ((timeoutCount < ServerSettings.MaxServerTimeoutCount) || (!model.ConnectionSocket.GetStream().DataAvailable))
             {
                 Thread.Sleep(200);
                 timeoutCount++;
@@ -87,8 +86,8 @@ namespace ReversiServer
 
             if (timeoutCount > ServerSettings.MaxServerTimeoutCount)
             {
-                Console.WriteLine("Connection has timedout");
-                status = ConnectionStatusTypes.STATUS_CONNECTION_ERROR;
+                Console.WriteLine("Connection has timed out");
+                status = ConnectionStatusTypes.StatusConnectionError;
                 return null;
             }
 
@@ -96,14 +95,14 @@ namespace ReversiServer
             if (ConnectedClientModelList.Count > ServerSettings.MaxServerConnections)
             {
                 model = RefuseConnection(model);
-                status = ConnectionStatusTypes.STATUS_CONNECTION_REFUSED;
+                status = ConnectionStatusTypes.StatusConnectionRefused;
                 model.CurrentStatus = status;
             }
             // Otherwise accept the connection
             else
             {
                 model = AcceptConnection(model);
-                status = ConnectionStatusTypes.STATUS_CONNECTION_ACCEPTED;
+                status = ConnectionStatusTypes.StatusConnectionAccepted;
                 model.CurrentStatus = status;
             }
 
@@ -112,86 +111,77 @@ namespace ReversiServer
 
 
 
-
-
         /// <summary>
         /// The main thread handle for this reversi server.
         /// </summary>
         public override void HandleServerThread()
         {
-            Console.WriteLine("Server " + ID + ":  Starting HandleServerThread");
+            Console.WriteLine("Server " + Id + ":  Starting HandleServerThread");
 
             while(!ShouldShutdown)
             {
                 if (ConnectedClientModelList.Count == 0)
                 {
-                    Console.WriteLine("No clients on ReversiServerManager " + ID);
+                    Console.WriteLine("No clients on ReversiServerManager " + Id);
                     Thread.Sleep(ServerSettings.ServerUpdatePulseDelay);
                     continue;
-                } else
-                {
-                    // Check for enough clients to place on a server
-                    Console.WriteLine("RSM currently has " + ConnectedClientModelList + " connected to it...");
                 }
 
+                // Check for enough clients to place on a server
+                Console.WriteLine("RSM currently has " + ConnectedClientModelList + " connected to it...");
+
                 // Get the oldest client
-                ReversiClientModel oldest_client_model = (ReversiClientModel)GetOldestClientModelFromConnectedList();
-                Console.WriteLine("-- Oldest available client is: " + oldest_client_model.ID);
+                ReversiClientModel oldestClientModel = (ReversiClientModel)GetOldestClientModelFromConnectedList();
+                Console.WriteLine("-- Oldest available client is: " + oldestClientModel.Id);
 
                 // Find an available game server or create a new one
-                ReversiGameServerModel availableServer = (ReversiGameServerModel)GetAvailableServer(ServerTypes.SERVER_GAMESERVER);
-                Console.WriteLine("-- Available server is: " + availableServer.ID);
+                ReversiGameServerModel availableServer = (ReversiGameServerModel)GetAvailableServer(ServerTypes.ServerGameserver);
+                Console.WriteLine("-- Available server is: " + availableServer.Id);
 
                 // Move the client model to a reversi game server....
-                availableServer.AddClientModelToServer(oldest_client_model);
-                Console.WriteLine("-- Adding client " + oldest_client_model.ID + " to game server " + availableServer.ID);
+                availableServer.AddClientModelToServer(oldestClientModel);
+                Console.WriteLine("-- Adding client " + oldestClientModel.Id + " to game server " + availableServer.Id);
 
                 // And remove it from the connected list
-                RemoveClientModelFromConnectedList(oldest_client_model);
+                RemoveClientModelFromConnectedList(oldestClientModel);
                 Console.WriteLine("-- Client removed from ReversiServerManager list");
-
             }
         }
 
         /// <summary>
         /// Function that finds a server with space for additional clients to be added.
         /// </summary>
-        /// <param name="server_type">The type of server to search for</param>
+        /// <param name="serverType">The type of server to search for</param>
         /// <returns></returns>
-        public override ServerModel GetAvailableServer(ServerTypes server_type)
+        public override ServerModel GetAvailableServer(ServerTypes serverType)
         {
             // Is there a server with room on it?
-            bool available = false;
-            int available_server_index = -1;
-            foreach (KeyValuePair<int, ServerModel> server in ServerList)
+            var available = false;
+            var availableServerIndex = -1;
+            foreach (var server in ServerList
+                .Where(server => server.Value.ConnectedClientModelList.Count < ReversiSettings.MaxReversiServerConnections - 1)
+                .Where(server => server.Value.Type == serverType))
             {
-                if (server.Value.ConnectedClientModelList.Count < ReversiSettings.MaxReversiServerConnections - 1)
-                {
-                    // Make sure it's a game server
-                    if (server.Value.Type == server_type)
-                    {
-                        available = true;
-                        available_server_index = server.Key;
-                        break;
-                    }
-                }
+                available = true;
+                availableServerIndex = server.Key;
+                break;
             }
 
             // If no servers are available, create a new server;
-            ServerModel new_server;
+            ServerModel newServer;
             if (!available)
             {
-                // TODO:  Will this crash if there is alreadt a reversi game server running?
-                new_server = new ReversiGameServerModel(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
-                AddServerToManager(new_server);
+                // TODO:  Will this crash if there is already a reversi game server running?
+                newServer = new ReversiGameServerModel(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
+                AddServerToManager(newServer);
             }
             else
             {
                 // Retrieve the server by its index value
-                new_server = GetServerFromListByID(available_server_index);
+                newServer = GetServerFromListById(availableServerIndex);
             }
 
-            return new_server;
+            return newServer;
         }
 
     }

@@ -1,6 +1,5 @@
 ﻿using ClientServerLibrary;
 using Reversi.Models;
-using Settings;
 using System;
 using System.Collections.Generic;
 
@@ -16,15 +15,15 @@ namespace ReversiServer
 
 
         #region Constructor
+
         /// <summary>
         /// Default constructor
         /// </summary>
-        /// <param name="server_type">The type of server <see cref="ServerTypes"/></param>
         /// <param name="address">The address to the server</param>
         /// <param name="port">The port for the server</param>
-        public ReversiChatServerModel(string address, Int32 port) : base(ServerTypes.SERVER_CHATSERVER, address, port)
+        public ReversiChatServerModel(string address, Int32 port) : base(ServerTypes.ServerChatserver, address, port)
         {
-            Console.WriteLine("---- Creating a new Reversi Chat Server with ID:" + ID.ToString());
+            Console.WriteLine("---- Creating a new Reversi Chat Server with ID:" + Id.ToString());
 
             this.StartServer();
         }

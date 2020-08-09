@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 
 namespace Reversi.Models
 {
@@ -26,7 +25,7 @@ namespace Reversi.Models
         public GamePieceModel()
         {
             Owner = new PlayerModel();
-            Shape = Pieceshapes.UNDEFINED;
+            Shape = Pieceshapes.Undefined;
         }
 
         public GamePieceModel(Pieceshapes shape, PlayerModel player)

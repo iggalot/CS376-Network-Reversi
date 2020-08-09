@@ -8,17 +8,17 @@ namespace Reversi.Models
         /// <summary>
         /// Index of the move that was made
         /// </summary>
-        public int MoveIndex { get; set; } = -1;
+        public int MoveIndex { get; set; }
 
         /// <summary>
         /// Player who made the move
         /// </summary>
-        public int ByPlayer { get; set; } = -1;
+        public int ByPlayer { get; set; }
 
-        public GameMoveModel(int player_id, int move)
+        public GameMoveModel(int playerId, int move)
         {
             MoveIndex = move;
-            ByPlayer = player_id;
+            ByPlayer = playerId;
         }
     }
 }

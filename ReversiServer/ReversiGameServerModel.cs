@@ -1,7 +1,5 @@
 ﻿using ClientServerLibrary;
-using Reversi;
 using Reversi.Models;
-using Settings;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -13,7 +11,7 @@ namespace ReversiServer
     {
         #region Private Properties
 
-        private Dictionary<int, ReversiGameModel> runningGameModelsList = new Dictionary<int, ReversiGameModel>();
+        private Dictionary<int, ReversiGameModel> _runningGameModelsList = new Dictionary<int, ReversiGameModel>();
 
         #endregion
 
@@ -35,7 +33,7 @@ namespace ReversiServer
         public static List<PlayerModel> WaitingRoom { get; set; } = new List<PlayerModel>();
 
         /// <summary>
-        /// A temporary staging area for when players are moved fro mthe waiting room to the game room
+        /// A temporary staging area for when players are moved from the waiting room to the game room
         /// </summary>
         public static List<PlayerModel> StagingArea { get; set; } = new List<PlayerModel>();
 
@@ -45,23 +43,23 @@ namespace ReversiServer
         public static List<Thread> GameThreads { get; set; } = new List<Thread>();
 
         /// <summary>
-        /// The list of threads runnign a chat server
+        /// The list of threads running a chat server
         /// </summary>
         public static List<Thread> ChatThreads { get; set; } = new List<Thread>();
 
         #endregion
 
         #region Constructor
+
         /// <summary>
         /// Default constructor
         /// </summary>
-        /// <param name="server_type">The type of server <see cref="ServerTypes"/></param>
         /// <param name="address">The address to the server</param>
         /// <param name="port">The port for the server</param>
-        public ReversiGameServerModel(string address, Int32 port ) : base(ServerTypes.SERVER_GAMESERVER, address, port)
+        public ReversiGameServerModel(string address, Int32 port ) : base(ServerTypes.ServerGameserver, address, port)
         {
             // TODO: Special ReversiGameServer setup here.
-            Console.WriteLine("---- Creating a new Reversi Game Server with ID:" + ID.ToString());
+            Console.WriteLine("---- Creating a new Reversi Game Server with ID:" + Id.ToString());
 
             this.StartServer();
         }
@@ -122,7 +120,7 @@ namespace ReversiServer
         /// Refusing a connection.
         /// Returns an UNDEFINED player packet
         /// </summary>
-        /// <param name="client">The client socket</param>
+        /// <param name="model">The client model</param>
         public ReversiClientModel RefuseConnection(ReversiClientModel model)
         {
             //PlayerModel newplayer = DataTransmission.DeserializeData<PlayerModel>(client);
@@ -159,11 +157,11 @@ namespace ReversiServer
         /// <summary>
         /// Function to determine whether a connection should be accepted or refused.
         /// </summary>
-        /// <param name="client">The client socket</param>
-        /// <param name="packet">The packet of data created when the connection was first made in ListenForConnections</param>
+        /// <param name="model">The client model</param>
+        /// <param name="status">The status odf the connection attempt to be returned</param>
         public ReversiClientModel AcceptOrRefuseConnection(ReversiClientModel model, out ConnectionStatusTypes status)
         {
-            status = ConnectionStatusTypes.STATUS_CONNECTION_UNKNOWN;
+            status = ConnectionStatusTypes.StatusConnectionUnknown;
             //int timeoutCount = 0;
             //while ((timeoutCount > 150) || (!client.GetStream().DataAvailable))
             //{
@@ -197,25 +195,23 @@ namespace ReversiServer
         /// <summary>
         /// Returns the socket associated with a playerID.
         /// </summary>
-        /// <param name="player_id"></param>
+        /// <param name="playerId"></param>
         /// <returns></returns>
-        private static TcpClient GetSocketByPlayerID(int player_id)
+        private static TcpClient GetSocketByPlayerId(int playerId)
         {
-            TcpClient client_socket;
-            ConnectedClients.TryGetValue(player_id, out client_socket);
+            ConnectedClients.TryGetValue(playerId, out var clientSocket);
 
-            return client_socket;
+            return clientSocket;
         }
 
         /// <summary>
         /// Returns the socket associated with a playerID.
         /// </summary>
-        /// <param name="game_id">The game id number</param>
+        /// <param name="gameId">The game id number</param>
         /// <returns></returns>
-        private static GameModel GetGameByGameID(int game_id)
+        private static GameModel GetGameByGameId(int gameId)
         {
-            GameModel game;
-            RunningGames.TryGetValue(game_id, out game);
+            RunningGames.TryGetValue(gameId, out var game);
 
             return game;
         }
@@ -347,7 +343,8 @@ namespace ReversiServer
         private static void InitializeMatchup(object data)
         {
             List<PlayerModel> temp = (List<PlayerModel>)data;
-            List<PlayerModel> players = new List<PlayerModel>();
+            List<PlayerModel> players;
+            players = new List<PlayerModel>();
 
             foreach (PlayerModel p in temp)
                 players.Add(p);

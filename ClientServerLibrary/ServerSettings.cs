@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ClientServerLibrary
+﻿namespace ClientServerLibrary
 {
     public static class ServerSettings
     {

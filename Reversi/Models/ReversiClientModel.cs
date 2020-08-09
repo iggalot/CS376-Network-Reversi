@@ -48,7 +48,7 @@ namespace Reversi.Models
         {
             Game = null;
             LastMove = null;
-            ClientPlayer = new PlayerModel(clientModel.ID, Players.UNDEFINED, name);
+            ClientPlayer = new PlayerModel(clientModel.Id, Players.Undefined, name);
             this.ClientProcess = clientModel.ClientProcess;
             this.ClientMainThread = clientModel.ClientMainThread;
         }

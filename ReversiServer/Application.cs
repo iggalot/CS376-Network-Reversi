@@ -1,9 +1,7 @@
 ﻿using ClientServerLibrary;
 using Reversi.Models;
-using Settings;
 using System;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace ReversiServer
 {
@@ -34,18 +32,17 @@ namespace ReversiServer
                 ReversiClientModel newTcpClientModel = new ReversiClientModel(newTcpClientSocket, null);
 
                 // Determine what we should do with the connection and send the appropriate response
-                ConnectionStatusTypes status;
-                newTcpClientModel = Manager.AcceptOrRefuseConnection(newTcpClientModel, out status);
+                newTcpClientModel = Manager.AcceptOrRefuseConnection(newTcpClientModel, out var status);
 
                 // If the connection was accepted then add the model to the connected models list
-                if (status == ConnectionStatusTypes.STATUS_CONNECTION_ACCEPTED)
+                if (status == ConnectionStatusTypes.StatusConnectionAccepted)
                 {
                     Manager.AddClientModelToConnectionList(newTcpClientModel);
-                    Console.WriteLine("Server manager #" + Manager.ID + " has accepted client " + newTcpClientModel.ID + ".");
+                    Console.WriteLine("Server manager #" + Manager.Id + " has accepted client " + newTcpClientModel.Id + ".");
                 }
-                else if (status == ConnectionStatusTypes.STATUS_CONNECTION_REFUSED)
+                else if (status == ConnectionStatusTypes.StatusConnectionRefused)
                 {
-                    Console.WriteLine("Server manager #" + Manager.ID + " has refused client" + newTcpClientModel.ID + ".");
+                    Console.WriteLine("Server manager #" + Manager.Id + " has refused client" + newTcpClientModel.Id + ".");
                 }
 
                 // List our connected clients for testing.

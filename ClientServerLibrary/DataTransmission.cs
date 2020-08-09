@@ -13,12 +13,12 @@ namespace ClientServerLibrary
         /// <summary>
         /// The max size of the read / write socket data array
         /// </summary>
-        public const int MAX_DATA_SIZE = 1024;
+        public const int MaxDataSize = 1024;
 
         /// <summary>
         /// The number of attempts to successful send a packet
         /// </summary>
-        public const int MAX_SEND_ATTEMPTS = 5;
+        public const int MaxSendAttempts = 5;
 
         /// <summary>
         /// Was the transmission deemed a success?
@@ -52,20 +52,18 @@ namespace ClientServerLibrary
             {
                 if (!stream.DataAvailable)
                 {
-        //            Console.WriteLine("ReceiveData: There was nothing in the stream at this time.");
+                    // Console.WriteLine("ReceiveData: There was nothing in the stream at this time.");
                 }
                 else
                 {
                     // Receive the TcpServer response.
                     // Buffer to store the response bytes.
-                    Byte[] receivedata = new byte[MAX_DATA_SIZE];
-
-                    int numberOfBytesRead = 0;
+                    Byte[] receivedata = new byte[MaxDataSize];
 
                     // Incoming message may be larger than the buffer size.
                     do
                     {
-                        numberOfBytesRead = stream.Read(receivedata, 0, receivedata.Length);
+                        var numberOfBytesRead = stream.Read(receivedata, 0, receivedata.Length);
                         message.AppendFormat("{0}", Encoding.ASCII.GetString(receivedata, 0, numberOfBytesRead));
                     }
                     while (stream.DataAvailable);
@@ -73,17 +71,14 @@ namespace ClientServerLibrary
                     Console.WriteLine("Data Received: {0}", message);
                     dataRead = true;
 
-                    if (dataRead)
-                    {
-                        stream.Flush();
+                    stream.Flush();
 
-                        // Reform the basic packet information.
-                        newpacket.UnpackPacket(message.ToString());
+                    // Reform the basic packet information.
+                    newpacket.UnpackPacket(message.ToString());
 
-                        // Assign the packet to the outgoing variable.
-                        packet = newpacket;
-                        break;
-                    }
+                    // Assign the packet to the outgoing variable.
+                    packet = newpacket;
+                    break;
                 }
             }
 
@@ -107,8 +102,8 @@ namespace ClientServerLibrary
             // Retrieve the stream for the client socket
             NetworkStream serverStream = client.GetStream();
 
-            int attempt = 0;
-            while (attempt < MAX_SEND_ATTEMPTS)
+            var attempt = 0;
+            while (attempt < MaxSendAttempts)
             {
                 try
                 {
@@ -120,10 +115,10 @@ namespace ClientServerLibrary
                     SendSuccess = true;
                 } catch
                 {
-                    ///Thread.Sleep(1000);
+                    // Thread.Sleep(1000);
                     Console.WriteLine("... Failed to send packet (attempt #" + attempt + ")");
                     attempt++;
-                }
+                } 
 
                 // Exit out of our send loop attempt
                 if (SendSuccess)
@@ -148,15 +143,15 @@ namespace ClientServerLibrary
 
             foreach(TcpClient client in list)
             {
-                bool send_status = false;
+                bool sendStatus = false;
 
                 // Check that the client is connected
                 if(client.Connected)
                 {
-                    send_status = SendData(client, packet);
+                    sendStatus = SendData(client, packet);
                 }
 
-                if (send_status == false)
+                if (sendStatus == false)
                     status = false;
             }
 
@@ -182,7 +177,7 @@ namespace ClientServerLibrary
         /// </summary>
         /// <typeparam name="T">The generic class of the data being serializes</typeparam>
         /// <param name="data">The data to be serialized</param>
-        /// <param name="stream">The stream to send the serialized data to (FileStream, NetworkStream, etc.) </param>
+        /// <param name="client">The <see cref="TcpClient"/> client socket </param>
         public static void SerializeData<T>(T data, TcpClient client) where T : class
         {
             if (!client.Connected)
@@ -210,7 +205,7 @@ namespace ClientServerLibrary
         /// Method that deserializes the data on a network stream
         /// </summary>
         /// <typeparam name="T">The generic class of the data that was serializes</typeparam>
-        /// <param name="stream">The stream in which to deserialize (FileStream, NetworkStream, etc.)</param>
+        /// <param name="client">The <see cref="TcpClient"/> client socket </param>
         /// <returns></returns>
         public static T DeserializeData<T>(TcpClient client) where T: class
         {
@@ -239,10 +234,7 @@ namespace ClientServerLibrary
         {
             bool part1 = s.Poll(1000, SelectMode.SelectRead);
             bool part2 = (s.Available == 0);
-            if (part1 && part2)
-                return false;
-            else
-                return true;
+            return !part1 || !part2;
         }
 
 

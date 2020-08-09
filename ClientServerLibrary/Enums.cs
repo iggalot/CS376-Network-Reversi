@@ -5,20 +5,20 @@ namespace ClientServerLibrary
     [Serializable]
     public enum ServerTypes
     {
-        SERVER_UNKNOWN = -1,
-        SERVER_SERVERMANAGER = 0,
-        SERVER_GAMESERVER = 1,
-        SERVER_CHATSERVER = 2
+        ServerUnknown = -1,
+        ServerServermanager = 0,
+        ServerGameserver = 1,
+        ServerChatserver = 2
     }
 
     [Serializable]
     public enum ConnectionStatusTypes
     {
-        STATUS_CONNECTION_INCAPABLE = -2,
-        STATUS_CONNECTION_UNKNOWN = -1,
-        STATUS_CONNECTION_ACCEPTED = 0,
-        STATUS_CONNECTION_REFUSED = 1,
-        STATUS_CONNECTION_ERROR = 2
+        StatusConnectionIncapable = -2,
+        StatusConnectionUnknown = -1,
+        StatusConnectionAccepted = 0,
+        StatusConnectionRefused = 1,
+        StatusConnectionError = 2
         
     }
 }

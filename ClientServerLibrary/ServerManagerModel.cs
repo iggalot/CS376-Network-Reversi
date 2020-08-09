@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace ClientServerLibrary
 {
@@ -15,7 +12,7 @@ namespace ClientServerLibrary
         /// <summary>
         /// The list of servers
         /// </summary>
-        private Dictionary<int, ServerModel> serverList = new Dictionary<int, ServerModel>();
+        private Dictionary<int, ServerModel> _serverList = new Dictionary<int, ServerModel>();
 
         #endregion
 
@@ -23,13 +20,13 @@ namespace ClientServerLibrary
 
         public Dictionary<int, ServerModel> ServerList 
         {
-            get => serverList; 
+            get => _serverList; 
             set
             {
                 if (value == null)
                     return;
 
-                serverList = value;
+                _serverList = value;
             }
         }
 
@@ -37,9 +34,9 @@ namespace ClientServerLibrary
 
         #region Constructor
 
-        public ServerManagerModel(ServerTypes server_type, string address, Int32 port) : base(server_type, address, port)
+        public ServerManagerModel(ServerTypes serverType, string address, Int32 port) : base(serverType, address, port)
         {
-            Console.WriteLine("---- Creating a new Server Manager with ID:" + ID.ToString());
+            Console.WriteLine("---- Creating a new Server Manager with ID:" + Id.ToString());
         }
 
         #endregion
@@ -48,19 +45,19 @@ namespace ClientServerLibrary
         /// <summary>
         /// Adds a client socket to the connected sockets list
         /// </summary>
-        /// <param name="clientSocket"></param>
+        /// <param name="clientModel">The client model</param>
         public void AddClientModelToConnectionList(ClientModel clientModel)
         {
             if (clientModel == null)
                 return;
 
-            if (ConnectedClientModelList.ContainsKey(clientModel.ID) == true)
+            if (ConnectedClientModelList.ContainsKey(clientModel.Id) == true)
             {
                 Console.WriteLine("This client ID already exists.");
                 return;
             }
                 
-            ConnectedClientModelList.Add(clientModel.ID, clientModel);
+            ConnectedClientModelList.Add(clientModel.Id, clientModel);
 
         }
         /// <summary>
@@ -72,10 +69,10 @@ namespace ClientServerLibrary
             if (server == null)
                 return;
 
-            if (serverList.ContainsKey(server.ID) == false)
+            if (_serverList.ContainsKey(server.Id) == false)
             {
                 Console.WriteLine("----- Adding server to manager...");
-                serverList.Add(server.ID, server);
+                _serverList.Add(server.Id, server);
             }
         }
 
@@ -85,15 +82,14 @@ namespace ClientServerLibrary
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ServerModel GetServerFromListByID(int id)
+        public ServerModel GetServerFromListById(int id)
         {
-            ServerModel model;
-            if(serverList.TryGetValue(id, out model))
+            if(_serverList.TryGetValue(id, out var model))
                 return model;
             return null;
         }
 
-        public virtual ServerModel GetAvailableServer(ServerTypes server_type) { return null; }
+        public virtual ServerModel GetAvailableServer(ServerTypes serverType) { return null; }
 
 
         /// <summary>
@@ -110,7 +106,8 @@ namespace ClientServerLibrary
         public TcpListener StartManager()
         {
             // Convert the string address to an IPAddress type
-            IPAddress localAddr = IPAddress.Parse(Address);
+            IPAddress localAddr;
+            localAddr = IPAddress.Parse(Address);
 
             // TcpListener -- create the server socket
             this.ListenerSocket = new TcpListener(localAddr, Port);
@@ -155,7 +152,7 @@ namespace ClientServerLibrary
             if (clientModel == null)
                 return;
 
-            ConnectedClientModelList.Remove(clientModel.ID);
+            ConnectedClientModelList.Remove(clientModel.Id);
         }
 
 
@@ -165,10 +162,10 @@ namespace ClientServerLibrary
             if (server == null)
                 return;
 
-            if(serverList.ContainsKey(server.ID) == true)
+            if(_serverList.ContainsKey(server.Id) == true)
             {
                 Console.WriteLine("----- Removing server from manager...");
-                serverList.Remove(server.ID);
+                _serverList.Remove(server.Id);
             }
 
         }
@@ -180,7 +177,7 @@ namespace ClientServerLibrary
         public override void Shutdown()
         {
             // First shut down all running servers...
-            foreach(KeyValuePair<int, ServerModel> server in serverList)
+            foreach(KeyValuePair<int, ServerModel> server in _serverList)
             {
                 server.Value.Shutdown();
             }
@@ -230,7 +227,7 @@ namespace ClientServerLibrary
             // You could also use server.AcceptSocket() here.
             ConnectionSocket = ListenerSocket.AcceptTcpClient();
 
-            Console.WriteLine(" ==== New client connected on ServerManager " + ID);
+            Console.WriteLine(" ==== New client connected on ServerManager " + Id);
 
             return ConnectionSocket;
         }

@@ -75,25 +75,25 @@ namespace Reversi.ViewModels
         /// <param name="s"></param>
         private void AddSquareVM(SquareModel s)
         {
-            ReversiSquareVM square_vm = new ReversiSquareVM(s);
-            ReversiGameboardVMCollection.Add(square_vm);
+            ReversiSquareVM squareVm = new ReversiSquareVM(s);
+            ReversiGameboardVMCollection.Add(squareVm);
         }
 
         public static double CanvasLeftPosition(int index, int width)
         {
-            int num_rows = NumRows;
-            int num_cols = NumCols;
+            int numRows = NumRows;
+            int numCols = NumCols;
 
-            int col = index % num_rows;
+            int col = index % numRows;
             return (col * width);
         }
 
         public static double CanvasTopPosition(int index, int height)
         {
-            int num_rows = NumRows;
-            int num_cols = NumCols;
+            int numRows = NumRows;
+            int numCols = NumCols;
 
-            int row = index / num_cols;
+            int row = index / numCols;
             return (row * height);
         }
 

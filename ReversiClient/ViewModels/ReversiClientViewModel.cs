@@ -32,10 +32,7 @@ namespace ReversiClient.ViewModels
             get => _reversiGameVM;
             set
             {
-                if (value == null)
-                    return;
-
-                if (value.Model == null)
+                if (value?.Model == null)
                     return;
 
                 _reversiGameVM = value;

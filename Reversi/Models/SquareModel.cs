@@ -42,7 +42,7 @@ namespace Reversi.Models
         {
             get
             {
-                if ((Piece == null) || (Piece.Shape == Pieceshapes.UNDEFINED))
+                if ((Piece == null) || (Piece.Shape == Pieceshapes.Undefined))
                     return false;
 
                 return true;
@@ -56,7 +56,7 @@ namespace Reversi.Models
         {
             Index = index;
             Piece = new GamePieceModel();
-            Shape = Regionshapes.UNDEFINED;
+            Shape = Regionshapes.Undefined;
         }
     }
 }
