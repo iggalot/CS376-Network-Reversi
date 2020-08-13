@@ -43,10 +43,6 @@ namespace Reversi.Models
     [Serializable]
     public class ChatModel : ClientServerInfoModel
     {
-        #region Private Properties
-        private static int _nextId = 0;
-
-        #endregion
 
         #region Public Properties
         /// <summary>

@@ -1,84 +1,81 @@
-﻿using ClientServerLibrary;
+﻿using System;
+using ClientServerLibrary;
 using Reversi.Models;
 using Reversi.ViewModels;
 using System.Net.Sockets;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace ReversiClient.ViewModels
 {
     public class ReversiClientViewModel : BaseViewModel
     {
+        private string _rcvmteststring;
+        public string RCVMTestString
+        {
+            get => _rcvmteststring;
+            set
+            {
+                _rcvmteststring = value ?? throw new ArgumentNullException(nameof(value));
+
+                OnPropertyChanged("RCVMTestString");
+            }
+        } 
+
+
         #region Private Properties
         private string _gameplayStatusString = string.Empty;
         private string _connectionStatusString = string.Empty;
         private string _packetStatusString = string.Empty;
-        private bool _isConnectedToServer;
+        private bool _isConnectedToServer = false;
+        private bool _isWaitingForGameStart = false;
 
         // new
-        private ReversiGameVM _reversiGameVM = null;
+        private ReversiGameVM _reversiReversiGameVm = null;
+        private ReversiClientModel _model;
 
         #endregion
 
         #region Public Properties
+
         /// <summary>
         /// The client model associated with this view model
         /// </summary>
-        public ReversiClientModel Model { get; private set; }
+        public ReversiClientModel Model
+        {
+            get => _model;
+            set
+            {
+                if((value == null) || (value == _model))
+                {
+                    return;
+                }
+
+                _model = value;
+
+                OnPropertyChanged("Model");
+            }
+        }
 
         /// <summary>
         /// The game view model controlled by this client window
         /// </summary>
-        public ReversiGameVM GameViewModel { 
-            get => _reversiGameVM;
+        public ReversiGameVM ReversiGameViewModel { 
+            get => _reversiReversiGameVm;
             set
             {
                 if (value?.Model == null)
                     return;
 
-                _reversiGameVM = value;
+                _reversiReversiGameVm = value;
 
-                OnPropertyChanged("GameViewModel");
+                OnPropertyChanged("ReversiGameViewModel");
                 OnPropertyChanged("GameboardVM");
             }
         }
 
-        /// <summary>
-        /// The current game being controlled by this client
-        /// </summary>
-        public ReversiGameModel CurrentGame
-        {
-            get => GetGame();
-            set
-            {
-                if (value == null)
-                    return;
 
-                // Assigns this game object to the underlying model's game object
-                SetGame(value);
 
-                // Update the corresponding game view model
-                GameViewModel = new ReversiGameVM(value);
-
-                OnPropertyChanged("CurrentGame");
-                OnPropertyChanged("GameboardDisplayString");
-            }
-        }
-
-        /// <summary>
-        /// Display the gameboard string
-        /// </summary>
-        public string GameboardDisplayString
-        {
-            get
-            {
-                if (Model.Game == null)
-                    return string.Empty;
-                else if (Model.Game.Gameboard == null)
-                    return string.Empty;
-                else
-                    return Model.Game.Gameboard.DrawGameboardString();
-            }
-        }
 
         /// <summary>
         /// The player object associated with this UI
@@ -146,7 +143,18 @@ namespace ReversiClient.ViewModels
         /// <summary>
         /// Is waiting for a response from the server.
         /// </summary>
-        public bool IsWaitingForResponse { get; set; } = false;
+        public bool IsWaitingForGameStart
+        {
+            get => _isWaitingForGameStart;
+            set
+            {
+                if (value == _isWaitingForGameStart)
+                    return;
+
+                _isWaitingForGameStart = value;
+                OnPropertyChanged("IsWaitingForGameStart");
+            }
+        }
 
         /// <summary>
         /// Is waiting for a response from the server.
@@ -176,12 +184,33 @@ namespace ReversiClient.ViewModels
         {
             Model = model;
 
+            if (model == null)
+                return;
+
             // TODO: DO we construct off of the CurrentGame constructor?:
             if (model.Game != null)
             {
-                GameViewModel = new ReversiGameVM(model.Game);
-                //CurrentGame = model.Game;                
+                SetGame(model.Game);
             }
+        }
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Copies the nonserialized data objects including sockets and threads from the original view model
+        /// To a new mode.  Needed after a Deserialize() request.
+        /// </summary>
+        /// <param name="vm">the client view model to update</param>
+        /// <param name="model">the new client model</param>
+        public void UpdateNonSerializeableObjects(ReversiClientViewModel vm, ReversiClientModel model)
+        {
+            // Must re-add the Connection socket and other nonserialized objects since
+            // these parameters on this Client Model are not serialized and are lost after transmission
+            model.ConnectionSocket = vm.Model.ConnectionSocket;
+            model.ListenerSocket = vm.Model.ListenerSocket;
+            model.ListenThread = vm.Model.ListenThread;
+            model.ClientProcess = vm.Model.ClientProcess;
+            model.ClientMainThread = vm.Model.ClientMainThread;
         }
         #endregion
 
@@ -192,16 +221,15 @@ namespace ReversiClient.ViewModels
         /// <param name="game"></param>
         private void SetGame(ReversiGameModel game)
         {
-            Model.Game = game;
-        }
-
-        /// <summary>
-        /// Retrtieve the underlying game object
-        /// </summary>
-        /// <returns></returns>
-        private ReversiGameModel GetGame()
-        {
-            return Model.Game;
+            // check for a valid game object
+            if (game == null)
+                return;
+            else
+            {
+                // assign the game model and update the game view model
+                Model.Game = game;
+                ReversiGameViewModel = new ReversiGameVM(game);
+            }
         }
 
         /// <summary>
@@ -214,10 +242,26 @@ namespace ReversiClient.ViewModels
         }
 
         /// <summary>
+        /// Display the gameboard string
+        /// </summary>
+        public string GameboardDisplayString
+        {
+            get
+            {
+                if (Model.Game == null)
+                    return string.Empty;
+                else if (Model.Game.Gameboard == null)
+                    return string.Empty;
+                else
+                    return Model.Game.Gameboard.DrawGameboardString();
+            }
+        }
+
+        /// <summary>
         /// The thread callback function that listens for data from the server and updates
         /// the various model objects.
         /// </summary>
-        public void ListenServer()
+        public void ListenServerThreadCallback()
         {
             NetworkStream stream = Model.ConnectionSocket.GetStream();
             Application.Current.Dispatcher.Invoke(() =>
@@ -259,12 +303,16 @@ namespace ReversiClient.ViewModels
                     });
                     try
                     {
-                        CurrentGame = DataTransmission.DeserializeData<ReversiGameModel>(Model.ConnectionSocket);
+                        ReversiGameModel currentGame = DataTransmission.DeserializeData<ReversiGameModel>(Model.ConnectionSocket);
 
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             PacketStatusString = "Game data received";
                         });
+
+                        // Set the game model to trigger OnProperty events.
+                        SetGame(currentGame);
+                        
                     }
                     catch
                     {
@@ -278,17 +326,24 @@ namespace ReversiClient.ViewModels
                         }
                         catch
                         {
-                            ThisPlayer = DataTransmission.DeserializeData<PlayerModel>(Model.ConnectionSocket);
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                PacketStatusString = "Player data received";
-                            });
+                            //ReversiClientModel = DataTransmission.DeserializeData<ReversiClientModel>(Model.ConnectionSocket);
+                            //Application.Current.Dispatcher.Invoke(() =>
+                            //{
+                            //    PacketStatusString = "Player data received";
+                            //});
                         }
 
                     }
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        PacketStatusString = "Client:  Data on thread detected.";
+                    });
                 }
+
             }
         }
+
+
 
         #endregion
 

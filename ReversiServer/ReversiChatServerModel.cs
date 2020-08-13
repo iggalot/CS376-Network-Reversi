@@ -2,6 +2,7 @@
 using Reversi.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace ReversiServer
 {
@@ -45,6 +46,22 @@ namespace ReversiServer
         public override void Update()
         {
             base.Update();
+        }
+        #endregion
+
+        #region Thread Callbacks
+
+        /// <summary>
+        /// The main thread for the chat server
+        /// </summary>
+        private static void ChatServerThread()
+        {
+            Console.WriteLine("... ChatServer: Chat server started");
+            while (true)
+            {
+                Thread.Sleep(3000);
+                Console.WriteLine("...ChatServer: chat server is idle");
+            }
         }
         #endregion
     }

@@ -25,20 +25,13 @@ namespace Reversi.ViewModels
         /// </summary>
         public ReversiGameModel Model {
             get => _reversiGame;
-            private set
+            set
             {
                 if (value == null)
                     return;
                 _reversiGame = value;
             } 
         }
-
-
-        /// <summary>
-        /// A test string
-        /// </summary>
-        public string TestText { get; set; } = "24";
-
 
         /// <summary>
         /// Constructor

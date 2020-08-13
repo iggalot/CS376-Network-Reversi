@@ -1,7 +1,9 @@
 ﻿using ClientServerLibrary;
+using Reversi;
 using Reversi.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -18,34 +20,19 @@ namespace ReversiServer
         #region Public Properties
 
         /// <summary>
-        /// A list of the connected clients using the playerID as an entry and the corresponding socket as the value
-        /// </summary>
-        public static Dictionary<int, TcpClient> ConnectedClients = new Dictionary<int, TcpClient>();
-
-        /// <summary>
         /// The list of currently running games, using the gameID as an entry and the ReversiGame as the value
         /// </summary>
-        public static Dictionary<int, GameModel> RunningGames = new Dictionary<int, GameModel>();
+        public static Dictionary<int, ReversiGameModel> RunningGames = new Dictionary<int, ReversiGameModel>();
 
         /// <summary>
         /// The staging area for all of our players
         /// </summary>
-        public static List<PlayerModel> WaitingRoom { get; set; } = new List<PlayerModel>();
+        public static List<ReversiClientModel> WaitingList { get; set; } = new List<ReversiClientModel>();
 
         /// <summary>
         /// A temporary staging area for when players are moved from the waiting room to the game room
         /// </summary>
-        public static List<PlayerModel> StagingArea { get; set; } = new List<PlayerModel>();
-
-        /// <summary>
-        /// The list of threads running a game server
-        /// </summary>
-        public static List<Thread> GameThreads { get; set; } = new List<Thread>();
-
-        /// <summary>
-        /// The list of threads running a chat server
-        /// </summary>
-        public static List<Thread> ChatThreads { get; set; } = new List<Thread>();
+        public static List<ReversiClientModel> StagingArea { get; set; } = new List<ReversiClientModel>();
 
         #endregion
 
@@ -77,44 +64,7 @@ namespace ReversiServer
             // TODO:  Create game model
         }
 
-        public ReversiClientModel AcceptConnection(ReversiClientModel model)
-        {
-            //    Player newplayer = DataTransmission.DeserializeData<Player>(client);
 
-            //    Console.WriteLine("... GameServer: Connection accepted for " + newplayer.Name + " as " + newplayer.IDType);
-
-            //    if (client != null)
-            //    {
-            //        // Prepare a connection acknowledgement from the server to the client
-            //        int newID = NextId;
-            //        NextId++; // increment the next IDType counter
-            //        newplayer.PlayerID = newID;
-
-            //        // Create the packet for an accepted connection response, returning the player name and the new IDType.
-            //        if (newID % 2 == 0)
-            //            newplayer.IDType = Players.PLAYER1;
-            //        else
-            //            newplayer.IDType = Players.PLAYER2;
-
-            //        try
-            //        {
-            //            DataTransmission.SerializeData<Player>(newplayer, client);
-            //        }
-            //        catch
-            //        {
-            //            throw new SocketException();
-            //        }
-
-            //        // Add the user as a player to the waiting room.  Player number is undetermined at this point,
-            //        // but will be set when the game actually begins.
-            //        // Add to the connected sockets list
-            //        ConnectedClients.Add(newID, client);
-
-            //        // Add the player to the waiting room
-            //        WaitingRoom.Add(newplayer);
-            //    }
-            return model;
-        }
 
         /// <summary>
         /// Refusing a connection.
@@ -140,12 +90,12 @@ namespace ReversiServer
             //    }
             //}
 
-            //Remove the player from the WaitingRoom
-            //foreach (PlayerModel p in WaitingRoom)
+            //Remove the player from the WaitingList
+            //foreach (PlayerModel p in WaitingList)
             //{
             //    if (p.Socket == client)
             //    {
-            //        WaitingRoom.Remove(p);
+            //        WaitingList.Remove(p);
             //        break;
             //    }
             //}
@@ -154,55 +104,20 @@ namespace ReversiServer
             return model;
         }
 
-        /// <summary>
-        /// Function to determine whether a connection should be accepted or refused.
-        /// </summary>
-        /// <param name="model">The client model</param>
-        /// <param name="status">The status odf the connection attempt to be returned</param>
-        public ReversiClientModel AcceptOrRefuseConnection(ReversiClientModel model, out ConnectionStatusTypes status)
-        {
-            status = ConnectionStatusTypes.StatusConnectionUnknown;
-            //int timeoutCount = 0;
-            //while ((timeoutCount > 150) || (!client.GetStream().DataAvailable))
-            //{
-            //    Thread.Sleep(200);
-            //    timeoutCount++;
-            //}
-
-            //if (timeoutCount > 150)
-            //{
-            //    Console.WriteLine("Connection has timedout");
-            //    return;
-            //}
-
-            //// Send a connection declined message for too many connections
-            //if (ConnectedClients.Count > GlobalSettings.MaxConnections)
-            //{
-            //    RefuseConnection(client);
-            //}
-            //// Otherwise accept the connection
-            //else
-            //{
-            //    AcceptConnection(client);
-            //}
-            return model;
-        }
-
-
         #endregion
 
         #region  Private Methods
-        /// <summary>
-        /// Returns the socket associated with a playerID.
-        /// </summary>
-        /// <param name="playerId"></param>
-        /// <returns></returns>
-        private static TcpClient GetSocketByPlayerId(int playerId)
-        {
-            ConnectedClients.TryGetValue(playerId, out var clientSocket);
+        ///// <summary>
+        ///// Returns the socket associated with a playerID.
+        ///// </summary>
+        ///// <param name="playerId"></param>
+        ///// <returns></returns>
+        //private static TcpClient GetSocketByPlayerId(int playerId)
+        //{
+        //    ConnectedClients.TryGetValue(playerId, out var clientSocket);
 
-            return clientSocket;
-        }
+        //    return clientSocket;
+        //}
 
         /// <summary>
         /// Returns the socket associated with a playerID.
@@ -220,95 +135,36 @@ namespace ReversiServer
         #region Thread Callbacks
 
         /// <summary>
-        /// The main thread for the chat server
-        /// </summary>
-        private static void ChatServerThread()
-        {
-            Console.WriteLine("... ChatServer: Chat server started");
-            while(true)
-            {
-                Thread.Sleep(3000);
-                Console.WriteLine("...ChatServer: chat server is idle");
-            }
-        }
-
-        /// <summary>
         /// The handler server thread
         /// </summary>
         public override void HandleServerThread()
         {
-            GameServerThread();
-        }
+            TcpClient client;
 
-        /// <summary>
-        ///  The main thread for the game server
-        /// </summary>
-        private static void GameServerThread()
-        {
+            //TODO: Detect if there are any dead sockets.  If so, revise the count.
+            // Now listen for connections
+            // While there are less than total number of players...continue listening for new players
+            while (ShouldShutdown == false)
+            {
+                //// Check if the Socket is still connected.  If not, exit and gracefully shutdown the thread.
+                //foreach (KeyValuePair<int, TcpClient> connection in ConnectedClients)
+                //{
+                //    if (!DataTransmission.SocketConnected((connection.Value).Client))
+                //    {
+                //        // TODO:  What to do if a socket has closed
+                //        // 1. Notify other members of the game that a player has left
+                //        // 2. Pause the game...
+                //        // 3. Remove the player from the game and chat room
+                //        //      a.  Are there any players remaining in the game?
+                //        // 4. Resend the updated board to remaining players...
+                //        // 5. Fill empty game slots with new connections...
+                //        //      a.  If user name matches, allow them to reconnect?
+                //    }
+                //}
+            }
 
-
-
-            //// Start our communication server listening for players
-            //GameServer = new ServerModel(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer);
-
-            //// Listen for a connection, and send acknowledgement when one is made
-            //Console.WriteLine("... GameServer: Game server started. Listening for connections...");
-
-            //TcpClient client;
-
-            ////TODO: Detect if there are any dead sockets.  If so, revise the count.
-            //// Now listen for connections
-            //// While there are less than total number of players...continue listening for new players
-            //while (!ServerShouldShutDown)
-            //{
-            //    // Check if the Socket is still connected.  If not, exit and gracefully shutdown the thread.
-            //    foreach (KeyValuePair<int, TcpClient> connection in ConnectedClients)
-            //    {
-            //        if (!DataTransmission.SocketConnected((connection.Value).Client))
-            //        {
-            //            // TODO:  What to do if a socket has closed
-            //            // 1. Notify other members of the game that a player has left
-            //            // 2. Pause the game...
-            //            // 3. Remove the player from the game and chat room
-            //            //      a.  Are there any players remaining in the game?
-            //            // 4. Resend the updated board to remaining players...
-            //            // 5. Fill empty game slots with new connections...
-            //            //      a.  If user name matches, allow them to reconnect?
-            //        }
-            //    }
-
-            //    //PacketInfo packet;
-            //    client = GameServer.ListenForConnections();
-
-            //    // If no socket, return to listening.
-            //    if (client == null)
-            //        continue;
-
-            //    // Acknowledge the connection and determine if we should accept it or refuse it.
-            //    AcknowledgeConnection(client);
-
-            //    // If we have two players currently waiting, create a game for them
-            //    // Must make sure that count is greater than 0
-            //    if ((WaitingRoom.Count % GlobalSettings.PlayersPerGame == 0) && (WaitingRoom.Count > GlobalSettings.PlayersPerGame-1))
-            //    {
-            //        Console.WriteLine("... GameServer: " + ConnectedClients.Count.ToString() + " connections made ... Ready to begin game");
-
-            //        MovePlayersFromWaitingToStaging();
-
-            //        // Create the game thread to handle this matchup and
-            //        // Populate the players                    
-            //        Thread gameThread = new Thread(InitializeMatchup);
-
-            //        // Start the game
-            //        gameThread.Start(StagingArea);
-            //    } else
-            //    {
-            //        Console.WriteLine("... GameServer: " + ConnectedClients.Count.ToString() + " connections currently. Waiting for additional connections.");
-            //    }
-            //}
-
-            //// Once the game is over, shutdown the server
-            //GameServer.Shutdown();
+            // Once the game is over, shutdown the server
+            Shutdown();
         }
 
         /// <summary>
@@ -318,63 +174,55 @@ namespace ReversiServer
         {
             for(int i = ReversiSettings.ReversiPlayersPerGame - 1; i>=0; i--)
             {
-                StagingArea.Add(WaitingRoom[i]);
-                WaitingRoom.RemoveAt(i);
+                StagingArea.Add(WaitingList[i]);
+                WaitingList.RemoveAt(i);
             }
         }
 
-        /// <summary>
-        /// Moves a player from the staging area to the gameroom.
-        /// </summary>
-        private static void MovePlayersFromStagingToGame()
-        {
-            for (int i = ReversiSettings.ReversiPlayersPerGame - 1; i >= 0; i--)
-            {
-                StagingArea.RemoveAt(i);
-            }
-        }
+        ///// <summary>
+        ///// Removes a player from the staging area to the gameroom.
+        ///// </summary>
+        //private static void RemovePlayersFromStaging()
+        //{
+        //    for (int i = ReversiSettings.ReversiPlayersPerGame - 1; i >= 0; i--)
+        //    {
+        //        StagingArea.RemoveAt(i);
+        //    }
+        //}
 
 
 
         /// <summary>
         /// The main thread routine for each game
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="data">The game staging area list of client models</param>
         private static void InitializeMatchup(object data)
         {
-            List<PlayerModel> temp = (List<PlayerModel>)data;
-            List<PlayerModel> players;
-            players = new List<PlayerModel>();
-
-            foreach (PlayerModel p in temp)
-                players.Add(p);
+            List<ReversiClientModel> clientModels = (List<ReversiClientModel>)data;
 
             // Move players to the gameroom
-            MovePlayersFromStagingToGame();
+            Console.WriteLine("... GameServer: Matchup pairing complete. Game is ready to start.");
 
-            //// Collect the sockets of the connected players
-            //List<TcpClient> sockets = GatherPlayerSocketList(players);
 
-            //if (sockets.Count != GlobalSettings.PlayersPerGame)
-            //{
-            //    Console.WriteLine("Error retrieving sockets for all players of this game.");
-            //    return;
-            //}
+            //// Create the game instance and play the game between the players...
+            ReversiGameModel game = new ReversiGameModel(clientModels);
+            RunningGames.Add(game.GameId, game);  // add the game to the dictionary of running games
 
-            //Console.WriteLine("... GameServer: Matchup pairing complete.");
+            Console.WriteLine("... GameServer: Creating game thread (id: " + game.GameId.ToString() + ") Beginning game...");
+//            Console.WriteLine("..... Game #" + game.GameId + " Participants\n" + game.DisplayGamePlayers());
 
-            //// Create the game instance and play the game between the two players...
-            //ReversiGameModel game = new ReversiGameModel(players);
-            //RunningGames.Add(game.GameID, game);  // add the game to the dictionary of running games
+            
+            // Send the game object to each of the clients.
+            foreach (ReversiClientModel client in game.CurrentPlayersList )
+            {
+                // Send the game data to each of the players
+                Console.WriteLine("Sending initial game matchup to players");
+                DataTransmission.SerializeData<ReversiGameModel>(game, client.ConnectionSocket);
 
-            //Console.WriteLine("... GameServer: Creating game thread (id: " + game.GameID.ToString() + ") Beginning game...");
+                StagingArea.Remove(client);
+            }
 
-            //// Send the game object to each of the players.
-            //foreach (TcpClient client in sockets)
-            //{
-            //    // Send the game data to each of the players
-            //    DataTransmission.SerializeData<ReversiGameModel>(game, client);
-            //}
+            int temp = game.CurrentPlayersList.Length;
 
             ////// The main game loop. Process individual moves here
             //while(!game.GameIsOver)
@@ -391,7 +239,7 @@ namespace ReversiServer
             //            DataTransmission.SerializeData<ReversiGameModel>(game, client);
             //        }
             //    }
-                
+
             //    // Listen for moves from each player
             //    foreach (TcpClient client in sockets)
             //    {
@@ -444,27 +292,100 @@ namespace ReversiServer
         //    return temp;
         //}
 
-        //private void RunUpdateThread()
-        //{
-        //    Console.WriteLine("- Update thread for server " + ID + " created");
-        //    while (!ShouldShutdown)
-        //    {
-        //        // If we have clients currently connected, check for updates
-        //        if (ConnectedClientModelList.Count > 0)
-        //        {
-        //            Console.WriteLine("Updating server " + ID);
-        //            this.Update();
-        //        }
+        public override void Update()
+        {
+            var temp = ConnectedClientModelList;
 
-        //        // Cause the the update thread to sleep for a specified duration
-        //        Thread.Sleep(ServerSettings.ServerUpdatePulseDelay);
+            ReversiClientModel client = (ReversiClientModel)GetOldestClientModelFromConnectedList();
+            Console.WriteLine(client.ClientPlayer.DisplayPlayerInfo());
 
-        //    }
 
-        //    // End the running thread
+            if (!WaitingList.Contains(client))
+            {
+                WaitingList.Add(client);
+                RemoveClientModelFromServer(client);
+            }
 
-        //    UpdateThread.Join();
-        //}
+            // If insufficient players have joined, add to wait list...
+            if (WaitingList.Count < ReversiSettings.ReversiPlayersPerGame)
+            {
+                // Do nothing here
+            }
+
+
+            // If two players and no running game, start the game
+            if ((WaitingList.Count == ReversiSettings.ReversiPlayersPerGame) && RunningGames.Count == 0)
+            {
+                Console.WriteLine("-- GameServer: Creating 1st game");
+
+                MovePlayersFromWaitingToStaging();
+
+                // Create the game thread to handle this matchup and
+                // Populate the players                    
+                Thread gameThread = new Thread(InitializeMatchup);
+
+                // Start the game
+                gameThread.Start(StagingArea);
+            }
+
+            // If a game is already running, add the player to the waiting list...
+            if (RunningGames.Count > 0)
+            {
+                Console.WriteLine("-- GameServer:  A game is already running so add client to waiting list");
+            }
+
+            // If someone already in the waiting list, and another player joins, allow option for players to start their own game...
+            if (WaitingList.Count == ReversiSettings.ReversiPlayersPerGame)
+            {
+                Console.WriteLine("-- Sending option to Wait List for additional games to be created...");
+                // TODO:  Send choice to waiting list about whether to keep waiting or to start a new game...
+                // Continue waiting...
+                // Or start a game with waiting list 
+            }
+
+            string str = string.Empty;
+            str += "-------------------------------\n";
+            foreach (ReversiClientModel item in WaitingList)
+            {
+                str += item.ClientPlayer.PlayerId + " -- " + item.ClientPlayer.Name + "\n";
+            }
+            str += "-------------------------------\n";
+            Console.WriteLine(str);
+        }
+
+        public override void RunUpdateThread()
+        {
+            // TODO:  Establish the updating that is required by a reversi game server...
+            // 1. Check for empty (but started) games
+            // 2. If one player missing...pause game and notify other user
+            //      a.  Allow a new player to take over
+            // 3. If both players missing... close the gamee?
+
+
+
+
+
+
+
+            Console.WriteLine("- Update thread for server " + Id + " created");
+            while (!ShouldShutdown)
+            {
+                // If we have clients currently connected, check for updates
+                if (ConnectedClientModelList.Count > 0)
+                {
+                    Console.WriteLine("Updating server " + Id);
+                    this.Update();
+                }
+
+                // Cause the the update thread to sleep for a specified duration
+                Thread.Sleep(ServerSettings.ServerUpdatePulseDelay);
+
+            }
+
+            // End the running thread
+
+            UpdateThread.Join();
+        }
 
         #endregion
 

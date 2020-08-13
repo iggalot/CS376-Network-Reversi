@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
+using Reversi;
 using Settings;
 
 namespace ReversiServer
@@ -22,9 +23,9 @@ namespace ReversiServer
         public ReversiClientModel AcceptConnection(ReversiClientModel newModel)
         {
 
-            // And immediately return it without updating the ID
+            // And updating the ID and status
             newModel.CurrentStatus = ConnectionStatusTypes.StatusConnectionAccepted;
-
+            newModel.ClientPlayer.PlayerId = newModel.NextId();   // updates the players ID here.
             try
             {
                 DataTransmission.SerializeData<ReversiClientModel>(newModel, newModel.ConnectionSocket);
@@ -77,34 +78,20 @@ namespace ReversiServer
                 return null;
             }
 
-            int timeoutCount = 0;
-            while ((timeoutCount < ServerSettings.MaxServerTimeoutCount) || (!model.ConnectionSocket.GetStream().DataAvailable))
-            {
-                Thread.Sleep(200);
-                timeoutCount++;
-            }
-
-            if (timeoutCount > ServerSettings.MaxServerTimeoutCount)
-            {
-                Console.WriteLine("Connection has timed out");
-                status = ConnectionStatusTypes.StatusConnectionError;
-                return null;
-            }
-
             // Send a connection declined message for too many connections
             if (ConnectedClientModelList.Count > ServerSettings.MaxServerConnections)
             {
                 model = RefuseConnection(model);
                 status = ConnectionStatusTypes.StatusConnectionRefused;
-                model.CurrentStatus = status;
             }
             // Otherwise accept the connection
             else
             {
                 model = AcceptConnection(model);
                 status = ConnectionStatusTypes.StatusConnectionAccepted;
-                model.CurrentStatus = status;
             }
+
+            model.CurrentStatus = status;
 
             return model;
         }
@@ -128,7 +115,7 @@ namespace ReversiServer
                 }
 
                 // Check for enough clients to place on a server
-                Console.WriteLine("RSM currently has " + ConnectedClientModelList + " connected to it...");
+                Console.WriteLine("RSM currently has " + ConnectedClientModelList.Count + " clients connected to it...");
 
                 // Get the oldest client
                 ReversiClientModel oldestClientModel = (ReversiClientModel)GetOldestClientModelFromConnectedList();

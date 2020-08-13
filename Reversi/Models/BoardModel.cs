@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using System.Data.Common;
 
 namespace Reversi.Models
 {
@@ -297,10 +299,10 @@ namespace Reversi.Models
             Cols = cols;
             Rows = rows;
 
-            var numsquares = Rows * Cols;
+            var numSquares = Rows * Cols;
 
             // Create our collection of game squares
-            Squares = new SquareModel[numsquares];
+            Squares = new SquareModel[numSquares];
 
             // Create a game square object for each index
             for (int i = 0; i < Rows; i++)
@@ -319,5 +321,12 @@ namespace Reversi.Models
             }
         }
         #endregion
+
+        public string DisplayGameboardStats()
+        {
+            string str = string.Empty;
+            str += "Gameboard (" + Rows*Cols + " squares): " + Rows.ToString() + " rows by " + Cols.ToString() + Cols.ToString() + "\n";
+            return str;
+        }
     }
 }

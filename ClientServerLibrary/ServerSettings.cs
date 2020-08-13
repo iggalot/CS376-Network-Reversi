@@ -15,6 +15,6 @@
         /// <summary>
         /// The default delay between update cycles on the update thread
         /// </summary>
-        public const int ServerUpdatePulseDelay = 2000;
+        public const int ServerUpdatePulseDelay = 500;
     }
 }

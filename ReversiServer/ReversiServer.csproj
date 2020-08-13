@@ -48,7 +48,6 @@
     <Compile Include="ReversiChatServerModel.cs" />
     <Compile Include="ReversiGameServerModel.cs" />
     <Compile Include="ReversiServerManagerModel.cs" />
-    <Compile Include="ReversiSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

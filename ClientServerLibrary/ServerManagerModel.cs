@@ -144,8 +144,6 @@ namespace ClientServerLibrary
 
         #endregion
 
-        #region Private Methods
-
 
         public void RemoveClientModelFromConnectedList(ClientModel clientModel)
         {
@@ -187,23 +185,7 @@ namespace ClientServerLibrary
         }
 
 
-        /// <summary>
-        /// Display the connected clients information
-        /// </summary>
-        /// <returns></returns>
-        public string ListConnectedClients()
-        {
-            string str = string.Empty;
-            str += " ---------------------------------------------------\n";
-            foreach(KeyValuePair<int,ClientModel> item in ConnectedClientModelList)
-            {
-                str += item.Key.ToString() + " --- " + item.Value.ListInfo() + "\n";
-            }
-            str += " ---------------------------------------------------\n";
 
-            return str;
-        }
-        #endregion
 
         #region IConnectionHandler Interface Implementation
         /// <summary>

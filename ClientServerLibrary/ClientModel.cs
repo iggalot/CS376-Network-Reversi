@@ -37,8 +37,8 @@ namespace ClientServerLibrary
         public ClientModel() : base(null,null)
         {
             // Store the client process
-            ClientProcess = Process.GetCurrentProcess();
-            ClientMainThread = Thread.CurrentThread;
+            this.ClientProcess = Process.GetCurrentProcess();
+            this.ClientMainThread = Thread.CurrentThread;
         }
 
         /// <summary>
@@ -49,18 +49,20 @@ namespace ClientServerLibrary
         public ClientModel(TcpClient client, TcpListener listener) : base(client, listener)
         {
             // Store the client process
-            ClientProcess = Process.GetCurrentProcess();
-            ClientMainThread = Thread.CurrentThread;
+            this.ClientProcess = Process.GetCurrentProcess();
+            this.ClientMainThread = Thread.CurrentThread;
         }
 
         /// <summary>
         /// A basic copy constructor of a clientModel
         /// </summary>
         /// <param name="clientModel"></param>
-        public ClientModel(ClientModel clientModel) : base()
+        public ClientModel(ClientModel clientModel) : base(clientModel.ConnectionSocket, clientModel.ListenerSocket)
         {
-            ClientProcess = clientModel.ClientProcess;
-            ClientMainThread = clientModel.ClientMainThread;
+            this.ClientProcess = clientModel.ClientProcess;
+            this.ClientMainThread = clientModel.ClientMainThread;
+            this.ListenThread = clientModel.ListenThread;
+
             Id = clientModel.Id;
             CurrentStatus = clientModel.CurrentStatus;
             ShouldShutdown = clientModel.ShouldShutdown;

@@ -29,7 +29,10 @@ namespace ReversiServer
             {
                 // Listen for connections
                 TcpClient newTcpClientSocket = Manager.ListenForConnections();
-                ReversiClientModel newTcpClientModel = new ReversiClientModel(newTcpClientSocket, null);
+
+                // Receive the response from the client, and readd the connection socket to the object since it's not serialized.
+                ReversiClientModel newTcpClientModel = DataTransmission.DeserializeData<ReversiClientModel>(newTcpClientSocket);
+                newTcpClientModel.ConnectionSocket = newTcpClientSocket;
 
                 // Determine what we should do with the connection and send the appropriate response
                 newTcpClientModel = Manager.AcceptOrRefuseConnection(newTcpClientModel, out var status);

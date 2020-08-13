@@ -51,5 +51,11 @@ namespace Reversi.Models
             IdType = idType;
             Name = name;
         }
+
+        public string DisplayPlayerInfo()
+        {
+            string str = string.Empty;
+            return (PlayerId + "  " + Name + " --- " + IdType);
+        }
     }
 }

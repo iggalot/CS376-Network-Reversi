@@ -23,6 +23,15 @@ namespace Reversi.Models
         /// </summary>
         public GameMoveModel LastMove { get; set; }
 
+        /// <summary>
+        /// The time when a player joined the wait list
+        /// </summary>
+        public DateTime TimeConnectedWhen { get; set; }
+
+        /// <summary>
+        ///  The time a player has been waiting
+        /// </summary>
+        public TimeSpan TimeWaiting => TimeConnectedWhen - DateTime.Now;
 
         #endregion
 
@@ -42,6 +51,7 @@ namespace Reversi.Models
             Game = null;
             LastMove = null;
             ClientPlayer = new PlayerModel();
+            TimeConnectedWhen = DateTime.Now;
         }
 
         public ReversiClientModel(ClientModel clientModel, string name) : base(clientModel)
@@ -49,16 +59,12 @@ namespace Reversi.Models
             Game = null;
             LastMove = null;
             ClientPlayer = new PlayerModel(clientModel.Id, Players.Undefined, name);
+
             this.ClientProcess = clientModel.ClientProcess;
             this.ClientMainThread = clientModel.ClientMainThread;
+            this.TimeConnectedWhen = DateTime.Now;
         }
 
         #endregion
-
-        #region Public Methods
-
-
-        #endregion
-
     }
 }

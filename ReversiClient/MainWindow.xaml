@@ -14,6 +14,7 @@
     
     <Grid>
         <StackPanel Orientation="Vertical">
+            <Label Content="{Binding RCVMTestString, FallbackValue=Error}" FontSize="14"></Label>
             <StackPanel Name="spMakeConnection" Orientation="Vertical" 
                         Visibility="{Binding IsConnectedToServer, 
                             Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=INVERT}">
@@ -22,7 +23,8 @@
                 <Label Content="{Binding ConnectionStatusString}"></Label>
                 <Button Content="Connect to Server" HorizontalAlignment="Left" Width="300" Click="Button_ConnectClick"></Button>
             </StackPanel>
-            <StackPanel Name="spActiveGameRegion" Width="800" Height="500" 
+
+            <StackPanel Name="spActiveGameRegion"
                         Visibility="{Binding IsConnectedToServer, 
                         Converter={StaticResource BoolToVisibilityConverter}}" 
                         Orientation="Horizontal">
@@ -30,60 +32,64 @@
                     <StackPanel Orientation="Vertical" Background="Orange">
                         <StackPanel Orientation="Horizontal">
                             <Label HorizontalAlignment="Left" Content="Game ID: " FontSize="14"/>
-                            <Label HorizontalAlignment="Left" Content="{Binding CurrentGame.GameID, FallbackValue=Pending...}" FontSize="14"/>
+                            <Label Content="{Binding ReversiGameViewModel.Model.GameId, FallbackValue=Pending}" FontSize="14"></Label>
                             <Label HorizontalAlignment="Right" Content="Your ID#" Height="40" FontSize="14"/>
-                            <Label HorizontalAlignment="Right" Content="{Binding ThisPlayer.PlayerID, FallbackValue=Pending}" FontSize="14" />
-                            <Label HorizontalAlignment="Right" Content="{Binding ThisPlayer.Name, FallbackValue=Pending}" FontSize="14"/>
+                            <Label Content="{Binding ThisPlayer.PlayerId, FallbackValue=Error}" FontSize="14"></Label>
+                            <Label Content="{Binding ThisPlayer.Name, FallbackValue=Error}" FontSize="14"></Label>
                         </StackPanel>
+
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
-                            <Label HorizontalAlignment="Left" Content="Current Player: " FontSize="14"/>
-                            <Label HorizontalAlignment="Left" Content="{Binding CurrentGame.CurrentPlayer, FallbackValue=Pending...}" FontSize="14"/>
+                            <StackPanel Background="LightGray" Orientation="Horizontal">
+                                <Label Content="Player1 ID: "/>
+                                <Label Content="{Binding ReversiGameViewModel.Model.CurrentPlayersList[0].ClientPlayer.PlayerId, FallbackValue=Error}" FontSize="14"></Label>
+                                <Label Content="{Binding ReversiGameViewModel.Model.CurrentPlayersList[0].ClientPlayer.Name, FallbackValue=Error}" FontSize="14"></Label>
 
+                            </StackPanel>
+                            <StackPanel Background="Cyan" Orientation="Horizontal">
+                                <Label Content="Player2 ID: "/>
+                                <Label Content="{Binding ReversiGameViewModel.Model.CurrentPlayersList[1].ClientPlayer.PlayerId, FallbackValue=Error}" FontSize="14"></Label>
+                                <Label Content="{Binding ReversiGameViewModel.Model.CurrentPlayersList[1].ClientPlayer.Name, FallbackValue=Error}" FontSize="14"></Label>
+
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label HorizontalAlignment="Left" Content="Current Player: " FontSize="14"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Label Name="lbCurrentMove" Content="Move request here"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Current Move: "/>
+                            <Label Name="lbIndex" Content="TextBlock here"/>
+                        </StackPanel>
+
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Name="tbIndex" Height="25" Width="100"/>
+                            <Button Height="40" Width="100" Content="Submit Move" Click="Button_SubmitMoveClick"></Button>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Background="LightBlue">
+                            <Label Content="Status: "></Label>
+                            <Label Width ="300" Content="{Binding GameplayStatusString}"></Label>
                         </StackPanel>
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel Background="LightGray" Orientation="Horizontal">
-                            <Label Content="Player1 ID: "/>
-                            <Label Name="lbPlayer1ID" Content="{Binding CurrentGame.CurrentPlayersList[0].PlayerID}"/>
-                            <Label Name="lbPlayer1Name" Content="{Binding CurrentGame.CurrentPlayersList[0].Name}"/>
-                        </StackPanel>
-                        <StackPanel Background="Cyan" Orientation="Horizontal">
-                            <Label Content="Player2 ID: "/>
-                            <Label Name="lbPlayer2ID" Content="{Binding CurrentGame.CurrentPlayersList[1].PlayerID}"/>
-                            <Label Name="lbPlayer2Name" Content="{Binding CurrentGame.CurrentPlayersList[1].Name}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal">
-                        <Label Name="lbCurrentMove" Content="Move request here"/>
-                    </StackPanel>
-                    
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Current Move: "/>
-                        <Label Name="lbIndex" Content="TextBlock here"/>
-                    </StackPanel>
-
-
-                    <StackPanel Orientation="Horizontal">
-                        <TextBox Name="tbIndex" Height="25" Width="100"/>
-                        <Button Height="40" Width="100" Content="Submit Move" Click="Button_SubmitMoveClick"></Button>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Background="LightBlue">
-                        <Label Content="Status: "></Label>
-                        <Label Width ="300" Content="{Binding GameplayStatusString}"></Label>
-                    </StackPanel>
-                    <TextBlock Background="Beige" Text="{Binding GameboardDisplayString, FallbackValue=Pending...}" Width="400" Height="400"></TextBlock>
                 </StackPanel>
-
-                <StackPanel Orientation="Horizontal">
-                    <view:ReversiGameView DataContext="{Binding GameViewModel}"/>
-                </StackPanel>
-                
+                        </StackPanel>
+            <StackPanel Orientation="Horizontal"                                 
+                    Visibility="{Binding ReversiGameViewModel.Model.GameHasStarted, 
+                    Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Background="Beige" Text="{Binding GameboardDisplayString, FallbackValue=Pending...}" Width="200" Height="200"/>
+                <view:ReversiGameView DataContext="{Binding ReversiGameViewModel}" HorizontalAlignment="Left"/>
             </StackPanel>
 
-            </StackPanel>
+        </StackPanel>
         <StackPanel Orientation="Horizontal" Background="LightGreen" VerticalAlignment="Bottom">
             <Label Content="PACKET STATUS: "/>
             <Label Width="300" Content="{Binding PacketStatusString}"></Label>
