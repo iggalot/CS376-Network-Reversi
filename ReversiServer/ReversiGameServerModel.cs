@@ -139,7 +139,6 @@ namespace ReversiServer
         /// </summary>
         public override void HandleServerThread()
         {
-            TcpClient client;
 
             //TODO: Detect if there are any dead sockets.  If so, revise the count.
             // Now listen for connections
@@ -209,11 +208,11 @@ namespace ReversiServer
             RunningGames.Add(game.GameId, game);  // add the game to the dictionary of running games
 
             Console.WriteLine("... GameServer: Creating game thread (id: " + game.GameId.ToString() + ") Beginning game...");
-//            Console.WriteLine("..... Game #" + game.GameId + " Participants\n" + game.DisplayGamePlayers());
+            //            Console.WriteLine("..... Game #" + game.GameId + " Participants\n" + game.DisplayGamePlayers());
 
-            
+
             // Send the game object to each of the clients.
-            foreach (ReversiClientModel client in game.CurrentPlayersList )
+            foreach (ReversiClientModel client in game.CurrentPlayersList)
             {
                 // Send the game data to each of the players
                 Console.WriteLine("Sending initial game matchup to players");
@@ -224,56 +223,66 @@ namespace ReversiServer
 
             int temp = game.CurrentPlayersList.Length;
 
-            ////// The main game loop. Process individual moves here
-            //while(!game.GameIsOver)
-            //{
-            //    // If the current turn is valid and complete, switch to the next player
-            //    if (game.TurnComplete)
-            //    {
-            //        game.NextPlayer();
-            //        game.TurnComplete = false;
+            //// The main game loop. Process individual moves here
+            List<TcpClient> sockets = game.GetPlayersSocketList();
+            while (!game.GameIsOver)
+            {
+                // If the current turn is valid and complete, switch to the next player
+                if (game.TurnComplete)
+                {
+                    game.NextPlayer();
+                    game.TurnComplete = false;
 
-            //        // Send the update gameboard to each player
-            //        foreach(TcpClient client in sockets)
-            //        {
-            //            DataTransmission.SerializeData<ReversiGameModel>(game, client);
-            //        }
-            //    }
+                    SendGameToAll(game);
+                }
 
-            //    // Listen for moves from each player
-            //    foreach (TcpClient client in sockets)
-            //    {
-            //        if(client == null)
-            //        {
-            //            // TODO: Determine which client has disconnected
-            //            Console.WriteLine("GameServer: (GameID #" + game.GameID + ") A client has disconnected");
-            //        }
-            //        NetworkStream stream = client.GetStream();
+                foreach (TcpClient client in sockets)
+                {
+                    if (!SocketConnected(client.Client))
+                    {
+                        Console.WriteLine("GameServer: (GameID #" + game.GameId + ") A client has disconnected");
+                    }
+                    NetworkStream stream = client.GetStream();
 
-            //        if (stream.DataAvailable)
-            //        {
-            //            GameMoveModel move = DataTransmission.DeserializeData<GameMoveModel>(client);
-            //            Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Player ID#" + move.ByPlayer + " move request received");
+                    if (stream.DataAvailable)
+                    {
+                        GameMoveModel move = DataTransmission.DeserializeData<GameMoveModel>(client);
+                        Console.WriteLine("GameServer: (GameID #" + game.GameId + ") Player ID#" + move.ByPlayer + " move request received");
 
-            //            if(move.ByPlayer == game.CurrentPlayer)
-            //            { 
-            //                game.CurrentMoveIndex = move.MoveIndex;
+                        if (move.ByPlayer == game.CurrentPlayer)
+                        {
+                            game.CurrentMoveIndex = move.MoveIndex;
 
-            //                // Check that the move was valid.
-            //                if (game.PlayTurn())
-            //                {
-            //                    Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Player ID#" + move.ByPlayer + " submitted a valid move");
-            //                    game.TurnComplete = true;
-            //                }
-            //            } else
-            //            {
-            //                Console.WriteLine("GameServer: (GameID #" + game.GameID + ") Move received by opponent.  Ignoring...");
-            //            }
-            //        }
-            //    }
+                            // Check that the move was valid.
+                            if (game.PlayTurn())
+                            {
+                                Console.WriteLine("GameServer: (GameID #" + game.GameId + ") Player ID#" + move.ByPlayer + " submitted a valid move");
+                                game.TurnComplete = true;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("GameServer: (GameID #" + game.GameId + ") Move received by opponent.  Ignoring...");
+                        }
+                    }
 
+                }
+            }
+        }
 
-            //}
+        /// <summary>
+        /// Sends the current game state to all current players...
+        /// </summary>
+        /// <param name="game"></param>
+        private static void SendGameToAll(ReversiGameModel game)
+        {
+            // Send the game object to each of the clients.
+            foreach (ReversiClientModel client in game.CurrentPlayersList)
+            {
+                // Send the game data to each of the players
+                Console.WriteLine("Sending initial game matchup to players");
+                DataTransmission.SerializeData<ReversiGameModel>(game, client.ConnectionSocket);
+            }
         }
 
         //private static List<TcpClient> GatherPlayerSocketList(List<PlayerModel> p)

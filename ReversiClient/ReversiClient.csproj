@@ -126,10 +126,6 @@
       <Project>{c3eaa10d-c3c0-43e5-aa6b-6382372ecbf1}</Project>
       <Name>Reversi</Name>
     </ProjectReference>
-    <ProjectReference Include="..\StateMachine\StateMachine.csproj">
-      <Project>{532fb2bc-c59b-4927-afd1-4c939ee24b9b}</Project>
-      <Name>StateMachine</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

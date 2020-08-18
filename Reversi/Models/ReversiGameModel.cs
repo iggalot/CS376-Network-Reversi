@@ -55,6 +55,15 @@ namespace Reversi.Models
             {
                 // create our empty players
                 CurrentPlayersList[i] = list[i];
+
+                if (i % 2 == 0)
+                    ((ReversiClientModel) CurrentPlayersList[i]).ClientPlayer.IdType = Players.Player1;
+                else if (i % 2 == 1)
+                    ((ReversiClientModel)CurrentPlayersList[i]).ClientPlayer.IdType = Players.Player2;
+                else
+                {
+                    ((ReversiClientModel)CurrentPlayersList[i]).ClientPlayer.IdType = Players.Undefined;
+                }
             }
 
             // Setup the gameboard
@@ -289,11 +298,11 @@ namespace Reversi.Models
             //            MakePlayerMove(Players[0], 12);
 
             // Test scenario for our board
- //           Gameboard.AddPiece(18, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
- //           Gameboard.AddPiece(17, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[0]));
- //           Gameboard.AddPiece(19, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
- //           Gameboard.AddPiece(21, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
- //           Gameboard.AddPiece(12, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
+            Gameboard.AddPiece(18, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
+            Gameboard.AddPiece(17, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[0]).ClientPlayer));
+            Gameboard.AddPiece(19, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
+            Gameboard.AddPiece(21, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
+            Gameboard.AddPiece(12, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
             //MessageBox.Show(Gameboard.DrawGameboard());
 
             //// The main game loop -- 
@@ -329,9 +338,9 @@ namespace Reversi.Models
             return true;
         }
 
-        public override void PlayTurn()
+        public override bool PlayTurn()
         {
-            //return (MakePlayerMove(CurrentMoveIndex));
+            return (MakePlayerMove(CurrentMoveIndex));
         }
 
 

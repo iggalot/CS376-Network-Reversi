@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net.Sockets;
 using ClientServerLibrary;
 
 namespace Reversi.Models
@@ -115,7 +117,10 @@ namespace Reversi.Models
         }
 
         public virtual void StartGame() {}
-        public virtual void PlayTurn() {}
+
+        public virtual bool PlayTurn()
+        {
+            return false;}
         public virtual void PlayRound() {}
 
         public virtual void SetupGame() {}
@@ -179,21 +184,22 @@ namespace Reversi.Models
             return str;
         }
 
-        ///// <summary>
-        ///// Make a list of the current player sockets for the game.
-        ///// </summary>
-        ///// <returns></returns>
-        //public List<TcpClient> GetPlayersSocketList()
-        //{
-        //    List<TcpClient> list = new List<TcpClient>();
+        /// <summary>
+        /// Make a list of the current player sockets for the game.
+        /// </summary>
+        /// <returns></returns>
+        public List<TcpClient> GetPlayersSocketList()
+        {
+            List<TcpClient> list = new List<TcpClient>();
 
-        //    foreach(PlayerModel item in CurrentPlayersList)
-        //    {
-        //        list.Add(item.Socket);
-        //    }
+            foreach (ClientModel item in CurrentPlayersList)
+            {
+                ReversiClientModel model = (ReversiClientModel) item;
+                list.Add(model.ConnectionSocket);
+            }
 
-        //    return list;
-        //}
+            return list;
+        }
         #endregion
     }
 }
