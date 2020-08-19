@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Reversi.Models
+namespace GameObjects.Models
 {
     /// <summary>
     /// A class that defines the basic game player

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-namespace Reversi.Models
+namespace GameObjects.Models
 {
     /// <summary>
     /// A class that defines the basic game regions for our game.

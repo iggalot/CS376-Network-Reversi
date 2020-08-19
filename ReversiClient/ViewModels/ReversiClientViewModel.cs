@@ -5,6 +5,7 @@ using Reversi.ViewModels;
 using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Controls;
+using GameObjects.Models;
 
 namespace ReversiClient.ViewModels
 {
@@ -344,11 +345,13 @@ namespace ReversiClient.ViewModels
         }
 
 
-
         #endregion
 
 
+
     }
+
+
 
 
 }

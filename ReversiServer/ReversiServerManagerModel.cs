@@ -29,12 +29,18 @@ namespace ReversiServer
             try
             {
                 DataTransmission.SerializeData<ReversiClientModel>(newModel, newModel.ConnectionSocket);
-                Console.WriteLine("... GameServer: Connection accepted for client #" + newModel.Id);
             }
             catch
             {
                 newModel.CurrentStatus = ConnectionStatusTypes.StatusConnectionError;
             }
+
+            ClientConnectedEventArgs args = new ClientConnectedEventArgs
+            {
+                client = newModel,
+                TimeOfConnection = DateTime.Now
+            };
+            OnClientConnected(args);
 
             return newModel;
         }
@@ -58,6 +64,13 @@ namespace ReversiServer
             }
 
             newModel.ConnectionSocket.Close();
+
+            ClientDisconnectedEventArgs args = new ClientDisconnectedEventArgs
+            {
+                client = newModel, TimeOfDisconnect = DateTime.Now
+            };
+            OnClientDisconnected(args);
+
             return newModel;
         }
 

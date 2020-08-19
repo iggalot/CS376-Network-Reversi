@@ -1,4 +1,4 @@
-﻿using Reversi.Models;
+﻿using GameObjects.Models;
 
 namespace Reversi.ViewModels
 {

@@ -1,4 +1,4 @@
-﻿using Reversi.Models;
+﻿using GameObjects.Models;
 using System.Media;
 using System.Threading;
 

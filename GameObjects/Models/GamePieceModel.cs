@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Reversi.Models
+namespace GameObjects.Models
 {
     /// <summary>
     /// Class that governs the game pieces

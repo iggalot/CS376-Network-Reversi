@@ -102,12 +102,21 @@ namespace ClientServerLibrary
 
             Thread handleThread = new Thread(HandleServerThread);
             handleThread.Start();
-
-
         }
         public virtual void Update()
         {
 //            Console.WriteLine("------- Checking for server updates on server " + ID.ToString());
+        }
+
+        /// <summary>
+        /// A function for shutting down the server.
+        /// </summary>
+        public virtual void Shutdown()
+        {
+            //// Shutdown and end connection         
+            ListenerSocket.Stop();
+            Console.WriteLine(" >> Server " + Id + " is shutting down...");
+            Console.ReadLine();
         }
 
         #endregion
@@ -193,16 +202,7 @@ namespace ClientServerLibrary
 
 
 
-        /// <summary>
-        /// A function for shutting down the server.
-        /// </summary>
-        public virtual void Shutdown()
-        {
-            //// Shutdown and end connection         
-            ListenerSocket.Stop();
-            Console.WriteLine(" >> Server " + Id + " is shutting down...");
-            Console.ReadLine();
-        }
+
 
         ///// <summary>
         ///// A server routine to broadcast a string message to all clients currently connected to
@@ -268,6 +268,48 @@ namespace ClientServerLibrary
 
             UpdateThread.Join();
         }
+
+        #region Events and Handlers
+
+        public event EventHandler ClientConnected;
+        public event EventHandler ClientDisconnected;
+
+        protected virtual void OnClientConnected(ClientConnectedEventArgs e)
+        {
+            EventHandler handler = ClientConnected;
+            handler?.Invoke(this, e);
+
+            Console.WriteLine("-- Client " + e.client.Id + " has connected at " + e.TimeOfConnection.ToString());
+
+            // TODO: Perform Connection
+        }
+        protected virtual void OnClientDisconnected(ClientDisconnectedEventArgs e)
+        {
+            EventHandler handler = ClientDisconnected;
+            handler?.Invoke(this, e);
+
+            Console.WriteLine("-- Client " + e.client.Id + " has disconnected at " + e.TimeOfDisconnect.ToString());
+
+            // TODO:  Perform disconnections
+
+        }
+
+
+
+        public class ClientConnectedEventArgs : EventArgs
+        {
+            public ClientModel client { get; set; }
+            public DateTime TimeOfConnection { get; set; }
+        }
+
+        public class ClientDisconnectedEventArgs : EventArgs
+        {
+            public ClientModel client { get; set; }
+            public DateTime TimeOfDisconnect { get; set; }
+        }
+        #endregion
+
+
     }
 
     ///// <summary>

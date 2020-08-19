@@ -1,4 +1,4 @@
-﻿namespace Reversi.Models
+﻿namespace GameObjects.Models
 {
     /// <summary>
     /// Enum for the players of the game

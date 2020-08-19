@@ -1,9 +1,8 @@
-﻿using System;
+﻿using ClientServerLibrary;
+using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
-using ClientServerLibrary;
 
-namespace Reversi.Models
+namespace GameObjects.Models
 {
     /// <summary>
     /// Generic game class for the game.  Provides basic functionality.
@@ -30,6 +29,8 @@ namespace Reversi.Models
 
         public bool GameHasStarted { get; set; } = false;
 
+        public bool GameIsPaused { get; set; } = false;
+
         /// <summary>
         /// Flag that indicates that the current player has completed their tur.
         /// </summary>
@@ -50,7 +51,7 @@ namespace Reversi.Models
         /// <summary>
         /// A list of the players for our game
         /// </summary>
-        public ClientModel[] CurrentPlayersList { get; set; }
+        public Dictionary<int, ClientModel> CurrentPlayersList { get; set; }
 
         /// <summary>
         /// The gameboard for our game
@@ -129,11 +130,6 @@ namespace Reversi.Models
         {
             return false;
         }
-        public virtual bool ValidatePlacement()
-        {
-            return false;
-
-        }
 
         #endregion
 
@@ -143,6 +139,7 @@ namespace Reversi.Models
             _nextId++;
             return _nextId;
         }
+        
         #endregion
 
         #region Public Methods
@@ -163,11 +160,30 @@ namespace Reversi.Models
         //    return null;
         //}
 
+        /// <summary>
+        /// Removes a player from the current players list
+        /// </summary>
+        /// <param name="clientModel"></param>
+        public virtual void RemovePlayerFromGame(ClientModel clientModel)
+        {
+            foreach (KeyValuePair<int, ClientModel> item in CurrentPlayersList)
+            {
+                if (item.Key == clientModel.Id)
+                {
+                    CurrentPlayersList.Remove(item.Key);
+                    break;
+                }
+
+                GameIsPaused = true;
+
+            }
+        }
+
 
         public string DisplayGameStats()
         {
             string str = string.Empty;
-            str += "Number of Players: " + CurrentPlayersList.Length + "\n";
+            str += "Number of Players: " + CurrentPlayersList.Count + "\n";
             str += "Current Turn: " + CurrentPlayer + "\n";
             str += " ---------------------------------------------------\n";
 
@@ -184,22 +200,7 @@ namespace Reversi.Models
             return str;
         }
 
-        /// <summary>
-        /// Make a list of the current player sockets for the game.
-        /// </summary>
-        /// <returns></returns>
-        public List<TcpClient> GetPlayersSocketList()
-        {
-            List<TcpClient> list = new List<TcpClient>();
 
-            foreach (ClientModel item in CurrentPlayersList)
-            {
-                ReversiClientModel model = (ReversiClientModel) item;
-                list.Add(model.ConnectionSocket);
-            }
-
-            return list;
-        }
         #endregion
     }
 }

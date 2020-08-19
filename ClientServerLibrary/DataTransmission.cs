@@ -230,6 +230,11 @@ namespace ClientServerLibrary
             return objnew;
         }
 
+        /// <summary>
+        /// Checks is a socket is still connected
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public static bool SocketConnected(Socket s)
         {
             bool part1 = s.Poll(1000, SelectMode.SelectRead);

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Reversi.Models
+namespace GameObjects.Models
 {
     [Serializable]
     public class GameMoveModel

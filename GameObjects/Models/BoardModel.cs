@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Data;
-using System.Data.Common;
 
-namespace Reversi.Models
+namespace GameObjects.Models
 {
     /// <summary>
     /// The class defining the gameboard characteristics.

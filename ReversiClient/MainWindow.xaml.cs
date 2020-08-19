@@ -6,6 +6,7 @@ using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
+using GameObjects.Models;
 
 namespace ReversiClient
 {
@@ -158,6 +159,12 @@ namespace ReversiClient
         private void Button_SubmitMoveClick(object sender, RoutedEventArgs e)
         {
             ThisClientVm.RCVMTestString = "submit clicked";
+
+            GameMoveSubmittedEventArgs args = new GameMoveSubmittedEventArgs();
+            args.MoveIndex = Int32.Parse(tbIndex.Text);
+            args.TimeReceived = DateTime.Now;
+            OnGameMoveSubmitted(args);
+
             // Parse the results of the text box.
             //if (Int32.TryParse(tbIndex.Text, out var result))
             //{
@@ -178,5 +185,38 @@ namespace ReversiClient
             //}
         }
         #endregion
+
+        #region Events and Handlers
+
+        public event EventHandler MoveSubmitted;
+        public event EventHandler GameUpdateReceived;
+
+        protected virtual void OnGameUpdateReceived(GameUpdateReceivedEventArgs e)
+        {
+            EventHandler handler = GameUpdateReceived;
+            handler?.Invoke(this, e);
+        }
+        protected virtual void OnGameMoveSubmitted(GameMoveSubmittedEventArgs e)
+        {
+            EventHandler handler = MoveSubmitted;
+            handler?.Invoke(this, e);
+
+            ThisClientVm.PacketStatusString = "Move received for index " + e.MoveIndex + " at " + e.TimeReceived.ToString();
+        }
+
+
+
+        public class GameMoveSubmittedEventArgs : EventArgs
+        {
+            public int MoveIndex { get; set; }
+            public DateTime TimeReceived { get; set; }
+        }
+
+        public class GameUpdateReceivedEventArgs : EventArgs
+        {
+
+        }
+        #endregion
+
     }
 }

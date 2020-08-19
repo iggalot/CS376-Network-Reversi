@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using ClientServerLibrary;
+using GameObjects.Models;
 
 namespace Reversi.Models
 {
@@ -49,21 +51,21 @@ namespace Reversi.Models
         {
 
             // Initialize our players list
-            CurrentPlayersList = new ClientModel[list.Count];
+            CurrentPlayersList = new Dictionary<int, ClientModel>();
 
             for (int i = 0; i < list.Count; i++)
             {
-                // create our empty players
-                CurrentPlayersList[i] = list[i];
-
+                // set the player numbers
                 if (i % 2 == 0)
-                    ((ReversiClientModel) CurrentPlayersList[i]).ClientPlayer.IdType = Players.Player1;
+                    ((ReversiClientModel) list[i]).ClientPlayer.IdType = Players.Player1;
                 else if (i % 2 == 1)
-                    ((ReversiClientModel)CurrentPlayersList[i]).ClientPlayer.IdType = Players.Player2;
+                    ((ReversiClientModel)list[i]).ClientPlayer.IdType = Players.Player2;
                 else
                 {
-                    ((ReversiClientModel)CurrentPlayersList[i]).ClientPlayer.IdType = Players.Undefined;
+                    ((ReversiClientModel)list[i]).ClientPlayer.IdType = Players.Undefined;
                 }
+
+                CurrentPlayersList.Add(i, list[i]);
             }
 
             // Setup the gameboard
@@ -353,7 +355,7 @@ namespace Reversi.Models
         //    str += " ---------------------------------------------------\n";
         //    foreach (var player in CurrentPlayersList)
         //    {
-                
+
         //        str += player.DisplayPlayerInfo() + "\n";
         //    }
         //    str += " ---------------------------------------------------\n";
@@ -361,6 +363,28 @@ namespace Reversi.Models
         //    return str;
         //}
 
+        /// <summary>
+        /// Make a list of the current player sockets for the game.
+        /// </summary>
+        /// <returns></returns>
+        public List<TcpClient> GetPlayersSocketList()
+        {
+            List<TcpClient> list = new List<TcpClient>();
+
+            foreach (KeyValuePair<int,ClientModel> item in CurrentPlayersList)
+            {
+                ReversiClientModel model = (ReversiClientModel)item.Value;
+                list.Add(model.ConnectionSocket);
+            }
+
+            return list;
+        }
+
+        public override void RemovePlayerFromGame(ClientModel model)
+        {
+
+            base.RemovePlayerFromGame(model);
+        }
         #endregion
 
     }

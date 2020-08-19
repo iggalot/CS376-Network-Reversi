@@ -1,10 +1,12 @@
 ﻿using ClientServerLibrary;
+using GameObjects.Models;
 using Reversi;
 using Reversi.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
+using System.Runtime.Remoting;
 using System.Threading;
 
 namespace ReversiServer
@@ -195,7 +197,7 @@ namespace ReversiServer
         /// The main thread routine for each game
         /// </summary>
         /// <param name="data">The game staging area list of client models</param>
-        private static void InitializeMatchup(object data)
+        private void InitializeMatchup(object data)
         {
             List<ReversiClientModel> clientModels = (List<ReversiClientModel>)data;
 
@@ -212,8 +214,10 @@ namespace ReversiServer
 
 
             // Send the game object to each of the clients.
-            foreach (ReversiClientModel client in game.CurrentPlayersList)
+            foreach (KeyValuePair<int,ClientModel> item in game.CurrentPlayersList)
             {
+                ReversiClientModel client = (ReversiClientModel) item.Value;
+
                 // Send the game data to each of the players
                 Console.WriteLine("Sending initial game matchup to players");
                 DataTransmission.SerializeData<ReversiGameModel>(game, client.ConnectionSocket);
@@ -221,12 +225,16 @@ namespace ReversiServer
                 StagingArea.Remove(client);
             }
 
-            int temp = game.CurrentPlayersList.Length;
+            int temp = game.CurrentPlayersList.Count;
 
             //// The main game loop. Process individual moves here
             List<TcpClient> sockets = game.GetPlayersSocketList();
             while (!game.GameIsOver)
             {
+                // If the game is paused ignore the user input
+                if (game.GameIsPaused == true)
+                    continue;
+
                 // If the current turn is valid and complete, switch to the next player
                 if (game.TurnComplete)
                 {
@@ -236,17 +244,60 @@ namespace ReversiServer
                     SendGameToAll(game);
                 }
 
-                foreach (TcpClient client in sockets)
+                List<ClientModel> disconnectList = new List<ClientModel>();
+                foreach (KeyValuePair<int,ClientModel> item in game.CurrentPlayersList)
                 {
-                    if (!SocketConnected(client.Client))
+                    ClientModel client = item.Value;
+                    Socket s = client.ConnectionSocket.Client;
+
+                    // Check for disconnected sockets
+                    if (!SocketConnected(s))
                     {
-                        Console.WriteLine("GameServer: (GameID #" + game.GameId + ") A client has disconnected");
+                        Console.WriteLine("GameServer: (GameID #" + game.GameId + ")");
+
+                        disconnectList.Add(client);
                     }
-                    NetworkStream stream = client.GetStream();
+                }
+
+                // Remove any disconnected players from the game...
+                foreach (ClientModel disconnectClient in disconnectList)
+                {
+                    ClientDisconnectedEventArgs args = new ClientDisconnectedEventArgs
+                    {
+                        client = disconnectClient,
+                        TimeOfDisconnect = DateTime.Now
+                    };
+                    game.GameIsPaused = true;
+                    OnClientDisconnected(args);
+
+                    game.RemovePlayerFromGame(((ClientModel) disconnectClient));
+                    try
+                    {
+                        disconnectClient.ConnectionSocket.Close();
+                    }
+                    catch
+                    {
+                        // Do nothing
+                    }
+                }
+
+                // Now proceed through the current player list
+                foreach (KeyValuePair<int,ClientModel> item in game.CurrentPlayersList)
+                {
+                    NetworkStream stream;
+                    try
+                    {
+                        stream = item.Value.ConnectionSocket.GetStream();
+                    }
+                    catch (ObjectDisposedException e)
+                    {
+                        // Catches a disposed socket possibility here in case it hasn't been fully disposed yet.
+                        continue;
+                    }
 
                     if (stream.DataAvailable)
                     {
-                        GameMoveModel move = DataTransmission.DeserializeData<GameMoveModel>(client);
+                        GameMoveModel move = DataTransmission.DeserializeData<GameMoveModel>(item.Value.ConnectionSocket);
                         Console.WriteLine("GameServer: (GameID #" + game.GameId + ") Player ID#" + move.ByPlayer + " move request received");
 
                         if (move.ByPlayer == game.CurrentPlayer)
@@ -277,11 +328,11 @@ namespace ReversiServer
         private static void SendGameToAll(ReversiGameModel game)
         {
             // Send the game object to each of the clients.
-            foreach (ReversiClientModel client in game.CurrentPlayersList)
+            foreach (KeyValuePair<int,ClientModel> item in game.CurrentPlayersList)
             {
                 // Send the game data to each of the players
                 Console.WriteLine("Sending initial game matchup to players");
-                DataTransmission.SerializeData<ReversiGameModel>(game, client.ConnectionSocket);
+                DataTransmission.SerializeData<ReversiGameModel>(game, item.Value.ConnectionSocket);
             }
         }
 
@@ -397,6 +448,7 @@ namespace ReversiServer
         }
 
         #endregion
+
 
     }
 }

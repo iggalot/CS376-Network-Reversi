@@ -1,5 +1,4 @@
 ﻿using Reversi.Models;
-using Reversi.ViewModels;
 
 namespace Reversi.ViewModels
 {

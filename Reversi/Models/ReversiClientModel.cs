@@ -1,6 +1,7 @@
 ﻿using ClientServerLibrary;
 using System;
 using System.Net.Sockets;
+using GameObjects.Models;
 
 namespace Reversi.Models
 {
