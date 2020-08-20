@@ -201,7 +201,7 @@ namespace ReversiServer
         {
             List<ReversiClientModel> clientModels = (List<ReversiClientModel>)data;
 
-            // Move players to the gameroom
+            // Move players to the game room
             Console.WriteLine("... GameServer: Matchup pairing complete. Game is ready to start.");
 
 
@@ -211,7 +211,7 @@ namespace ReversiServer
 
             Console.WriteLine("... GameServer: Creating game thread (id: " + game.GameId.ToString() + ") Beginning game...");
             //            Console.WriteLine("..... Game #" + game.GameId + " Participants\n" + game.DisplayGamePlayers());
-
+            Console.WriteLine(game.DisplayGameInfoComplete());
 
             // Send the game object to each of the clients.
             foreach (KeyValuePair<int,ClientModel> item in game.CurrentPlayersList)
@@ -235,13 +235,30 @@ namespace ReversiServer
                 if (game.GameIsPaused == true)
                     continue;
 
+                if (game.GameOverCheckRequired)
+                {
+                    if (game.CheckGameOver(game.CurrentPlayer) == true)
+                    {
+                        Console.WriteLine("No available moves for " + game.CurrentPlayer);
+                        game.GameIsOver = true;
+                        break;
+                    }
+
+                    Console.WriteLine("Valid moves available for " + game.CurrentPlayer);
+                    game.AvailableMovesList.ForEach(Console.WriteLine);
+                    game.GameOverCheckRequired = false;
+                }
+
                 // If the current turn is valid and complete, switch to the next player
                 if (game.TurnComplete)
                 {
+                    Console.WriteLine(game.Gameboard.DrawGameboardString());
                     game.NextPlayer();
                     game.TurnComplete = false;
+                    game.GameOverCheckRequired = true;
 
                     SendGameToAll(game);
+
                 }
 
                 List<ClientModel> disconnectList = new List<ClientModel>();
@@ -281,7 +298,7 @@ namespace ReversiServer
                     }
                 }
 
-                // Now proceed through the current player list
+                // Now proceed through the current player list, looking for moves sent by the clients
                 foreach (KeyValuePair<int,ClientModel> item in game.CurrentPlayersList)
                 {
                     NetworkStream stream;
@@ -298,7 +315,7 @@ namespace ReversiServer
                     if (stream.DataAvailable)
                     {
                         GameMoveModel move = DataTransmission.DeserializeData<GameMoveModel>(item.Value.ConnectionSocket);
-                        Console.WriteLine("GameServer: (GameID #" + game.GameId + ") Player ID#" + move.ByPlayer + " move request received");
+                        Console.WriteLine("GameServer: (GameID #" + game.GameId + ")" + move.ByPlayer + " move request received");
 
                         if (move.ByPlayer == game.CurrentPlayer)
                         {
@@ -307,7 +324,7 @@ namespace ReversiServer
                             // Check that the move was valid.
                             if (game.PlayTurn())
                             {
-                                Console.WriteLine("GameServer: (GameID #" + game.GameId + ") Player ID#" + move.ByPlayer + " submitted a valid move");
+                                Console.WriteLine("GameServer: (GameID #" + game.GameId + ")" +  move.ByPlayer + " submitted a valid move");
                                 game.TurnComplete = true;
                             }
                         }
@@ -319,6 +336,9 @@ namespace ReversiServer
 
                 }
             }
+
+            // At this point the game is over.
+            Console.WriteLine("The game is over...");
         }
 
         /// <summary>
@@ -327,11 +347,12 @@ namespace ReversiServer
         /// <param name="game"></param>
         private static void SendGameToAll(ReversiGameModel game)
         {
+            Console.WriteLine("Sending game matchup to players");
             // Send the game object to each of the clients.
             foreach (KeyValuePair<int,ClientModel> item in game.CurrentPlayersList)
             {
                 // Send the game data to each of the players
-                Console.WriteLine("Sending initial game matchup to players");
+
                 DataTransmission.SerializeData<ReversiGameModel>(game, item.Value.ConnectionSocket);
             }
         }

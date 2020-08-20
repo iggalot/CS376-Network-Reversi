@@ -7,6 +7,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using GameObjects.Models;
+using Reversi.ViewModels;
 
 namespace ReversiClient
 {
@@ -140,7 +141,7 @@ namespace ReversiClient
             ReversiClientModel temp = new ReversiClientModel(model, name);
 
             ThisClientVm.Model = model;
-            ThisClientVm.ThisPlayer = temp.ClientPlayer;
+            ThisClientVm.ThisPlayerViewModel = new ReversiPlayerVM(temp);
             #endregion
 
             ThisClientVm.IsWaitingForGameStart = true;
@@ -165,37 +166,31 @@ namespace ReversiClient
             args.TimeReceived = DateTime.Now;
             OnGameMoveSubmitted(args);
 
-            // Parse the results of the text box.
-            //if (Int32.TryParse(tbIndex.Text, out var result))
-            //{
-            //    if (result < 0)
-            //    {
-            //        ThisClientVm.GameplayStatusString = "Invalid entry";
-            //        return;
-            //    }
-            //    else
-            //    {
-            //        // Send move to server
-            //        ThisClientVm.Model.LastMove = new GameMoveModel(ThisClientVm.ThisPlayer.PlayerId, result);
-            //        DataTransmission.SerializeData<GameMoveModel>(ThisClientVm.Model.LastMove, ThisClientVm.Model.ConnectionSocket);
+            //Parse the results of the text box.
+            if (Int32.TryParse(tbIndex.Text, out var result))
+            {
+                if (result < 0)
+                {
+                    ThisClientVm.GameplayStatusString = "Invalid entry";
+                    return;
+                }
+                else
+                {
+                    // Send move to server
+                    ThisClientVm.Model.LastMove = new GameMoveModel(ThisClientVm.ThisPlayerViewModel.IdType, result);
+                    DataTransmission.SerializeData<GameMoveModel>(ThisClientVm.Model.LastMove, ThisClientVm.Model.ConnectionSocket);
 
-            //        // Create the packet info.
-            //        ThisClientVm.GameplayStatusString = "Processing Move. Waiting for response from Server...";
-            //    }
-            //}
+                    // Create the packet info.
+                    ThisClientVm.GameplayStatusString = "Processing Move. Waiting for response from Server...";
+                }
+            }
         }
         #endregion
 
         #region Events and Handlers
 
         public event EventHandler MoveSubmitted;
-        public event EventHandler GameUpdateReceived;
 
-        protected virtual void OnGameUpdateReceived(GameUpdateReceivedEventArgs e)
-        {
-            EventHandler handler = GameUpdateReceived;
-            handler?.Invoke(this, e);
-        }
         protected virtual void OnGameMoveSubmitted(GameMoveSubmittedEventArgs e)
         {
             EventHandler handler = MoveSubmitted;
@@ -212,10 +207,7 @@ namespace ReversiClient
             public DateTime TimeReceived { get; set; }
         }
 
-        public class GameUpdateReceivedEventArgs : EventArgs
-        {
 
-        }
         #endregion
 
     }

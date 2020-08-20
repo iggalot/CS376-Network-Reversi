@@ -13,12 +13,12 @@ namespace GameObjects.Models
         /// <summary>
         /// Player who made the move
         /// </summary>
-        public int ByPlayer { get; set; }
+        public Players ByPlayer { get; set; }
 
-        public GameMoveModel(int playerId, int move)
+        public GameMoveModel(Players playerType, int move)
         {
             MoveIndex = move;
-            ByPlayer = playerId;
+            ByPlayer = playerType;
         }
     }
 }

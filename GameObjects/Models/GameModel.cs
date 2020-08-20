@@ -37,10 +37,16 @@ namespace GameObjects.Models
         public bool TurnComplete { get; set; } = false;
 
         /// <summary>
+        /// Flag that indicates if the gameboard needs to be checked for valid moves.
+        /// This is reset at the start of each player turn;
+        /// </summary>
+        public bool GameOverCheckRequired { get; set; } = true;
+
+        /// <summary>
         /// The current player whoss turn is active as indexed by position in
         /// the CurrentPlayerList collection.  Default is zero.
         /// </summary>
-        public int CurrentPlayer { get; set; } = 0;
+        public Players CurrentPlayer { get; set; } = Players.Player1;
 
         /// <summary>
         /// The index of the current move
@@ -108,20 +114,33 @@ namespace GameObjects.Models
         /// </summary>
         public virtual void NextPlayer()
         {
-            CurrentPlayer = CurrentPlayer++ % 2;
+            Players old = CurrentPlayer;
+            if (CurrentPlayer == Players.Player1)
+                CurrentPlayer = Players.Player2;
+            else
+            {
+                CurrentPlayer = Players.Player1;
+            }
         }
 
-        public virtual bool ValidatePlacement(int index)
+        public virtual bool ValidateTilePlacement(int index, Players p)
         {
             return false;
 
+        }
+
+        public virtual bool CheckGameOver(Players p)
+        {
+            return true;
         }
 
         public virtual void StartGame() {}
 
         public virtual bool PlayTurn()
         {
-            return false;}
+            return false;
+
+        }
         public virtual void PlayRound() {}
 
         public virtual void SetupGame() {}
@@ -190,15 +209,16 @@ namespace GameObjects.Models
             return str;
         }
 
-        public string DisplayGameInfoComplete()
+        public virtual string DisplayGameInfoComplete()
         {
             string str = string.Empty;
             str += "----- GAME INFO -----\n";
             str += DisplayGameStats() + "\n";
             str += Gameboard.DisplayGameboardStats() + "\n";
-            //str += DisplayGamePlayers() + "\n";
             return str;
         }
+
+
 
 
         #endregion

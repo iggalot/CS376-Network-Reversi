@@ -21,6 +21,11 @@ namespace Reversi.Models
         public List<int> TilesToTurn { get; set; } = new List<int>();
 
         /// <summary>
+        /// Array containing available moves
+        /// </summary>
+        public List<int> AvailableMovesList { get; set; } = new List<int>();
+
+        /// <summary>
         /// Has the P1 player gone yet?
         /// </summary>
         public bool P1Went { get; set; } = false;
@@ -31,21 +36,7 @@ namespace Reversi.Models
         public bool P2Went { get; set; } = false;
         #endregion
 
-        #region Constructors
-
-        ///// <summary>
-        ///// Constructor for our Reversi game
-        ///// </summary>
-        ///// <param name="list">The list of participating player objects</param>
-        //public ReversiGameModel(List<PlayerModel> list) : base(list)
-        //{
-        //    // Setup the gameboard
-        //    SetupGame();
-
-        //    // Start the game
-        //    StartGame();
-        //}
-
+        #region Constructor
 
         public ReversiGameModel(List<ReversiClientModel> list) : base(ReversiSettings.ReversiBoardSizeCols, ReversiSettings.ReversiBoardSizeRows)
         {
@@ -83,110 +74,145 @@ namespace Reversi.Models
         /// </summary>
         public override void NextPlayer()
         {
-            CurrentPlayer = (CurrentPlayer++) % ReversiSettings.ReversiPlayersPerGame;
+            base.NextPlayer();
+        }
+
+        /// <summary>
+        /// Check the initial positioning including:
+        /// 1.  Does the square have a piece
+        /// 2.  Is the index within the gameboard region
+        /// </summary>
+        /// <param name="index">The index of the piece placement</param>
+        /// <param name="p">The player placing the piece</param>
+        /// <returns></returns>
+        private bool ValidateInitialPlacementPosition(int index, Players p)
+        {
+            // Make sure that we are within acceptable index ranges, otherwise return
+            if (index < 0 || index >= Gameboard.Squares.Length)
+            {
+                return false;
+            }
+            // Selected index must not already contain a piece
+            if (Gameboard.Squares[index].Piece != null)
+            {
+                //MessageBox.Show("This block already contains a piece.");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Check Direction from Index
+        /// <summary>
+        /// Check Direction from a specified index value
+        /// </summary>
+        /// <param name="index">The index where the tile is placed</param>
+        /// <param name="p">The player making the move</param>
+        /// <param name="opp">The opponent of the player</param>
+        /// <param name="d">The direction to check <see cref="DirectionVectors"/></param>
+        /// <returns></returns>
+        private bool ValidateDirectionFromIndex(int index, Players p, Players opp, DirectionVectors dv, 
+            out List<int> result)
+        {
+            result = new List<int>();
+            Players player = p;
+            Players opponent = (player == Players.Player1) ? Players.Player2 : Players.Player1;
+
+            // returns -1 if the neighbor is a boundary
+            int tmp_index = Gameboard.GetIndexByOffsets(index, dv);
+
+            // Is there a valid piece in this square?
+            if ((tmp_index == -1) || (Gameboard.Squares[tmp_index].Piece == null))
+                return false;
+
+            // Check if the neighbor is owned by the opponent, if not then its not a valid case
+            Players owner = Gameboard.Squares[tmp_index].Piece.Owner.IdType;
+
+            if (owner != opponent)
+                return false;
+
+            // Otherwise continue searching in this direction to see if a 
+            // players piece is also in this direction.
+            int nextIndex = tmp_index;
+            Players nextOwner = owner;
+
+            // Continue searching so long as we don't reach the border (-1) and the next square is 
+            // owned by the opponent.
+            while ((nextIndex != -1) && (nextOwner == opponent))
+            {
+                // Add our element to the list.
+                result.Add(nextIndex);
+
+                Console.WriteLine("...searching " + nextIndex + " to " + dv);
+
+                // Get the next neighbor in the direction
+                nextIndex = Gameboard.GetIndexByOffsets(nextIndex, dv);
+
+                // Did we find the border? Is there a valid piece in this square? 
+                // If not, stop searching
+                if ((nextIndex == -1) || (Gameboard.Squares[nextIndex].Piece == null))
+                {
+                    result.Clear(); // clear the resul list since the direction isnt valid
+                    return false;
+                }
+
+                nextOwner = Gameboard.Squares[nextIndex].Piece.Owner.IdType;
+
+                // If neighbor to the neighbor in this direction is the same as the player,
+                // the move is valid.
+                if (nextOwner == player)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
         /// Determine if the new placement location is valid.
         /// </summary>
         /// <param name="index">The square index where they are placing the piece</param>
+        /// <param name="p">The player placing the tile</param>
         /// <returns></returns>
-        public override bool ValidatePlacement(int index)
+        public override bool ValidateTilePlacement(int index, Players p)
         {
-            bool isValidMove = false;
+            // Determine our opponent
+            Players player = p;
+            Players opponent = (player == Players.Player1) ? Players.Player2 : Players.Player1;
 
-            //Console.WriteLine("Index: " + index);
+            if (ValidateInitialPlacementPosition(index, p) == false)
+                return false;
 
-            //// Determine our opponent
-            //int player = CurrentPlayer;
-            //int opponent = (player == CurrentPlayersList[0].PlayerId) ? CurrentPlayersList[1].PlayerId : CurrentPlayersList[0].PlayerId;
+            var tmp_index = index; // returns -1 if the neighbor is a boundary
+            
+            // 1 2 3
+            // 4 X 5
+            // 6 7 8
+            foreach (DirectionVectors dv in Enum.GetValues(typeof(DirectionVectors)))
+            {
+                List<int> result = new List<int>(); // stores the values of a valid placement
+                if (ValidateDirectionFromIndex(index, player, opponent, dv, out result) == true)
+                {
+                    foreach (int item in result)
+                    {
+                        Console.WriteLine("...VALID to " + dv);
+                        if (TilesToTurn.Contains(item) == false)
+                            TilesToTurn.Add(item);
+                    }
+                }
+            }
 
-            //// Make sure that we are within acceptable index ranges, otherwise return
-            //if (index < 0 || index >= Gameboard.Squares.Length)
-            //{
-            //    return false;
-            //}
-            //// Selected index must not already contain a piece
-            //if (Gameboard.Squares[index].Piece != null)
-            //{
-            //    //MessageBox.Show("This block already contains a piece.");
-            //    return false;
-            //}
+            // Print the Tiles to Turn list
 
-            //var tmp_index = index;
-            //// 1 2 3
-            //// 4 X 5
-            //// 6 7 8
-            //// A neightbor must be owned by the opposite player
-            //foreach (DirectionVectors dv in Enum.GetValues(typeof(DirectionVectors)))
-            //{
-            //    isValidMove = false;
+            string str = string.Empty;
+            foreach (int item in TilesToTurn)
+            {
+                str += item.ToString() + " ";
+            }
+            Console.WriteLine(index + ": -- " + str + "\n");
 
-            //    tmp_index = Gameboard.GetIndexByOffsets(index, dv);
-
-            //    // Is there a valid piece in this square?
-            //    if ((tmp_index == -1) || (Gameboard.Squares[tmp_index].Piece == null))
-            //        continue;
-
-            //    // Check if the neighbor is owned by the opponent
-            //    PlayerModel owner = Gameboard.Squares[tmp_index].Piece.Owner;
-
-            //    if (owner.PlayerId != opponent)
-            //    {
-            //        // Neighbor isn't the opponent so not a valid move
-            //        continue;
-            //    }
-            //    else
-            //    {
-            //        // Store indices in a list while we search
-            //        List<int> tmpList = new List<int>();
-
-            //        // Otherwise continue searching in this direction to see if a 
-            //        // players piece is also in this direction.
-            //        int nextIndex = tmp_index;
-            //        PlayerModel nextOwner = owner;
-
-            //        // Continue searching so long as we don't reach the border (-1) and the next square is 
-            //        // owned by the opponent.
-            //        while ((nextIndex != -1) && (nextOwner.PlayerId == opponent))
-            //        {
-            //            // Add our element to the list.
-            //            tmpList.Add(nextIndex);
-
-            //            Console.WriteLine("...searching " + nextIndex + " to " + dv);
-
-            //            nextIndex = Gameboard.GetIndexByOffsets(nextIndex, dv);
-
-
-            //            // Did we find the border? Is there a valid piece in this square? 
-            //            // If not, stop searching
-            //            if ((nextIndex == -1) || (Gameboard.Squares[nextIndex].Piece == null))
-            //            {
-            //                tmpList.Clear(); // clear the temp list
-            //                break;
-            //            }
-
-            //            nextOwner = Gameboard.Squares[nextIndex].Piece.Owner;
-
-            //            // If neighbor to the neighbor in this direction is the same as the player,
-            //            // the move is valid.
-            //            if (nextOwner.PlayerId == player)
-            //            {
-            //                isValidMove = true;
-            //                break;
-            //            }
-            //        }
-            //        if (isValidMove)
-            //        {
-            //            Console.WriteLine("...VALID to " + dv);
-            //            foreach (int item in tmpList)
-            //                TilesToTurn.Add(item);
-            //            tmpList.Clear();
-            //        }
-            //    }
-            //}
-
-            return isValidMove;
+            return (TilesToTurn.Count > 0);
         }
 
         /// <summary>
@@ -195,37 +221,40 @@ namespace Reversi.Models
         /// <param name="index">the index of the move being made</param>
         internal bool MakePlayerMove(int index)
         {
-            //    PlayerModel player = null; ;
-            //    bool playerFound = false;            
+            PlayerModel player = null; ;
+            bool playerFound = false;
 
-            //    foreach(PlayerModel item in CurrentPlayersList)
-            //    {
-            //        if (item.PlayerId == CurrentPlayer)
-            //        {
-            //            player = item;
-            //            playerFound = true;
-            //        }                    
-            //    }
+            foreach(KeyValuePair<int,ClientModel> model in CurrentPlayersList)
+            {
+                ReversiClientModel reversiClientModel = (ReversiClientModel) model.Value;
 
-            //    if (player == null)
-            //        return false;
+                if (reversiClientModel.ClientPlayer.IdType == CurrentPlayer)
+                {
+                    player = reversiClientModel.ClientPlayer;
+                    playerFound = true;
+                    break;
+                }
+            }
 
-            //    if (playerFound && ValidatePlacement(index))
-            //    {
+            if ((player == null) || (playerFound == false))
+                return false;
 
+            bool placementIsValid = ValidateTilePlacement(index, CurrentPlayer);
+            if (placementIsValid)
+            {
+                // Add a new game piece at the location
+                GamePieceModel piece = new GamePieceModel(Pieceshapes.Ellipse, player);
+                Gameboard.AddPiece(index, piece);
 
-            //        // Add a new game piece at the location
-            //        GamePieceModel piece = new GamePieceModel(Pieceshapes.Ellipse, player);
-            //        Gameboard.AddPiece(index, piece);
+                // Capture the opponents tiles
+                DoTurnTiles();
 
-            //        // Capture the opponents tiles
-            //        DoTurnTiles();
+                // Reset the tiles to be turned array
+                TilesToTurn.Clear();
+                return true;
+            }
 
-            //        // Reset the tiles to be turned array
-            //        TilesToTurn.Clear();
-            //    }
-        
-            return true;
+            return false;
             //MessageBox.Show(Gameboard.DrawGameboard() + "\nCurrent Player: " + CurrentPlayer.IDType + " : " + CurrentPlayer.Name);
         }
 
@@ -234,29 +263,31 @@ namespace Reversi.Models
         /// </summary>
         private void DoTurnTiles()
         {
-            //PlayerModel player = null; ;
-            //bool playerFound = false;
+            PlayerModel player = null; ;
+            bool playerFound = false;
 
-            //foreach (ReversiClientModel item in CurrentPlayersList)
-            //{
-            //    if (item.ClientPlayer.PlayerId == CurrentPlayer)
-            //    {
-            //        player = item;
-            //        playerFound = true;
-            //    }
-            //}
+            foreach (KeyValuePair<int,ClientModel> model in CurrentPlayersList)
+            {
+                ReversiClientModel reversiClientModel = (ReversiClientModel) model.Value;
 
-            //// If we didnt find the player, return
-            //if (!playerFound)
-            //    return;
+                if (reversiClientModel.ClientPlayer.IdType == CurrentPlayer)
+                {
+                    player = reversiClientModel.ClientPlayer;
+                    playerFound = true;
+                }
+            }
 
-            //foreach (int index in TilesToTurn)
-            //{
-            //    Gameboard.Squares[index].Piece.Owner = player;
+            // If we didnt find the player, return
+            if (!playerFound)
+                return;
 
-            //    //// TODO: For each tile being flipped...play a sounds
-            //    //ReversiSounds.PlaySounds(GameSounds.SOUND_FLIPTILE);
-            //}
+            foreach (int index in TilesToTurn)
+            {
+                Gameboard.Squares[index].Piece.Owner = player;
+
+                //// TODO: For each tile being flipped...play a sounds
+                //ReversiSounds.PlaySounds(GameSounds.SOUND_FLIPTILE);
+            }
 
             // Now clear the tiles to turn array since all the moves have been made
             TilesToTurn.Clear();
@@ -267,18 +298,18 @@ namespace Reversi.Models
             // TODO:  What if the board has odd rows and columns ODD numbered?
             var midpoint = Gameboard.Rows * Gameboard.Cols / 2;
 
-//            PlayerModel player1 = ((ReversiClientModel)CurrentPlayersList[0]).ClientPlayer.IdType;
-            
+            //            PlayerModel player1 = ((ReversiClientModel)CurrentPlayersList[0]).ClientPlayer.IdType;
+
             // Place the starting pieces
-            //Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[0]));
-            //Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
-            //Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 - 1, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[1]));
-            //Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePieceModel(Pieceshapes.Ellipse, CurrentPlayersList[0]));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2 - 1, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[0]).ClientPlayer));
+            Gameboard.AddPiece(midpoint - Gameboard.Cols / 2, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2 - 1, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
+            Gameboard.AddPiece(midpoint + Gameboard.Cols / 2, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[0]).ClientPlayer));
 
             // MessageBox.Show(Gameboard.DrawGameboard());
 
             // Set the First player to be the current player
-//            CurrentPlayer = CurrentPlayersList[0].ClientPlayer.PlayerId;
+            //            CurrentPlayer = CurrentPlayersList[0].ClientPlayer.PlayerId;
         }
 
 
@@ -300,48 +331,43 @@ namespace Reversi.Models
             //            MakePlayerMove(Players[0], 12);
 
             // Test scenario for our board
-            Gameboard.AddPiece(18, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
-            Gameboard.AddPiece(17, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[0]).ClientPlayer));
-            Gameboard.AddPiece(19, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
-            Gameboard.AddPiece(21, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
-            Gameboard.AddPiece(12, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
+            //Gameboard.AddPiece(18, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
+            //Gameboard.AddPiece(17, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
+            //Gameboard.AddPiece(19, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
+            //Gameboard.AddPiece(21, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
+            //Gameboard.AddPiece(12, new GamePieceModel(Pieceshapes.Ellipse, ((ReversiClientModel)CurrentPlayersList[1]).ClientPlayer));
             //MessageBox.Show(Gameboard.DrawGameboard());
-
-            //// The main game loop -- 
-            //while (!IsGameOver)
-            //{
-            //    // Play a round for the current player
-            //    PlayRound();
-
-            //    // Cycle to next player
-            //    NextPlayer();
-
-            //    IsGameOver = CheckGameOver();
-            //}
 
             GameHasStarted = true;
 
         }
 
         /// <summary>
-        /// Checks if there is a valid move for the current player.
+        /// Checks if there is a valid move for the specified player.
         /// </summary>
         /// <returns></returns>
-        public override bool CheckGameOver()
+        public override bool CheckGameOver(Players player)
         {
+            bool GameIsOver = true;
+
             for (int i = 0; i < Gameboard.Rows * Gameboard.Cols; i++)
             {
-                if (!ValidatePlacement(i))
+                if (ValidateTilePlacement(i, player))
                 {
-                    return false;
+                    GameIsOver = false;
+                    AvailableMovesList.Add(i);
                 }
             }
 
-            return true;
+            return GameIsOver;
         }
 
         public override bool PlayTurn()
         {
+            // Clear the tiles to turn array
+            AvailableMovesList.Clear();
+            TilesToTurn.Clear();
+
             return (MakePlayerMove(CurrentMoveIndex));
         }
 
@@ -349,19 +375,19 @@ namespace Reversi.Models
         #endregion
 
         #region Public Methods
-        //public string DisplayGamePlayers()
-        //{
-        //    string str = string.Empty;
-        //    str += " ---------------------------------------------------\n";
-        //    foreach (var player in CurrentPlayersList)
-        //    {
+        public string DisplayGamePlayers()
+        {
+            string str = string.Empty;
+            str += "----- PLAYER INFO -----\n";
+            foreach (KeyValuePair<int, ClientModel> item in CurrentPlayersList)
+            {
+                ReversiClientModel model = (ReversiClientModel) item.Value;
+                str += model.ClientPlayer.PlayerId + "   " + model.ClientPlayer.Name + "    " +
+                       model.ClientPlayer.IdType + "\n";
+            }
 
-        //        str += player.DisplayPlayerInfo() + "\n";
-        //    }
-        //    str += " ---------------------------------------------------\n";
-
-        //    return str;
-        //}
+            return str;
+        }
 
         /// <summary>
         /// Make a list of the current player sockets for the game.
@@ -384,6 +410,17 @@ namespace Reversi.Models
         {
 
             base.RemovePlayerFromGame(model);
+        }
+
+        public override string DisplayGameInfoComplete()
+        {
+            string str = string.Empty;
+            str += "----- GAME INFO -----\n";
+            str += DisplayGameStats() + "\n";
+            str += DisplayGamePlayers() + "\n";
+            str += Gameboard.DisplayGameboardStats() + "\n";
+
+            return str;
         }
         #endregion
 

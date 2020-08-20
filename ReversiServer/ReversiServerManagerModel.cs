@@ -122,13 +122,13 @@ namespace ReversiServer
             {
                 if (ConnectedClientModelList.Count == 0)
                 {
-                    Console.WriteLine("No clients on ReversiServerManager " + Id);
+                    //Console.WriteLine("No clients on ReversiServerManager " + Id);
                     Thread.Sleep(ServerSettings.ServerUpdatePulseDelay);
                     continue;
                 }
 
-                // Check for enough clients to place on a server
-                Console.WriteLine("RSM currently has " + ConnectedClientModelList.Count + " clients connected to it...");
+                //// Check for enough clients to place on a server
+                //Console.WriteLine("RSM currently has " + ConnectedClientModelList.Count + " clients connected to it...");
 
                 // Get the oldest client
                 ReversiClientModel oldestClientModel = (ReversiClientModel)GetOldestClientModelFromConnectedList();
@@ -144,7 +144,7 @@ namespace ReversiServer
 
                 // And remove it from the connected list
                 RemoveClientModelFromConnectedList(oldestClientModel);
-                Console.WriteLine("-- Client removed from ReversiServerManager list");
+                //Console.WriteLine("-- Client removed from ReversiServerManager list");
             }
         }
 

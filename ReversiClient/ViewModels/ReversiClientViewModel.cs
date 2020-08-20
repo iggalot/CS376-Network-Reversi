@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using ClientServerLibrary;
 using Reversi.Models;
 using Reversi.ViewModels;
 using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using GameObjects.Models;
 
 namespace ReversiClient.ViewModels
@@ -12,6 +14,8 @@ namespace ReversiClient.ViewModels
     public class ReversiClientViewModel : BaseViewModel
     {
         private string _rcvmteststring;
+
+
         public string RCVMTestString
         {
             get => _rcvmteststring;
@@ -33,6 +37,7 @@ namespace ReversiClient.ViewModels
 
         // new
         private ReversiGameVM _reversiReversiGameVm = null;
+        private ReversiPlayerVM _thisReversiPlayerVm;
         private ReversiClientModel _model;
 
         #endregion
@@ -75,23 +80,38 @@ namespace ReversiClient.ViewModels
             }
         }
 
-
-
-
-        /// <summary>
-        /// The player object associated with this UI
-        /// </summary>
-        public PlayerModel ThisPlayer { 
-            get => Model.ClientPlayer;
+        public ReversiPlayerVM ThisPlayerViewModel
+        {
+            get => _thisReversiPlayerVm;
             set
             {
                 if (value == null)
                     return;
 
-                SetPlayer(value);
-                OnPropertyChanged("ThisPlayer");
-            } 
+                _thisReversiPlayerVm = value;
+
+                OnPropertyChanged("ThisPlayerViewModel");
+            }
         }
+
+
+
+
+        ///// <summary>
+        ///// The player object associated with this UI
+        ///// </summary>
+        //public PlayerModel ThisPlayer { 
+        //    get => Model.ClientPlayer;
+        //    set
+        //    {
+        //        if (value == null)
+        //            return;
+
+        //        SetPlayer(value);
+        //        OnPropertyChanged("ThisPlayer");
+        //    } 
+        //}
+
 
         /// <summary>
         /// Holds the gameplay status string for this client
@@ -219,7 +239,7 @@ namespace ReversiClient.ViewModels
         /// <summary>
         /// Set the game associated with this client
         /// </summary>
-        /// <param name="game"></param>
+        /// <param name="game">The game object to be set</param>
         private void SetGame(ReversiGameModel game)
         {
             // check for a valid game object
@@ -227,6 +247,19 @@ namespace ReversiClient.ViewModels
                 return;
             else
             {
+                if (ThisPlayerViewModel.IdType == Players.Undefined)
+                {
+                    foreach (KeyValuePair<int,ClientModel> item in game.CurrentPlayersList)
+                    {
+                        ReversiClientModel reversiPlayer = (ReversiClientModel) item.Value;
+                        if (ThisPlayerViewModel.PlayerId == reversiPlayer.ClientPlayer.PlayerId)
+                        {
+                            ThisPlayerViewModel.IdType = reversiPlayer.ClientPlayer.IdType;
+                            break;
+                        }
+
+                    }
+                }
                 // assign the game model and update the game view model
                 Model.Game = game;
                 ReversiGameViewModel = new ReversiGameVM(game);
@@ -311,6 +344,9 @@ namespace ReversiClient.ViewModels
                             PacketStatusString = "Game data received";
                         });
 
+                        GameUpdateReceivedEventArgs args = new GameUpdateReceivedEventArgs() {TimeReceived = DateTime.Now};
+                        OnGameUpdateReceived(args);
+
                         // Set the game model to trigger OnProperty events.
                         SetGame(currentGame);
                         
@@ -335,16 +371,33 @@ namespace ReversiClient.ViewModels
                         }
 
                     }
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        PacketStatusString = "Client:  Data on thread detected.";
-                    });
+                    //Application.Current.Dispatcher.Invoke(() =>
+                    //{
+                    //    PacketStatusString = "Client:  Data on thread detected.";
+                    //});
                 }
 
             }
         }
 
 
+        #endregion
+
+        #region Events
+        public event EventHandler GameUpdateReceived;
+
+        protected virtual void OnGameUpdateReceived(GameUpdateReceivedEventArgs e)
+        {
+            EventHandler handler = GameUpdateReceived;
+            handler?.Invoke(this, e);
+
+            PacketStatusString = "Game update received from server at " + e.TimeReceived.ToString();
+        }
+
+        public class GameUpdateReceivedEventArgs : EventArgs
+        {
+            public DateTime TimeReceived { get; set; }
+        }
         #endregion
 
 

@@ -323,7 +323,7 @@ namespace GameObjects.Models
         public string DisplayGameboardStats()
         {
             string str = string.Empty;
-            str += "Gameboard (" + Rows*Cols + " squares): " + Rows.ToString() + " rows by " + Cols.ToString() + Cols.ToString() + "\n";
+            str += "Gameboard (" + Rows*Cols + " squares): " + Rows.ToString() + " rows by " + Cols.ToString() + "\n";
             return str;
         }
     }

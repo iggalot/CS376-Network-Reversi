@@ -57,9 +57,10 @@ namespace Reversi.Models
 
         public ReversiClientModel(ClientModel clientModel, string name) : base(clientModel)
         {
+            ReversiClientModel model = (ReversiClientModel) clientModel;
             Game = null;
             LastMove = null;
-            ClientPlayer = new PlayerModel(clientModel.Id, Players.Undefined, name);
+            ClientPlayer = new PlayerModel(model.ClientPlayer.PlayerId, model.ClientPlayer.IdType, name);
 
             this.ClientProcess = clientModel.ClientProcess;
             this.ClientMainThread = clientModel.ClientMainThread;

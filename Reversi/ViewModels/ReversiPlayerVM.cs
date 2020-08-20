@@ -1,10 +1,12 @@
-﻿using GameObjects.Models;
+﻿using ClientServerLibrary;
+using GameObjects.Models;
+using Reversi.Models;
 
 namespace Reversi.ViewModels
 {
     public class ReversiPlayerVM : BaseViewModel
     {
-        private PlayerModel _reversiPlayerVM;
+        private PlayerModel _reversiPlayerModel;
 
         public ReversiPlayerVM(PlayerModel model)
         {
@@ -14,22 +16,65 @@ namespace Reversi.ViewModels
 
         public string Name
         {
-            get => "TestReversiName";
+            get => Model.Name;
+            set
+            {
+                if ((value == null) || (value == Model.Name))
+                    return;
 
+                Model.Name = value;
 
+                OnPropertyChanged("Name");
+            }
         }
+
+        public Players IdType
+        {
+            get => Model.IdType;
+            set
+            {
+                if (value == Model.IdType)
+                    return;
+
+                Model.IdType = value;
+
+                OnPropertyChanged("IdType");
+            }
+        }
+
+        public int PlayerId
+        {
+            get => Model.PlayerId;
+            set
+            {
+                if (value == Model.PlayerId)
+                    return;
+
+                Model.PlayerId = value;
+
+                OnPropertyChanged("PlayerId");
+            }
+        }
+
         public PlayerModel Model
         {
-            get => _reversiPlayerVM;
+            get => _reversiPlayerModel;
             set
             {
                 if (value == null)
                     return;
 
-                _reversiPlayerVM = value;
+                _reversiPlayerModel = value;
 
                 OnPropertyChanged("Model");
             }
+        }
+
+        public ReversiPlayerVM(ClientModel clientModel)
+        {
+            ReversiClientModel reversiClientModel = (ReversiClientModel) clientModel;
+
+            Model = reversiClientModel.ClientPlayer;
         }
     }
 }

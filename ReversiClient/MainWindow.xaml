@@ -34,8 +34,12 @@
                             <Label HorizontalAlignment="Left" Content="Game ID: " FontSize="14"/>
                             <Label Content="{Binding ReversiGameViewModel.Model.GameId, FallbackValue=Pending}" FontSize="14"></Label>
                             <Label HorizontalAlignment="Right" Content="Your ID#" Height="40" FontSize="14"/>
-                            <Label Content="{Binding ThisPlayer.PlayerId, FallbackValue=Error}" FontSize="14"></Label>
-                            <Label Content="{Binding ThisPlayer.Name, FallbackValue=Error}" FontSize="14"></Label>
+                            <Label Content="{Binding ThisPlayerViewModel.PlayerId, FallbackValue=Error}" FontSize="14"></Label>
+                            <Label Content="{Binding ThisPlayerViewModel.Name, FallbackValue=Error}" FontSize="14"></Label>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="You are" Height="40" FontSize="14"/>
+                            <Label Content="{Binding ThisPlayerViewModel.IdType, FallbackValue=Error}" FontSize="14"></Label>
                         </StackPanel>
 
                     </StackPanel>
@@ -56,6 +60,8 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label HorizontalAlignment="Left" Content="Current Player: " FontSize="14"/>
+                                <Label Content="{Binding ReversiGameViewModel.Model.CurrentPlayer, FallbackValue=Error}" FontSize="14"></Label>
+
                             </StackPanel>
                         </StackPanel>
 
