@@ -36,6 +36,7 @@ namespace ReversiClient.ViewModels
         private bool _isWaitingForGameStart = false;
 
         // new
+        private string _reversiGameboardDisplayString = String.Empty;
         private ReversiGameVM _reversiReversiGameVm = null;
         private ReversiPlayerVM _thisReversiPlayerVm;
         private ReversiClientModel _model;
@@ -63,6 +64,11 @@ namespace ReversiClient.ViewModels
             }
         }
 
+        public bool IsPlayersTurn
+        {
+            get => ReversiGameViewModel.Model.CurrentPlayer == ThisPlayerViewModel.IdType;
+        }
+
         /// <summary>
         /// The game view model controlled by this client window
         /// </summary>
@@ -77,6 +83,8 @@ namespace ReversiClient.ViewModels
 
                 OnPropertyChanged("ReversiGameViewModel");
                 OnPropertyChanged("GameboardVM");
+                OnPropertyChanged("GameboardDisplayString");
+                OnPropertyChanged("LastMoveIndex");
             }
         }
 
@@ -93,25 +101,6 @@ namespace ReversiClient.ViewModels
                 OnPropertyChanged("ThisPlayerViewModel");
             }
         }
-
-
-
-
-        ///// <summary>
-        ///// The player object associated with this UI
-        ///// </summary>
-        //public PlayerModel ThisPlayer { 
-        //    get => Model.ClientPlayer;
-        //    set
-        //    {
-        //        if (value == null)
-        //            return;
-
-        //        SetPlayer(value);
-        //        OnPropertyChanged("ThisPlayer");
-        //    } 
-        //}
-
 
         /// <summary>
         /// Holds the gameplay status string for this client
@@ -194,6 +183,22 @@ namespace ReversiClient.ViewModels
             } 
         }
 
+        /// <summary>
+        /// Display the gameboard string
+        /// </summary>
+        public string GameboardDisplayString
+        {
+            get
+            {
+                if (Model.Game == null)
+                    return string.Empty;
+                else if (Model.Game.Gameboard == null)
+                    return string.Empty;
+                else
+                    return Model.Game.Gameboard.DrawGameboardString();
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -213,6 +218,16 @@ namespace ReversiClient.ViewModels
             {
                 SetGame(model.Game);
             }
+            
+            // Create a default list of two players to generate the game model
+            List<ReversiClientModel> list = new List<ReversiClientModel>();
+            list.Add(model);
+            list.Add(model);
+
+
+            ReversiGameViewModel = new ReversiGameVM(new ReversiGameModel(list));
+            ThisPlayerViewModel = new ReversiPlayerVM(model);
+            IsWaitingForGameStart = true;
         }
         #endregion
 
@@ -263,6 +278,7 @@ namespace ReversiClient.ViewModels
                 // assign the game model and update the game view model
                 Model.Game = game;
                 ReversiGameViewModel = new ReversiGameVM(game);
+                IsWaitingForGameStart = false; 
             }
         }
 
@@ -275,21 +291,7 @@ namespace ReversiClient.ViewModels
             Model.ClientPlayer = player;
         }
 
-        /// <summary>
-        /// Display the gameboard string
-        /// </summary>
-        public string GameboardDisplayString
-        {
-            get
-            {
-                if (Model.Game == null)
-                    return string.Empty;
-                else if (Model.Game.Gameboard == null)
-                    return string.Empty;
-                else
-                    return Model.Game.Gameboard.DrawGameboardString();
-            }
-        }
+
 
         /// <summary>
         /// The thread callback function that listens for data from the server and updates

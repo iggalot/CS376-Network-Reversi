@@ -11,10 +11,6 @@ namespace GameObjects.Models
     {
         public string SquareTextTest { get; set; } = "Square test";
 
-        //TODO this should not be here...but it helps with the data binding when the board is created
-        public static int Width { get; set; } = 30;
-        public static int Height { get; set; } = 30;
-
         /// <summary>
         /// Index for the square location on the gameboard
         /// </summary>

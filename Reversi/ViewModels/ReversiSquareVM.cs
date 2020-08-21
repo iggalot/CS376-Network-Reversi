@@ -36,6 +36,14 @@ namespace Reversi.ViewModels
             }
         }
 
+        public static int Width { get; set; } = 40;
+        public static int Height { get; set; } = 40;
+
+        public static int IndexLabelFontSize
+        {
+            get => (int)(Width * 0.3);
+        }
+
         /// <summary>
         /// The model object behind this view model
         /// </summary>

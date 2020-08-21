@@ -8,9 +8,6 @@ namespace Reversi.ViewModels
         private ObservableCollection<ReversiSquareVM> _reversiSquareCollection = new ObservableCollection<ReversiSquareVM>();
         private BoardModel _reversiGameboard;
 
-        public static int GameboardSquareWidth { get; set; } = 50;
-        public static int GameboardSquareHeight { get; set; } = 50;
-
         public static int NumRows { get; set; }
         public static int NumCols { get; set; }
 

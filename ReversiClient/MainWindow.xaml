@@ -65,13 +65,10 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal">
-                            <Label Name="lbCurrentMove" Content="Move request here"/>
-                        </StackPanel>
 
                         <StackPanel Orientation="Horizontal">
-                            <Label Content="Current Move: "/>
-                            <Label Name="lbIndex" Content="TextBlock here"/>
+                            <Label Content="Last Move: "/>
+                            <Label Name="lbIndex" Content="{Binding ReversiGameViewModel.LastMoveIndex}" FontSize="14" FontWeight="Bold"/>
                         </StackPanel>
 
 
@@ -91,14 +88,24 @@
             <StackPanel Orientation="Horizontal"                                 
                     Visibility="{Binding ReversiGameViewModel.Model.GameHasStarted, 
                     Converter={StaticResource BoolToVisibilityConverter}}">
-                <TextBlock Background="Beige" Text="{Binding GameboardDisplayString, FallbackValue=Pending...}" Width="200" Height="200"/>
-                <view:ReversiGameView DataContext="{Binding ReversiGameViewModel}" HorizontalAlignment="Left"/>
+                <TextBlock Background="Beige" Text="{Binding GameboardDisplayString, FallbackValue=Pending...}" FontFamily="Courier New" Width="200" Height="200"/>
+                <StackPanel Visibility="{Binding IsWaitingForGameStart, 
+                    Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=INVERT}">
+                    <view:ReversiGameView DataContext="{Binding ReversiGameViewModel}" HorizontalAlignment="Left"/>
+                </StackPanel>
+
             </StackPanel>
 
+            <Rectangle Height="100" Width="100" Fill="BlueViolet"
+                       Visibility="{Binding IsPlayersTurn, 
+                    Converter={StaticResource BoolToVisibilityConverter}}"></Rectangle>
+
         </StackPanel>
+
+        
         <StackPanel Orientation="Horizontal" Background="LightGreen" VerticalAlignment="Bottom">
             <Label Content="PACKET STATUS: "/>
-            <Label Width="300" Content="{Binding PacketStatusString}"></Label>
+            <Label Width="350" Content="{Binding PacketStatusString}"></Label>
         </StackPanel>
     </Grid>
 </Window>

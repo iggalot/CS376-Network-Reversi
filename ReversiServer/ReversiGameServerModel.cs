@@ -201,16 +201,11 @@ namespace ReversiServer
         {
             List<ReversiClientModel> clientModels = (List<ReversiClientModel>)data;
 
-            // Move players to the game room
-            Console.WriteLine("... GameServer: Matchup pairing complete. Game is ready to start.");
-
-
-            //// Create the game instance and play the game between the players...
+            //// Create the game instance which moves the players to the game room
             ReversiGameModel game = new ReversiGameModel(clientModels);
             RunningGames.Add(game.GameId, game);  // add the game to the dictionary of running games
 
-            Console.WriteLine("... GameServer: Creating game thread (id: " + game.GameId.ToString() + ") Beginning game...");
-            //            Console.WriteLine("..... Game #" + game.GameId + " Participants\n" + game.DisplayGamePlayers());
+            Console.WriteLine("... GameServer: Matchup pairing complete. Game " + game.GameId.ToString() + " is ready to start.");
             Console.WriteLine(game.DisplayGameInfoComplete());
 
             // Send the game object to each of the clients.
@@ -222,10 +217,9 @@ namespace ReversiServer
                 Console.WriteLine("Sending initial game matchup to players");
                 DataTransmission.SerializeData<ReversiGameModel>(game, client.ConnectionSocket);
 
+                // And remove the players from the Staging area.
                 StagingArea.Remove(client);
             }
-
-            int temp = game.CurrentPlayersList.Count;
 
             //// The main game loop. Process individual moves here
             List<TcpClient> sockets = game.GetPlayersSocketList();
@@ -257,8 +251,8 @@ namespace ReversiServer
                     game.TurnComplete = false;
                     game.GameOverCheckRequired = true;
 
+                    // Update the game model for all players...
                     SendGameToAll(game);
-
                 }
 
                 List<ClientModel> disconnectList = new List<ClientModel>();
@@ -326,6 +320,7 @@ namespace ReversiServer
                             {
                                 Console.WriteLine("GameServer: (GameID #" + game.GameId + ")" +  move.ByPlayer + " submitted a valid move");
                                 game.TurnComplete = true;
+                                game.CurrentMoveIndex = move.MoveIndex;
                             }
                         }
                         else

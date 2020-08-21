@@ -179,9 +179,6 @@ namespace ReversiClient
                     // Send move to server
                     ThisClientVm.Model.LastMove = new GameMoveModel(ThisClientVm.ThisPlayerViewModel.IdType, result);
                     DataTransmission.SerializeData<GameMoveModel>(ThisClientVm.Model.LastMove, ThisClientVm.Model.ConnectionSocket);
-
-                    // Create the packet info.
-                    ThisClientVm.GameplayStatusString = "Processing Move. Waiting for response from Server...";
                 }
             }
         }
@@ -196,7 +193,7 @@ namespace ReversiClient
             EventHandler handler = MoveSubmitted;
             handler?.Invoke(this, e);
 
-            ThisClientVm.PacketStatusString = "Move received for index " + e.MoveIndex + " at " + e.TimeReceived.ToString();
+            ThisClientVm.PacketStatusString = "Move submitted for index " + e.MoveIndex + " at " + e.TimeReceived.ToString();
         }
 
 

@@ -8,11 +8,7 @@ namespace Reversi.ViewModels
     {
         private PlayerModel _reversiPlayerModel;
 
-        public ReversiPlayerVM(PlayerModel model)
-        {
-            Model = model;
 
-        }
 
         public string Name
         {
@@ -70,9 +66,16 @@ namespace Reversi.ViewModels
             }
         }
 
+
         public ReversiPlayerVM(ClientModel clientModel)
         {
             ReversiClientModel reversiClientModel = (ReversiClientModel) clientModel;
+
+            // Sets a default player object if one hasn't been created yet.
+            if (reversiClientModel.ClientPlayer == null)
+            {
+                reversiClientModel.ClientPlayer = new PlayerModel();
+            }
 
             Model = reversiClientModel.ClientPlayer;
         }

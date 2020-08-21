@@ -37,10 +37,17 @@ namespace Reversi.Models
         #endregion
 
         #region Constructor
+
         /// <summary>
         /// A default constructor
         /// </summary>
-        public ReversiClientModel() : base(null, null) { }
+        public ReversiClientModel() : base(null, null)
+        {
+            Game = null;
+            LastMove = null;
+            ClientPlayer = new PlayerModel();
+            TimeConnectedWhen = DateTime.Now;
+        }
 
         /// <summary>
         /// The more formal connected client model structor

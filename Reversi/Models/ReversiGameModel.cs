@@ -68,15 +68,62 @@ namespace Reversi.Models
 
         #endregion
 
-        #region Public Methods
+        #region Private and Internal Methods
         /// <summary>
-        /// Toggle the current and opponent player properties for the game
+        /// Routine that changes the owner of a tile based on indices stored in TilesToTurn list.
         /// </summary>
-        public override void NextPlayer()
+        private void DoTurnTiles()
         {
-            base.NextPlayer();
+            PlayerModel player = null; ;
+            bool playerFound = false;
+
+            foreach (KeyValuePair<int, ClientModel> model in CurrentPlayersList)
+            {
+                ReversiClientModel reversiClientModel = (ReversiClientModel)model.Value;
+
+                if (reversiClientModel.ClientPlayer.IdType == CurrentPlayer)
+                {
+                    player = reversiClientModel.ClientPlayer;
+                    playerFound = true;
+                }
+            }
+
+            // If we didnt find the player, return
+            if (!playerFound)
+                return;
+
+            foreach (int index in TilesToTurn)
+            {
+                Gameboard.Squares[index].Piece.Owner = player;
+
+                //// TODO: For each tile being flipped...play a sounds
+                //ReversiSounds.PlaySounds(GameSounds.SOUND_FLIPTILE);
+            }
+
+            // Now clear the tiles to turn array since all the moves have been made
+            TilesToTurn.Clear();
         }
 
+        /// <summary>
+        /// Creates a list of valid indices for available moves
+        /// </summary>
+        /// <param name="p">The player to search valid moves for</param>
+        /// <returns></returns>
+        private List<int> FindAvailableMoves(Players p)
+        {
+            List<int> moves = new List<int>();
+
+            for (int i = 0; i < Gameboard.Rows * Gameboard.Cols; i++)
+            {
+                if (ValidateTilePlacement(i, p))
+                {
+                    GameIsOver = false;
+                    moves.Add(i);
+                }
+            }
+
+            return moves;
+        }
         /// <summary>
         /// Check the initial positioning including:
         /// 1.  Does the square have a piece
@@ -170,52 +217,6 @@ namespace Reversi.Models
         }
 
         /// <summary>
-        /// Determine if the new placement location is valid.
-        /// </summary>
-        /// <param name="index">The square index where they are placing the piece</param>
-        /// <param name="p">The player placing the tile</param>
-        /// <returns></returns>
-        public override bool ValidateTilePlacement(int index, Players p)
-        {
-            // Determine our opponent
-            Players player = p;
-            Players opponent = (player == Players.Player1) ? Players.Player2 : Players.Player1;
-
-            if (ValidateInitialPlacementPosition(index, p) == false)
-                return false;
-
-            var tmp_index = index; // returns -1 if the neighbor is a boundary
-            
-            // 1 2 3
-            // 4 X 5
-            // 6 7 8
-            foreach (DirectionVectors dv in Enum.GetValues(typeof(DirectionVectors)))
-            {
-                List<int> result = new List<int>(); // stores the values of a valid placement
-                if (ValidateDirectionFromIndex(index, player, opponent, dv, out result) == true)
-                {
-                    foreach (int item in result)
-                    {
-                        Console.WriteLine("...VALID to " + dv);
-                        if (TilesToTurn.Contains(item) == false)
-                            TilesToTurn.Add(item);
-                    }
-                }
-            }
-
-            // Print the Tiles to Turn list
-
-            string str = string.Empty;
-            foreach (int item in TilesToTurn)
-            {
-                str += item.ToString() + " ";
-            }
-            Console.WriteLine(index + ": -- " + str + "\n");
-
-            return (TilesToTurn.Count > 0);
-        }
-
-        /// <summary>
         /// Primary routine for a player to make a move
         /// </summary>
         /// <param name="index">the index of the move being made</param>
@@ -258,39 +259,115 @@ namespace Reversi.Models
             //MessageBox.Show(Gameboard.DrawGameboard() + "\nCurrent Player: " + CurrentPlayer.IDType + " : " + CurrentPlayer.Name);
         }
 
+        #endregion
+
+        #region Public Methods
         /// <summary>
-        /// Routine that changes the owner of a tile based on indices stored in TilesToTurn list.
+        /// Utility function that displays the info
+        /// about the players of the game.
         /// </summary>
-        private void DoTurnTiles()
+        /// <returns></returns>
+        public string DisplayGamePlayers()
         {
-            PlayerModel player = null; ;
-            bool playerFound = false;
-
-            foreach (KeyValuePair<int,ClientModel> model in CurrentPlayersList)
+            string str = string.Empty;
+            str += "----- PLAYER INFO -----\n";
+            foreach (KeyValuePair<int, ClientModel> item in CurrentPlayersList)
             {
-                ReversiClientModel reversiClientModel = (ReversiClientModel) model.Value;
+                ReversiClientModel model = (ReversiClientModel) item.Value;
+                str += model.ClientPlayer.PlayerId + "   " + model.ClientPlayer.Name + "    " +
+                       model.ClientPlayer.IdType + "\n";
+            }
 
-                if (reversiClientModel.ClientPlayer.IdType == CurrentPlayer)
+            return str;
+        }
+
+        /// <summary>
+        /// Make a list of the current player sockets for the game.
+        /// </summary>
+        /// <returns></returns>
+        public List<TcpClient> GetPlayersSocketList()
+        {
+            List<TcpClient> list = new List<TcpClient>();
+
+            foreach (KeyValuePair<int,ClientModel> item in CurrentPlayersList)
+            {
+                ReversiClientModel model = (ReversiClientModel)item.Value;
+                list.Add(model.ConnectionSocket);
+            }
+
+            return list;
+        }
+        #endregion
+
+        #region Public Overrides
+        public override void RemovePlayerFromGame(ClientModel model)
+        {
+            base.RemovePlayerFromGame(model);
+        }
+
+        public override string DisplayGameInfoComplete()
+        {
+            string str = string.Empty;
+            str += "----- GAME INFO -----\n";
+            str += DisplayGameStats() + "\n";
+            str += DisplayGamePlayers() + "\n";
+            str += Gameboard.DisplayGameboardStats() + "\n";
+
+            return str;
+        }
+
+        /// <summary>
+        /// Toggle the current and opponent player properties for the game
+        /// </summary>
+        public override void NextPlayer()
+        {
+            base.NextPlayer();
+        }
+
+        /// <summary>
+        /// Determine if the new placement location is valid.
+        /// </summary>
+        /// <param name="index">The square index where they are placing the piece</param>
+        /// <param name="p">The player placing the tile</param>
+        /// <returns></returns>
+        public override bool ValidateTilePlacement(int index, Players p)
+        {
+            // Determine our opponent
+            Players player = p;
+            Players opponent = (player == Players.Player1) ? Players.Player2 : Players.Player1;
+
+            if (ValidateInitialPlacementPosition(index, p) == false)
+                return false;
+
+            var tmp_index = index; // returns -1 if the neighbor is a boundary
+
+            // 1 2 3
+            // 4 X 5
+            // 6 7 8
+            foreach (DirectionVectors dv in Enum.GetValues(typeof(DirectionVectors)))
+            {
+                List<int> result = new List<int>(); // stores the values of a valid placement
+                if (ValidateDirectionFromIndex(index, player, opponent, dv, out result) == true)
                 {
-                    player = reversiClientModel.ClientPlayer;
-                    playerFound = true;
+                    foreach (int item in result)
+                    {
+                        Console.WriteLine("...VALID to " + dv);
+                        if (TilesToTurn.Contains(item) == false)
+                            TilesToTurn.Add(item);
+                    }
                 }
             }
 
-            // If we didnt find the player, return
-            if (!playerFound)
-                return;
+            // Print the Tiles to Turn list
 
-            foreach (int index in TilesToTurn)
+            string str = string.Empty;
+            foreach (int item in TilesToTurn)
             {
-                Gameboard.Squares[index].Piece.Owner = player;
-
-                //// TODO: For each tile being flipped...play a sounds
-                //ReversiSounds.PlaySounds(GameSounds.SOUND_FLIPTILE);
+                str += item.ToString() + " ";
             }
+            Console.WriteLine(index + ": -- " + str + "\n");
 
-            // Now clear the tiles to turn array since all the moves have been made
-            TilesToTurn.Clear();
+            return (TilesToTurn.Count > 0);
         }
 
         public override void SetupGame()
@@ -350,14 +427,10 @@ namespace Reversi.Models
         {
             bool GameIsOver = true;
 
-            for (int i = 0; i < Gameboard.Rows * Gameboard.Cols; i++)
-            {
-                if (ValidateTilePlacement(i, player))
-                {
-                    GameIsOver = false;
-                    AvailableMovesList.Add(i);
-                }
-            }
+            AvailableMovesList = FindAvailableMoves(player);
+
+            if (AvailableMovesList.Count > 0)
+                GameIsOver = false;
 
             return GameIsOver;
         }
@@ -371,58 +444,8 @@ namespace Reversi.Models
             return (MakePlayerMove(CurrentMoveIndex));
         }
 
-
         #endregion
 
-        #region Public Methods
-        public string DisplayGamePlayers()
-        {
-            string str = string.Empty;
-            str += "----- PLAYER INFO -----\n";
-            foreach (KeyValuePair<int, ClientModel> item in CurrentPlayersList)
-            {
-                ReversiClientModel model = (ReversiClientModel) item.Value;
-                str += model.ClientPlayer.PlayerId + "   " + model.ClientPlayer.Name + "    " +
-                       model.ClientPlayer.IdType + "\n";
-            }
-
-            return str;
-        }
-
-        /// <summary>
-        /// Make a list of the current player sockets for the game.
-        /// </summary>
-        /// <returns></returns>
-        public List<TcpClient> GetPlayersSocketList()
-        {
-            List<TcpClient> list = new List<TcpClient>();
-
-            foreach (KeyValuePair<int,ClientModel> item in CurrentPlayersList)
-            {
-                ReversiClientModel model = (ReversiClientModel)item.Value;
-                list.Add(model.ConnectionSocket);
-            }
-
-            return list;
-        }
-
-        public override void RemovePlayerFromGame(ClientModel model)
-        {
-
-            base.RemovePlayerFromGame(model);
-        }
-
-        public override string DisplayGameInfoComplete()
-        {
-            string str = string.Empty;
-            str += "----- GAME INFO -----\n";
-            str += DisplayGameStats() + "\n";
-            str += DisplayGamePlayers() + "\n";
-            str += Gameboard.DisplayGameboardStats() + "\n";
-
-            return str;
-        }
-        #endregion
 
     }
 }

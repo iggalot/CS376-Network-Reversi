@@ -19,6 +19,9 @@ namespace Reversi.ViewModels
             }
         }
 
+        public static int Width { get; set; } = 30;
+        public static int Height { get; set; } = 30;
+
         public ReversiGamepieceVM(GamePieceModel piece)
         {
             Model = piece;

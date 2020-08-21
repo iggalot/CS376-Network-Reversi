@@ -19,6 +19,11 @@ namespace Reversi.ViewModels
             } 
         }
 
+        public int LastMoveIndex
+        {
+            get => Model.CurrentMoveIndex;
+        }
+
         /// <summary>
         /// The game model object for this view model
         /// </summary>
