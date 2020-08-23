@@ -13,7 +13,7 @@
         <convert:PlayerIDTypeToSolidFillConverter x:Key="PlayerIdTypeToSolidFillConverter"/>
     </UserControl.Resources>
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-        <ItemsControl ItemsSource="{Binding GameboardVM.ReversiGameboardVMCollection}">
+        <ItemsControl ItemsSource="{Binding ReversiGameViewModel.GameboardVM.ReversiGameboardVMCollection}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas/>

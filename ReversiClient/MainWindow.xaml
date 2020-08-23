@@ -7,14 +7,16 @@
         xmlns:view="clr-namespace:ReversiClient.Views"
         xmlns:convert="clr-namespace:ReversiClient.ValueConverters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="800">
+        Title="MainWindow" 
+        Height="{Binding WindowHeight}" Width="{Binding WindowWidth}">
     <Window.Resources>
         <convert:BoolToVisibilityValueConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
     
     <Grid>
         <StackPanel Orientation="Vertical">
-            <Label Content="{Binding RCVMTestString, FallbackValue=Error}" FontSize="14"></Label>
+
+            <!-- Make Connection Region -->
             <StackPanel Name="spMakeConnection" Orientation="Vertical" 
                         Visibility="{Binding IsConnectedToServer, 
                             Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=INVERT}">
@@ -24,6 +26,7 @@
                 <Button Content="Connect to Server" HorizontalAlignment="Left" Width="300" Click="Button_ConnectClick"></Button>
             </StackPanel>
 
+            <!-- Active Game Region -->
             <StackPanel Name="spActiveGameRegion"
                         Visibility="{Binding IsConnectedToServer, 
                         Converter={StaticResource BoolToVisibilityConverter}}" 
@@ -71,7 +74,7 @@
                             <Label Name="lbIndex" Content="{Binding ReversiGameViewModel.LastMoveIndex}" FontSize="14" FontWeight="Bold"/>
                         </StackPanel>
 
-
+                        <!-- Submit Move -->
                         <StackPanel Orientation="Horizontal">
                             <TextBox Name="tbIndex" Height="25" Width="100"/>
                             <Button Height="40" Width="100" Content="Submit Move" Click="Button_SubmitMoveClick"></Button>
@@ -84,25 +87,31 @@
                     </StackPanel>
 
                 </StackPanel>
-                        </StackPanel>
+            </StackPanel>
+
+            <!-- Gameboard Displays -->
             <StackPanel Orientation="Horizontal"                                 
                     Visibility="{Binding ReversiGameViewModel.Model.GameHasStarted, 
                     Converter={StaticResource BoolToVisibilityConverter}}">
-                <TextBlock Background="Beige" Text="{Binding GameboardDisplayString, FallbackValue=Pending...}" FontFamily="Courier New" Width="200" Height="200"/>
-                <StackPanel Visibility="{Binding IsWaitingForGameStart, 
-                    Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=INVERT}">
-                    <view:ReversiGameView DataContext="{Binding ReversiGameViewModel}" HorizontalAlignment="Left"/>
+                <TextBlock 
+                    Background="Beige" Text="{Binding GameboardDisplayString, FallbackValue=Pending...}" FontFamily="Courier New" Width="200" Height="200"/>
+                <StackPanel>
+                    <view:ReversiGameView 
+                        Visibility="{Binding IsWaitingForGameStart, 
+                            Converter={StaticResource BoolToVisibilityConverter}, 
+                            ConverterParameter=INVERT}"/>
                 </StackPanel>
 
             </StackPanel>
 
+            <!-- Opacity Mask -->
             <Rectangle Height="100" Width="100" Fill="BlueViolet"
                        Visibility="{Binding IsPlayersTurn, 
-                    Converter={StaticResource BoolToVisibilityConverter}}"></Rectangle>
+                    Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=INVERT}"></Rectangle>
 
         </StackPanel>
 
-        
+        <!-- Status Bar -->
         <StackPanel Orientation="Horizontal" Background="LightGreen" VerticalAlignment="Bottom">
             <Label Content="PACKET STATUS: "/>
             <Label Width="350" Content="{Binding PacketStatusString}"></Label>

@@ -20,5 +20,14 @@ namespace GameObjects.Models
             MoveIndex = move;
             ByPlayer = playerType;
         }
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public GameMoveModel()
+        {
+            MoveIndex = -1;
+            ByPlayer = Players.Undefined;
+        }
     }
 }

@@ -44,7 +44,7 @@ namespace Reversi.Models
         public ReversiClientModel() : base(null, null)
         {
             Game = null;
-            LastMove = null;
+            LastMove = new GameMoveModel();
             ClientPlayer = new PlayerModel();
             TimeConnectedWhen = DateTime.Now;
         }
@@ -57,7 +57,7 @@ namespace Reversi.Models
         public ReversiClientModel(TcpClient clientSocket, TcpListener listenerSocket) : base(clientSocket, listenerSocket)
         {
             Game = null;
-            LastMove = null;
+            LastMove = new GameMoveModel();
             ClientPlayer = new PlayerModel();
             TimeConnectedWhen = DateTime.Now;
         }
@@ -66,7 +66,7 @@ namespace Reversi.Models
         {
             ReversiClientModel model = (ReversiClientModel) clientModel;
             Game = null;
-            LastMove = null;
+            LastMove = new GameMoveModel();
             ClientPlayer = new PlayerModel(model.ClientPlayer.PlayerId, model.ClientPlayer.IdType, name);
 
             this.ClientProcess = clientModel.ClientProcess;

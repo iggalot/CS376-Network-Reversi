@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using ClientServerLibrary;
+﻿using ClientServerLibrary;
+using GameObjects.Models;
 using Reversi.Models;
 using Reversi.ViewModels;
+using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using GameObjects.Models;
 
 namespace ReversiClient.ViewModels
 {
@@ -15,25 +13,13 @@ namespace ReversiClient.ViewModels
     {
         private string _rcvmteststring;
 
-
-        public string RCVMTestString
-        {
-            get => _rcvmteststring;
-            set
-            {
-                _rcvmteststring = value ?? throw new ArgumentNullException(nameof(value));
-
-                OnPropertyChanged("RCVMTestString");
-            }
-        } 
-
-
         #region Private Properties
         private string _gameplayStatusString = string.Empty;
         private string _connectionStatusString = string.Empty;
         private string _packetStatusString = string.Empty;
         private bool _isConnectedToServer = false;
         private bool _isWaitingForGameStart = false;
+        private bool _isPlayersTurn = false;
 
         // new
         private string _reversiGameboardDisplayString = String.Empty;
@@ -44,6 +30,9 @@ namespace ReversiClient.ViewModels
         #endregion
 
         #region Public Properties
+
+        public double WindowWidth { get; set; } = 600;
+        public double WindowHeight { get; set; } = 600;
 
         /// <summary>
         /// The client model associated with this view model
@@ -66,7 +55,16 @@ namespace ReversiClient.ViewModels
 
         public bool IsPlayersTurn
         {
-            get => ReversiGameViewModel.Model.CurrentPlayer == ThisPlayerViewModel.IdType;
+            get
+            {
+                if (ReversiGameViewModel.Model.CurrentPlayer == ThisPlayerViewModel.IdType)
+                {
+ //                   OnPropertyChanged("IsPlayersTurn");
+                    return true;
+                }
+
+                return false;
+            }
         }
 
         /// <summary>
@@ -85,6 +83,7 @@ namespace ReversiClient.ViewModels
                 OnPropertyChanged("GameboardVM");
                 OnPropertyChanged("GameboardDisplayString");
                 OnPropertyChanged("LastMoveIndex");
+                OnPropertyChanged("IsPlayersTurn");
             }
         }
 

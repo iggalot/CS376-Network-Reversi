@@ -66,6 +66,7 @@
     <Compile Include="Views\ReversiGameView.xaml.cs">
       <DependentUpon>ReversiGameView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="VisualTreeHelpers.cs" />
     <Page Include="Views\ReversiGameboardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -131,5 +132,6 @@
       <Name>Reversi</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

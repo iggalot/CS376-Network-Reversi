@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading;
 using ClientServerLibrary;
 using GameObjects.Models;
+using Reversi.ViewModels;
 
 namespace Reversi.Models
 {
@@ -34,6 +36,8 @@ namespace Reversi.Models
         /// Has the P2 player gone yet?
         /// </summary>
         public bool P2Went { get; set; } = false;
+
+
         #endregion
 
         #region Constructor

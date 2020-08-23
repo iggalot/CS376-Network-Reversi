@@ -77,7 +77,6 @@ namespace ReversiClient
         /// <param name="e"></param>
         private void Button_ConnectClick(object sender, RoutedEventArgs e)
         {
-            ThisClientVm.RCVMTestString = "Button connect clicked";
             #region Connecting to Server
             
             // Reset the status string
@@ -159,8 +158,6 @@ namespace ReversiClient
         /// <param name="e"></param>
         private void Button_SubmitMoveClick(object sender, RoutedEventArgs e)
         {
-            ThisClientVm.RCVMTestString = "submit clicked";
-
             GameMoveSubmittedEventArgs args = new GameMoveSubmittedEventArgs();
             args.MoveIndex = Int32.Parse(tbIndex.Text);
             args.TimeReceived = DateTime.Now;
@@ -182,6 +179,7 @@ namespace ReversiClient
                 }
             }
         }
+
         #endregion
 
         #region Events and Handlers

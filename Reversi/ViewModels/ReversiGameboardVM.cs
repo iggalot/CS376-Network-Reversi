@@ -13,7 +13,40 @@ namespace Reversi.ViewModels
 
         public string GameboardViewModelText { get; set; } = "My gameboard viewmodel text";
 
+        public int P1Score
+        {
+            get
+            {
+                int count = 0;
+                foreach (ReversiSquareVM square in ReversiGameboardVMCollection)
+                {
+                    if (square.Model.Piece == null)
+                        continue;
+                    if (square.Model.Piece.Owner.IdType == Players.Player1)
+                        count++;
+                }
 
+                return count;
+            }
+        }
+
+        public int P2Score
+        {
+            get
+            {
+                int count = 0;
+                foreach (ReversiSquareVM square in ReversiGameboardVMCollection)
+                {
+                    if (square.Model.Piece == null)
+                        continue;
+
+                    if (square.Model.Piece.Owner.IdType == Players.Player2)
+                        count++;
+                }
+
+                return count;
+            }
+        }
         /// <summary>
         /// The board model for this view model
         /// </summary>

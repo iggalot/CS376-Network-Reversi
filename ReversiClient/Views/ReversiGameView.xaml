@@ -4,15 +4,43 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ReversiClient.Views"
+             xmlns:convert="clr-namespace:ReversiClient.ValueConverters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <convert:BoardIndexToCanvasPositionValueConverter x:Key="BoardIndexConverter"/>
+        <convert:BoolToVisibilityValueConverter x:Key="BoolToVisibilityConverter"/>
+        <convert:PlayerIDTypeToSolidFillConverter x:Key="PlayerIdTypeToSolidFillConverter"/>
+    </UserControl.Resources>
 
-    <Grid>
+    <Border Margin="10" Padding="5">
         <StackPanel Orientation="Vertical">
-
-            <local:ReversiGameboardView />
+                <Grid Width="300" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Ellipse Grid.Column="0" Panel.ZIndex="1"
+                             Width="40"
+                             Height="40"
+                             Stroke="Black" StrokeThickness="1"
+                             Fill="White"                />
+                    <Label Grid.Column="1" Content="{Binding ReversiGameViewModel.GameboardVM.P1Score}" FontSize="20" FontWeight="Bold"></Label>
+                    <Ellipse Grid.Column="2" HorizontalAlignment="Right" Panel.ZIndex="1"
+                             Width="40"
+                             Height="40"
+                             Stroke="Black" StrokeThickness="1"
+                             Fill="Black"                />
+                <Label Grid.Column="3" Content="{Binding ReversiGameViewModel.GameboardVM.P2Score}" FontSize="20" FontWeight="Bold"></Label>
+                <local:ReversiGameboardView Grid.Row="1" Margin="10" Padding="10"/>
+                </Grid>
 
         </StackPanel>
-
-    </Grid>
+    </Border>
 </UserControl>

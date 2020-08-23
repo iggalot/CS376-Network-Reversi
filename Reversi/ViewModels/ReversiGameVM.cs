@@ -1,4 +1,5 @@
-﻿using Reversi.Models;
+﻿using GameObjects.Models;
+using Reversi.Models;
 
 namespace Reversi.ViewModels
 {
@@ -16,12 +17,23 @@ namespace Reversi.ViewModels
                 _reversiGameboardVM = value;
 
                 OnPropertyChanged("GameboardVM");
+                OnPropertyChanged("P1Score");
+                OnPropertyChanged("P2Score");
             } 
         }
 
         public int LastMoveIndex
         {
             get => Model.CurrentMoveIndex;
+            set
+            {
+                if (value == null)
+                    return;
+
+                Model.CurrentMoveIndex = value;
+
+                OnPropertyChanged("LastMoveIndex");
+            }
         }
 
         /// <summary>
