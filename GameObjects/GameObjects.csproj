@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClientServerLibrary\ClientServerLibrary.csproj" />
-    <ProjectReference Include="..\GameObjects\GameObjects.csproj" />
     <ProjectReference Include="..\GlobalSettings\GlobalSettings.csproj" />
   </ItemGroup>
 

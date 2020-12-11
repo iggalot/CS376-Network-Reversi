@@ -10,10 +10,10 @@
     <UserControl.Resources>
         <convert:BoardIndexToCanvasPositionValueConverter x:Key="BoardIndexConverter"/>
         <convert:BoolToVisibilityValueConverter x:Key="BoolToVisibilityConverter"/>
-        <convert:PlayerIDTypeToSolidFillConverter x:Key="PlayerIDTypeToSolidFillConverter"/>
+        <convert:PlayerIDTypeToSolidFillConverter x:Key="PlayerIdTypeToSolidFillConverter"/>
     </UserControl.Resources>
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-        <ItemsControl ItemsSource="{Binding Model.Gameboard.Squares}">
+        <ItemsControl ItemsSource="{Binding ReversiGameViewModel.GameboardVM.ReversiGameboardVMCollection}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas/>
@@ -24,7 +24,7 @@
                     <Setter Property="Canvas.Left">
                         <Setter.Value>
                             <MultiBinding Converter="{StaticResource BoardIndexConverter}" ConverterParameter="LEFT">
-                                <Binding Path="Index"/>
+                                <Binding Path="Model.Index"/>
                                 <Binding Path="Width"/>
                             </MultiBinding>
                         </Setter.Value>
@@ -32,7 +32,7 @@
                     <Setter Property="Canvas.Top">
                         <Setter.Value>
                             <MultiBinding Converter="{StaticResource BoardIndexConverter}" ConverterParameter="TOP">
-                                <Binding Path="Index"/>
+                                <Binding Path="Model.Index"/>
                                 <Binding Path="Height"/>
                             </MultiBinding>
                         </Setter.Value>
@@ -41,25 +41,30 @@
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
-                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" 
-                                   Fill="DarkGreen" Stroke="Black" StrokeThickness="2"/>
-                        <Label Content="{Binding Index}" FontSize="10"/>
-                        
-                        <Ellipse 
-                            Visibility="{Binding HasPiece, 
+                    <Grid Background="DarkGreen">
+                        <Rectangle Name="gameSquare" Panel.ZIndex="1" 
+                                   MouseLeftButtonDown="GameSquare_OnMouseLeftButtonDown"
+                                   MouseEnter="GameSquare_OnMouseEnter"
+                                   MouseLeave="GameSquare_OnMouseLeave"
+                                   Width="{Binding Width}"
+                                   Height="{Binding Height}"
+                                   Stroke="Black"
+                                   StrokeThickness="1"/>
+
+                        <Label Content="{Binding Model.Index}" Panel.ZIndex="0" FontSize="{Binding IndexLabelFontSize}"/>
+
+                        <Ellipse Panel.ZIndex="1"
+                            Visibility="{Binding Model.HasPiece, 
                                 Converter={StaticResource BoolToVisibilityConverter} 
                                 }"
-                            Width="{Binding Width}" Height="{Binding Height}" 
-                            Stroke="Black" StrokeThickness="1"
-                            Fill="{Binding Piece.Owner.IDType, Converter={StaticResource PlayerIDTypeToSolidFillConverter}}" 
+                            Width="{Binding PieceVM.Width}" Height="{Binding PieceVM.Height}" 
+                            Stroke="Black" StrokeThickness="0.5"
+                            Fill="{Binding Model.Piece.Owner.IdType, Converter={StaticResource PlayerIdTypeToSolidFillConverter}}" 
                             />
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-
-        <Label Content="After" Width="150" FontSize="15"/>
 
     </StackPanel>
 </UserControl>

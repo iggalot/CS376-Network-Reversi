@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Drawing;
 
-namespace Reversi.Models
+namespace GameObjects.Models
 {
     /// <summary>
     /// A class that defines the basic game regions for our game.
     /// </summary>
     [Serializable]
-    public class Square
+    public class SquareModel
     {
         public string SquareTextTest { get; set; } = "Square test";
-
-        //TODO this should not be here...but it helps with the data binding when the board is created
-        public static int Width { get; set; } = 30;
-        public static int Height { get; set; } = 30;
 
         /// <summary>
         /// Index for the square location on the gameboard
@@ -33,7 +29,7 @@ namespace Reversi.Models
         /// <summary>
         /// Piece contained in the square
         /// </summary>
-        public GamePiece Piece { get; set; }
+        public GamePieceModel Piece { get; set; }
 
         /// <summary>
         /// Determines if the square contains a game piece
@@ -42,7 +38,7 @@ namespace Reversi.Models
         {
             get
             {
-                if ((Piece == null) || (Piece.Shape == Pieceshapes.UNDEFINED))
+                if ((Piece == null) || (Piece.Shape == Pieceshapes.Undefined))
                     return false;
 
                 return true;
@@ -52,11 +48,11 @@ namespace Reversi.Models
         /// <summary>
         /// Default constructor
         /// </summary>
-        public Square(int index)
+        public SquareModel(int index)
         {
             Index = index;
-            Piece = new GamePiece();
-            Shape = Regionshapes.UNDEFINED;
+            Piece = new GamePieceModel();
+            Shape = Regionshapes.Undefined;
         }
     }
 }

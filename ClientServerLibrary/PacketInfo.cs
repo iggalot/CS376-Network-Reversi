@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Net.Sockets;
 
 namespace ClientServerLibrary
 {
     /// <summary>
     /// The basic packet class for information to be shared between clients and the server 
     /// </summary>
-    
+
     [Serializable]
     public class PacketInfo
     {
@@ -37,9 +36,6 @@ namespace ClientServerLibrary
         /// <summary>
         /// Forms the packet information into a string to be transmitted
         /// </summary>
-        /// <param name="id">The id of the sender</param>
-        /// <param name="data">The string data to send</param>
-        /// <param name="type">The type of packet being sent</param>
         /// <returns></returns>
         public string FormPacket()
         {

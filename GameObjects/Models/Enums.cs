@@ -1,13 +1,13 @@
-﻿namespace Reversi.Models
+﻿namespace GameObjects.Models
 {
     /// <summary>
     /// Enum for the players of the game
     /// </summary>
     public enum Players
     {
-        UNDEFINED = -1,
-        PLAYER1 = 0,
-        PLAYER2 = 1
+        Undefined = -1,
+        Player1 = 0,
+        Player2 = 1
     }
 
     /// <summary>
@@ -15,9 +15,9 @@
     /// </summary>
     public enum Pieceshapes
     {
-        UNDEFINED = -1,
-        ELLIPSE = 0,
-        SQUARE = 1
+        Undefined = -1,
+        Ellipse = 0,
+        Square = 1
     }
 
     /// <summary>
@@ -25,8 +25,8 @@
     /// </summary>
     public enum Regionshapes
     {
-        UNDEFINED = -1,
-        SQUARE = 0
+        Undefined = -1,
+        Square = 0
     }
 
     /// <summary>
@@ -49,10 +49,10 @@
     /// </summary>
     public enum GameSounds
     {
-        SOUND_CLICK_SUCCESSFUL = 0,
-        SOUND_FLIPTILE = 1,
-        SOUND_TURN_COMPLETE = 2,
-        SOUND_MOVE_ACCEPTED = 3,
-        SOUND_MOVE_REJECTED = 4
+        SoundClickSuccessful = 0,
+        SoundFliptile = 1,
+        SoundTurnComplete = 2,
+        SoundMoveAccepted = 3,
+        SoundMoveRejected = 4
     }
 }

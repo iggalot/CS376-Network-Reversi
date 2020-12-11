@@ -1,11 +1,13 @@
 ﻿using ClientServerLibrary;
-using Models.ReversiClient;
 using Reversi.Models;
 using ReversiClient.ViewModels;
+using Settings;
 using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
+using GameObjects.Models;
+using Reversi.ViewModels;
 
 namespace ReversiClient
 {
@@ -13,13 +15,27 @@ namespace ReversiClient
     /// Interaction logic for MainWindow.xaml
     /// This is the ClientViewModel
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
+        private static ReversiClientViewModel _thisClientVm;
+
         #region Public Properties
+
         /// <summary>
         /// The view model associated with this UI
         /// </summary>
-        public static ReversiClientViewModel ThisClient { get; private set; }
+        public static ReversiClientViewModel ThisClientVm
+        {
+            get => _thisClientVm;
+            private set
+            {
+                if ((value == null) || (value == _thisClientVm))
+                    return;
+
+                _thisClientVm = value;
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -27,8 +43,10 @@ namespace ReversiClient
         {
             InitializeComponent();
 
-            ThisClient = new ReversiClientViewModel(new ReversiClientModel());
-            this.DataContext = ThisClient;
+            ThisClientVm = new ReversiClientViewModel(new ReversiClientModel());
+            this.DataContext = ThisClientVm;
+
+
         }
 
         #endregion
@@ -38,7 +56,7 @@ namespace ReversiClient
         /// <summary>
         /// Hacky routine to allow the UI to update in the middle of a method.
         /// </summary>
-        void AllowUIToUpdate()
+        void AllowUiToUpdate()
         {
             DispatcherFrame frame = new DispatcherFrame();
             Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Render, new DispatcherOperationCallback(delegate (object parameter)
@@ -60,84 +78,76 @@ namespace ReversiClient
         private void Button_ConnectClick(object sender, RoutedEventArgs e)
         {
             #region Connecting to Server
+            
+            // Reset the status string
+            ThisClientVm.ConnectionStatusString = String.Empty;
 
             // Check if the player name is valid
-            if (String.IsNullOrEmpty(tbPlayerName.Text))
+            string name = tbPlayerName.Text;
+            if (String.IsNullOrEmpty(name))
             {
-                ThisClient.ConnectionStatusString = "You must enter a user name.";
+                ThisClientVm.ConnectionStatusString = "A valid name must be entered.";
+                return;
+            }
+
+            if (String.IsNullOrEmpty(name))
+            {
+                ThisClientVm.ConnectionStatusString = "You must enter a user name.";
                 return;
             }
 
             // If the client is already connected to the game server, then don't
             // allow another connection.
-            string status_string = String.Empty;
-            if (ThisClient.IsConnectedToGameServer)
+            if (ThisClientVm.IsConnectedToServer)
             {
-                ThisClient.ConnectionStatusString = "You are already connected to the server!";
+                ThisClientVm.ConnectionStatusString = "You are already connected to the server!";
                 return;
             }
 
             // Otherwise attempt to make the connection
-            ThisClient.IsConnectedToGameServer = ThisClient.Model.MakeConnection(out status_string);
-            if(!ThisClient.IsConnectedToGameServer)
+            ThisClientVm.IsConnectedToServer = ThisClientVm.Model.ConnectClient(GlobalSettings.ServerAddress, GlobalSettings.Port_GameServer, out var statusString);
+            if(!ThisClientVm.IsConnectedToServer)
             {
-                ThisClient.ConnectionStatusString = status_string;
+                ThisClientVm.ConnectionStatusString = statusString;
                 return;
             }
 
             // If our socket is not connected, or we have lost link... 
-            if (!ThisClient.Model.ServerSocket.Connected)
+            if (DataTransmission.SocketConnected(ThisClientVm.Model.ConnectionSocket.Client) == false)
             {
-                ThisClient.IsConnectedToGameServer = false;
-                ThisClient.ConnectionStatusString = "Error connecting to socket.";
+                ThisClientVm.ConnectionStatusString = "Error connecting to socket.";
                 return;
             }
 
-            string name = tbPlayerName.Text;
-            // Check if the name entered is a valid string
-            if(String.IsNullOrEmpty(tbPlayerName.Text))
+            ThisClientVm.IsConnectedToServer = true;
+
+            // Create our player object and send to the server.
+            // Id is currently -1 since its not assigned yet.
+            ReversiClientModel model = new ReversiClientModel(ThisClientVm.Model.ConnectionSocket, null)
             {
-                ThisClient.ConnectionStatusString = "Invalid name!";
-                return;
-            }
+                ClientPlayer = new PlayerModel(-1, Players.Undefined, name)
+            };
 
-            // Send our login name to the server
-            if (String.IsNullOrEmpty(name))
-            {
-                ThisClient.ConnectionStatusString = "A valid name must be entered.";
-                ThisClient.IsConnectedToGameServer = false;
-                return;
-            }
+            // Send the client model to the server
+            ReversiClientModel.SerializeData<ReversiClientModel>(model, ThisClientVm.Model.ConnectionSocket);
 
-            // Create our player object and send to the server
-            Player newPlayer = new Player(-1, Players.UNDEFINED, name, ThisClient.Model.ServerSocket);
-            Client.SerializeData<Player>(newPlayer, ThisClient.Model.ServerSocket);
+            // Retrieve the updated client model data from the server
+            model = DataTransmission.DeserializeData<ReversiClientModel>(ThisClientVm.Model.ConnectionSocket);
+            ThisClientVm.UpdateNonSerializeableObjects(ThisClientVm, model);
 
-            // Retrieve the accepted player data from the server
-            ThisClient.ThisPlayer = DataTransmission.DeserializeData<Player>(ThisClient.Model.ServerSocket);
+            // Create a ReversiClientModel from the received client model
+            // This sets the PlayerID that was assigned to the client model
+            ReversiClientModel temp = new ReversiClientModel(model, name);
 
-            if(ThisClient.ThisPlayer.IDType == Players.UNDEFINED)
-            {
-                // Update the UI
-                spMakeConnection.Visibility = Visibility.Visible;
-                spActiveGameRegion.Visibility = Visibility.Collapsed;
-
-                ThisClient.ConnectionStatusString = "Connection refused by server.";
-
-                // close the socket
-                ThisClient.Model.ServerSocket.Close();  
-                return;
-            } else
-            {
-                // Now make the game area visible
-                spMakeConnection.Visibility = Visibility.Collapsed;
-                spActiveGameRegion.Visibility = Visibility.Visible;
-            }
+            ThisClientVm.Model = model;
+            ThisClientVm.ThisPlayerViewModel = new ReversiPlayerVM(temp);
             #endregion
 
-            #region Create a listening thread
-            ThisClient.Model.ListenThread = new Thread(ThisClient.ListenServer);
-            ThisClient.Model.ListenThread.Start();
+            ThisClientVm.IsWaitingForGameStart = true;
+
+            #region Create a listening thread to listen for updates
+            ThisClientVm.Model.ListenThread = new Thread(ThisClientVm.ListenServerThreadCallback);
+            ThisClientVm.Model.ListenThread.Start();
             #endregion
         }
 
@@ -148,28 +158,52 @@ namespace ReversiClient
         /// <param name="e"></param>
         private void Button_SubmitMoveClick(object sender, RoutedEventArgs e)
         {
-            int result;
+            GameMoveSubmittedEventArgs args = new GameMoveSubmittedEventArgs();
+            args.MoveIndex = Int32.Parse(tbIndex.Text);
+            args.TimeReceived = DateTime.Now;
+            OnGameMoveSubmitted(args);
 
-            // Parse the results of the text box.
-            if (Int32.TryParse(tbIndex.Text, out result))
+            //Parse the results of the text box.
+            if (Int32.TryParse(tbIndex.Text, out var result))
             {
                 if (result < 0)
                 {
-                    ThisClient.GameplayStatusString = "Invalid entry";
+                    ThisClientVm.GameplayStatusString = "Invalid entry";
                     return;
                 }
                 else
                 {
                     // Send move to server
-                    ThisClient.Model.LastMove = new ReversiGameMove(ThisClient.ThisPlayer.PlayerID, result);
-                    DataTransmission.SerializeData<ReversiGameMove>(ThisClient.Model.LastMove, ThisClient.Model.ServerSocket);
-
-                    // Create the packet info.
-                    ThisClient.GameplayStatusString = "Processing Move. Waiting for response from Server...";
-                    
+                    ThisClientVm.Model.LastMove = new GameMoveModel(ThisClientVm.ThisPlayerViewModel.IdType, result);
+                    DataTransmission.SerializeData<GameMoveModel>(ThisClientVm.Model.LastMove, ThisClientVm.Model.ConnectionSocket);
                 }
             }
         }
+
         #endregion
+
+        #region Events and Handlers
+
+        public event EventHandler MoveSubmitted;
+
+        protected virtual void OnGameMoveSubmitted(GameMoveSubmittedEventArgs e)
+        {
+            EventHandler handler = MoveSubmitted;
+            handler?.Invoke(this, e);
+
+            ThisClientVm.PacketStatusString = "Move submitted for index " + e.MoveIndex + " at " + e.TimeReceived.ToString();
+        }
+
+
+
+        public class GameMoveSubmittedEventArgs : EventArgs
+        {
+            public int MoveIndex { get; set; }
+            public DateTime TimeReceived { get; set; }
+        }
+
+
+        #endregion
+
     }
 }

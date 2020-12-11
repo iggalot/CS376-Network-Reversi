@@ -1,4 +1,4 @@
-﻿using Reversi.Models;
+﻿using GameObjects.Models;
 using System.Media;
 using System.Threading;
 
@@ -16,13 +16,13 @@ namespace ReversiClient
             // tada.wav -- successful move
             switch (sound)
             {
-                case GameSounds.SOUND_CLICK_SUCCESSFUL:
+                case GameSounds.SoundClickSuccessful:
                     soundString = @"c:\Windows\Media\Windows User Account Control.wav";
                     break;
-                case GameSounds.SOUND_FLIPTILE:
+                case GameSounds.SoundFliptile:
                     soundString = @"c:\Windows\Media\chimes.wav";
                     break;
-                case GameSounds.SOUND_TURN_COMPLETE:
+                case GameSounds.SoundTurnComplete:
                     soundString = @"c:\Windows\Media\tada.wav";
                     break;
                 default:

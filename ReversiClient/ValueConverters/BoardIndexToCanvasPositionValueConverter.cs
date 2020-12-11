@@ -1,4 +1,5 @@
-﻿using ReversiClient.ViewModels;
+﻿using Reversi.ViewModels;
+using ReversiClient.ViewModels;
 using System;
 using System.Globalization;
 using System.Windows.Data;
@@ -14,11 +15,11 @@ namespace ReversiClient.ValueConverters
 
             if (String.Equals((string)parameter, "LEFT"))
             {
-                return ReversiGameboardViewModel.CanvasLeftPosition(index,dim);
+                return ReversiGameboardVM.CanvasLeftPosition(index,dim);
             }
             else
             {
-                return ReversiGameboardViewModel.CanvasTopPosition(index,dim);
+                return ReversiGameboardVM.CanvasTopPosition(index,dim);
             }
         }
 

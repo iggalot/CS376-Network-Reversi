@@ -55,21 +55,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Models\ReversiClientModel.cs" />
     <Compile Include="ValueConverters\BoardIndexToCanvasPositionValueConverter.cs" />
     <Compile Include="ValueConverters\BoolToVisibilityValueConverter.cs" />
     <Compile Include="ValueConverters\PlayerIDTypeToSolidFillConverter.cs" />
-    <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\ReversiClientViewModel.cs" />
-    <Compile Include="ViewModels\ReversiGameboardViewModel.cs" />
     <Compile Include="Views\ReversiGameboardView.cs">
       <DependentUpon>ReversiGameboardView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ReversiSounds.cs" />
-    <Compile Include="ViewModels\ReversiGameViewModel.cs" />
     <Compile Include="Views\ReversiGameView.xaml.cs">
       <DependentUpon>ReversiGameView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="VisualTreeHelpers.cs" />
     <Page Include="Views\ReversiGameboardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -122,6 +119,10 @@
       <Project>{598105ce-2bb6-4493-9654-3e213c6d0004}</Project>
       <Name>ClientServerLibrary</Name>
     </ProjectReference>
+    <ProjectReference Include="..\GameObjects\GameObjects.csproj">
+      <Project>{6c3e982c-a05f-4c25-891c-34134076e407}</Project>
+      <Name>GameObjects</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GlobalSettings\GlobalSettings.csproj">
       <Project>{2d23b76a-9a46-46a7-859e-913f4f141b1e}</Project>
       <Name>GlobalSettings</Name>
@@ -130,10 +131,7 @@
       <Project>{c3eaa10d-c3c0-43e5-aa6b-6382372ecbf1}</Project>
       <Name>Reversi</Name>
     </ProjectReference>
-    <ProjectReference Include="..\StateMachine\StateMachine.csproj">
-      <Project>{532fb2bc-c59b-4927-afd1-4c939ee24b9b}</Project>
-      <Name>StateMachine</Name>
-    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

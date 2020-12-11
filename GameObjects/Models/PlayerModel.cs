@@ -1,26 +1,25 @@
 ﻿using System;
-using System.Net.Sockets;
 
-namespace Reversi.Models
+namespace GameObjects.Models
 {
     /// <summary>
     /// A class that defines the basic game player
     /// </summary>
-    
+
     [Serializable]
-    public class Player
+    public class PlayerModel
     {
 
         #region Public Properties
         /// <summary>
         /// 
         /// </summary>
-        public int PlayerID { get; set; } = -1;
+        public int PlayerId { get; set; } = -1;
 
         /// <summary>
         /// The IDType of our player as a player type
         /// </summary>
-        public Players IDType { get; set; }
+        public Players IdType { get; set; }
 
 
         /// <summary>
@@ -28,23 +27,16 @@ namespace Reversi.Models
         /// </summary>
         public string Name { get; set; }
 
-        /// <summary>
-        /// The socket for this players connection
-        /// /summary>
-
-        [NonSerialized()] public TcpClient Socket;
-
         #endregion
 
         /// <summary>
         /// Default constructor
         /// </summary>
-        public Player()
+        public PlayerModel()
         {
-            PlayerID = -1;
-            IDType = Players.UNDEFINED;
+            PlayerId = -1;
+            IdType = Players.Undefined;
             Name = "Some bloke...";
-            Socket = null;
         }
 
         /// <summary>
@@ -52,13 +44,18 @@ namespace Reversi.Models
         /// </summary>
         /// <param name="id">The player number</param>
         /// <param name="name">The name of the player</param>
-        /// <param name="socket">The associated socket for this player</param>
-        public Player(int num, Players id, string name, TcpClient socket)
+        /// <param name="idType">The player type for this player</param>
+        public PlayerModel(int id, Players idType, string name)
         {
-            PlayerID = num;
-            IDType = id;
+            PlayerId = id;
+            IdType = idType;
             Name = name;
-            Socket = socket;
+        }
+
+        public string DisplayPlayerInfo()
+        {
+            string str = string.Empty;
+            return (PlayerId + "  " + Name + " --- " + IdType);
         }
     }
 }

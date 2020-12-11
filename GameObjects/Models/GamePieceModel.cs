@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Drawing;
 
-namespace Reversi.Models
+namespace GameObjects.Models
 {
     /// <summary>
     /// Class that governs the game pieces
     /// </summary>
     [Serializable]
-    public class GamePiece
+    public class GamePieceModel
     {
         /// <summary>
         /// Owner of the piece
         /// </summary>
-        public Player Owner { get; set; }
+        public PlayerModel Owner { get; set; }
 
         /// <summary>
         /// The shape of the gamepiece
@@ -23,13 +22,13 @@ namespace Reversi.Models
         /// <summary>
         /// Default constructor
         /// </summary>
-        public GamePiece()
+        public GamePieceModel()
         {
-            Owner = new Player();
-            Shape = Pieceshapes.UNDEFINED;
+            Owner = new PlayerModel();
+            Shape = Pieceshapes.Undefined;
         }
 
-        public GamePiece(Pieceshapes shape, Player player)
+        public GamePieceModel(Pieceshapes shape, PlayerModel player)
         {
             Owner = player;
             Shape = shape;
@@ -39,7 +38,7 @@ namespace Reversi.Models
         /// Constructor for a piece of a known shape
         /// </summary>
         /// <param name="shape"></param>
-        public GamePiece(Pieceshapes shape)
+        public GamePieceModel(Pieceshapes shape)
         {
             Shape = shape;
         }
